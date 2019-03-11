@@ -10,6 +10,9 @@ For multiple servers, use an instance per server.
 interruption of any preexisting conversations.
 * Poll frequency of each feed is individually customizable.
 * Entry URLs are shortened by default using [`bitlyshortener`](https://github.com/impredicative/bitlyshortener/).
+* For each new feed with no history in the database, only up to five of its most recent entries are posted.
+The rest are never posted but are nevertheless saved in the database. Future entries of the feed are all posted.
+This feature exists to limit flooding a channel when one or more new feeds are added.
 
 ## Links
 * Code: https://github.com/impredicative/irc-rss-feed-bot
@@ -65,6 +68,8 @@ Feed-specific settings:
 * `shorten` indicates whether to use Bitly to shorten URLs. It is "yes" by default and can otherwise be "no".
 Setting this is recommended only for feeds with naturally short URLs.
 
+A `posts.sqlite` database file is written by the bot in the same directory as `config.yaml`. It must not be lost.
+
 ### Deployment
 * Some but not all warning and error alerts are sent to `##{nick}-alerts`.
 For example, if the nick is `Feed[bot]`, these alerts will be sent to `##Feed[bot]-alerts`.
@@ -95,4 +100,8 @@ This should be the directory containing `config.yaml`.
 
 From the directory containing `docker-compose.yml`, run `docker-compose up -d irc-rss-feed-bot`.
 
+### Maintenance
+
 If `config.yaml` is updated, the container must be restarted to use the updated file.
+
+Any external changes to the database should be made only when the bot is stopped. 
