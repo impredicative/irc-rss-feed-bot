@@ -11,8 +11,9 @@ interruption of any preexisting conversations.
 * Poll frequency of each feed is individually customizable.
 * Entry URLs are shortened by default using [`bitlyshortener`](https://github.com/impredicative/bitlyshortener/).
 * For each new feed with no history in the database, only up to five of its most recent entries are posted.
-The rest are never posted but are nevertheless saved in the database. Future entries of the feed are all posted.
-This feature exists to limit flooding a channel when one or more new feeds are added.
+The rest are never posted but are nevertheless saved in the database.
+This is done to limit flooding a channel when one or more new feeds are added.
+Future entries of the feed are all posted, however.
 
 ## Links
 * Code: https://github.com/impredicative/irc-rss-feed-bot
