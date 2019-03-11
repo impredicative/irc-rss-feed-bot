@@ -69,7 +69,7 @@ Feed-specific settings:
 * `shorten` indicates whether to use Bitly to shorten URLs. It is "yes" by default and can otherwise be "no".
 Setting this is recommended only for feeds with naturally short URLs.
 
-A `posts.sqlite` database file is written by the bot in the same directory as `config.yaml`. It must not be lost.
+A `posts.sqlite` database file is written by the bot in the same directory as `config.yaml`. It must be preserved.
 
 ### Deployment
 * Some but not all warning and error alerts are sent to `##{nick}-alerts`.
