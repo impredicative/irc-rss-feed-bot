@@ -13,6 +13,9 @@ INSTANCE: Dict = {}  # Set from YAML config file.
 PACKAGE_NAME = Path(__file__).parent.stem
 DB_FILENAME = 'posts.sqlite'
 FREQ_HOURS_DEFAULT = 1
+POST_FEED_NAME_CHAR = '⧙'
+PRE_FEED_NAME_CHAR = '⧘'
+PRE_FEED_URL_CHAR = '→'
 REQUEST_TIMEOUT = 60
 
 LOGGING = {  # Ref: https://docs.python.org/3/howto/logging.html#configuring-logging
