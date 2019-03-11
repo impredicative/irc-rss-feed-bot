@@ -56,7 +56,7 @@ Global settings:
 Setting it is recommended.
 * `tokens/bitly`: Bitly tokens are required for shortening URLs. They are mandatory.
 The sample tokens are for illustration only and are invalid.
-To obtain them, refer to these [instructions](https://github.com/impredicative/bitlyshortener#usage).
+To obtain tokens, refer to these [instructions](https://github.com/impredicative/bitlyshortener#usage).
 Providing multiple tokens, perhaps as many as ten free ones or a single commercial one, is required.
 Failing this, Bitly imposed rate limits for shortening URLs will lead to errors, and groups of posts will be skipped.
 
