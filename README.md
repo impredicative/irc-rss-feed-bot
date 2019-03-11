@@ -4,10 +4,10 @@ It essentially posts the entries of RSS/Atom feeds in IRC channels, one entry pe
 
 ## Features
 * Multiple channels on an IRC server are supported, with each channel having its own set of feeds.
-To use with multiple servers, use an instance per server.
-* A SQLite database file records the entries that have already been posted, thereby preventing them from being reposted.
-* Entries are posted to a channel only if the channel has not had any conversation for at least 15 minutes, thereby
-preventing the interruption of any preexisting conversations.
+For multiple servers, use an instance per server.
+* A SQLite database file records the entries that have been posted, thereby preventing them from being reposted.
+* Entries are posted only if the channel has not had any conversation for at least 15 minutes, thereby preventing the
+interruption of any preexisting conversations.
 * Poll frequency of each feed is individually customizable.
 * Entry URLs are shortened by default using [`bitlyshortener`](https://github.com/impredicative/bitlyshortener/).
 
@@ -55,22 +55,23 @@ Global settings:
 * `mode`: This is optional and can for example be `+igR` for [Freenode](https://freenode.net/kb/answer/usermodes).
 Setting it is recommended.
 * `tokens/bitly`: Bitly tokens are required for shortening URLs. They are mandatory.
+The sample tokens are for illustration only and are invalid.
 To obtain them, refer to these [instructions](https://github.com/impredicative/bitlyshortener#usage).
 Providing multiple tokens, perhaps as many as ten free ones or a single commercial one, is required.
-Failing this, Bitly imposed rate limits will lead to errors, and groups of posts will be skipped.
+Failing this, Bitly imposed rate limits for shortening URLs will lead to errors, and groups of posts will be skipped.
 
 Feed-specific settings:
 * `freq` indicates how frequently to poll the feed in hours. It is 1 by default. Conservative polling is recommended.
-* `shorten` indicates whether to use Bitly to shorten URls. It is "yes" by default and can otherwise be "no".
+* `shorten` indicates whether to use Bitly to shorten URLs. It is "yes" by default and can otherwise be "no".
 Setting this is recommended only for feeds with naturally short URLs.
 
 ### Deployment
 * Some but not all warning and error alerts are sent to `##{nick}-alerts`.
 For example, if the nick is `Feed[bot]`, these alerts will be sent to `##Feed[bot]-alerts`.
-It is recommended that the alerts channel be registered even if it is not monitored.
+It is recommended that the alerts channel be registered and monitored.
 
 * It is required that the bot be auto-voiced (+V) in each channel.
-Failing this, rapid-fire messages from the bot can easily be dropped by the server.
+Failing this, rapid-fire messages from the bot can easily be silently dropped by the server.
 
 * It is recommended that the bot be run as a Docker container using using Docker ≥18.09.3, possibly with
 Docker Compose ≥1.24.0-rc1, etc.
