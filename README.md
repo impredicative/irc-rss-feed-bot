@@ -66,7 +66,7 @@ Failing this, Bitly imposed rate limits for shortening URLs will lead to errors,
 
 Feed-specific settings:
 * `freq` indicates how frequently to poll the feed in hours. It is 1 by default. Conservative polling is recommended.
-* `shorten` indicates whether to use Bitly to shorten URLs. It is "yes" by default and can otherwise be "no".
+* `shorten` indicates whether to use Bitly to shorten URLs. It is `true` by default and can otherwise be `false`.
 Setting this is recommended only for feeds with naturally short URLs.
 
 A `posts.sqlite` database file is written by the bot in the same directory as `config.yaml`. It must be preserved.
