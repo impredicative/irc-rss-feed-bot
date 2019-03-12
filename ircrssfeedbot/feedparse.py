@@ -12,14 +12,13 @@ class FeedEntry:
 
 @dataclass
 class FeedEntryWithShortURL(FeedEntry):
-    short_url: str = None
+    short_url: str
 
 
 @dataclass
 class Feed:
     feed: bytes
 
-    @property
     def entries(self, *, shorten_links: bool = True) -> List[FeedEntry]:
         entries_list = [FeedEntry(entry['title'], entry['link']) for entry in feedparser.parse(self.feed)['entries']]
         if shorten_links:
@@ -30,5 +29,5 @@ class Feed:
 if __name__ == '__main__':
     from urllib.request import urlopen
     content = urlopen('https://feeds.feedburner.com/blogspot/gJZg').read()
-    for entry in Feed(content).entries:
+    for entry in Feed(content).entries():
         print(entry)
