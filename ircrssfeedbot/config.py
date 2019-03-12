@@ -18,6 +18,7 @@ POST_FEED_NAME_CHAR = '⧙'
 PRE_FEED_NAME_CHAR = '⧘'
 PRE_FEED_URL_CHAR = '→'
 REQUEST_TIMEOUT = 60
+USER_AGENT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:65.0) Gecko/20100101 Firefox/65.0'
 
 LOGGING = {  # Ref: https://docs.python.org/3/howto/logging.html#configuring-logging
     'version': 1,
