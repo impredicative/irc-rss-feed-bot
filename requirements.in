@@ -1,2 +1,3 @@
+bitlyshortener
 feedparser==5.2.1
 ruamel.yaml==0.15.89
