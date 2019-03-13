@@ -1,19 +1,20 @@
 # irc-rss-feed-bot
 **irc-rss-feed-bot** is a Python 3.7 based IRC RSS and Atom feed posting bot.
 It essentially posts the entries of RSS and Atom feeds in IRC channels, one entry per message.
+Specifically, it posts the titles and shortened URLs of entries.
 
 ## Features
 * Multiple channels on an IRC server are supported, with each channel having its own set of feeds.
 For multiple servers, use an instance per server.
+* Entry URLs are always shortened using [`bitlyshortener`](https://github.com/impredicative/bitlyshortener/).
 * A SQLite database file records the entries that have been posted, thereby preventing them from being reposted.
 * Entries are posted only if the channel has not had any conversation for at least 15 minutes, thereby preventing the
 interruption of any preexisting conversations.
 * Poll frequency of each feed is individually customizable.
-* Entry URLs are shortened by default using [`bitlyshortener`](https://github.com/impredicative/bitlyshortener/).
 * For each new feed with no history in the database, only up to five of its most recent entries are posted.
 The rest are never posted but are nevertheless saved in the database.
 This is done to limit flooding a channel when one or more new feeds are added.
-Future entries of the feed are all posted, however.
+Future entries of the feed are all posted, of course.
 
 ## Links
 * Code: https://github.com/impredicative/irc-rss-feed-bot
@@ -21,8 +22,8 @@ Future entries of the feed are all posted, however.
 
 ## Examples
 ```text
-<Feed[bot]> ⧘ArXiv:cs.AI⧙ Concurrent Meta Reinforcement Learning (v1) → https://arxiv.org/abs/1903.02710v1
-<Feed[bot]> ⧘ArXiv:cs.AI⧙ Attack Graph Obfuscation (v1) → https://arxiv.org/abs/1903.02601v1
+<Feed[bot]> ⧘ArXiv:cs.AI⧙ Concurrent Meta Reinforcement Learning (v1) → https://j.mp/2J6RNda
+<Feed[bot]> ⧘ArXiv:cs.AI⧙ Attack Graph Obfuscation (v1) → https://j.mp/2TJ2UNp
 <Feed[bot]> ⧘InfoWorld⧙ What is a devops engineer? And how do you become one? → https://j.mp/2NOgQ3g
 <Feed[bot]> ⧘InfoWorld⧙ What is Jupyter Notebook? Data analysis made easier → https://j.mp/2NMailP
 ```
@@ -44,7 +45,6 @@ feeds:
   "#some_chan1":
     ArXiv:cs.AI:
       url: https://export.arxiv.org/rss/cs.AI
-      shorten: no
     InfoWorld:
       url: https://www.infoworld.com/index.rss
   "#some_chan2":
@@ -66,8 +66,6 @@ Failing this, Bitly imposed rate limits for shortening URLs will lead to errors,
 
 Feed-specific settings:
 * `freq` indicates how frequently to poll the feed in hours. It is 1 by default. Conservative polling is recommended.
-* `shorten` indicates whether to use Bitly to shorten URLs. It is `true` by default and can otherwise be `false`.
-Setting this is recommended only for feeds with naturally short URLs.
 
 A `posts.sqlite` database file is written by the bot in the same directory as `config.yaml`. It must be preserved.
 
@@ -105,4 +103,4 @@ From the directory containing `docker-compose.yml`, run `docker-compose up -d ir
 
 If `config.yaml` is updated, the container must be restarted to use the updated file.
 
-Any external changes to the database should be made only when the bot is stopped. 
+Any external changes to the database should be made only when the bot is stopped, but no such changes are expected.
