@@ -70,8 +70,7 @@ The sample tokens are for illustration only and are invalid.
 To obtain tokens, refer to these [instructions](https://github.com/impredicative/bitlyshortener#usage).
 Providing multiple tokens, perhaps as many as ten free ones or a single commercial one, is required.
 Failing this, Bitly imposed rate limits for shortening URLs will lead to errors.
-If there are errors, the new posts in a feed will be reprocessed if they are still present in the  feed when it is
-read the next time as per its configured frequency.
+If there are errors, the new posts in a feed may be reprocessed the next time the feed is read.
 
 Feed-specific settings:
 * `freq` indicates how frequently to poll the feed in hours. Its default value is 1.
