@@ -54,7 +54,7 @@ feeds:
       url: https://export.arxiv.org/rss/cs.AI
     InfoWorld:
       url: https://www.infoworld.com/index.rss
-  "#some_chan2":
+  "##some_chan2":
     j:AJCN:
       url: https://academic.oup.com/rss/site_6122/3981.xml
       freq: 24
