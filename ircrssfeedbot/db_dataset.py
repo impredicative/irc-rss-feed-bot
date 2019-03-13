@@ -9,12 +9,16 @@ from ircrssfeedbot import config
 class Database:
     def __init__(self):
         db_path = config.INSTANCE['dir'] / config.DB_FILENAME
-        db = dataset.connect(f'sqlite:///{db_path}?check_same_thread=False')  # Ref: https://stackoverflow.com/a/43538853/
-        self._posts = db['posts']
         self._write_lock = threading.Lock()
+        with self._write_lock:
+            db = dataset.connect(f'sqlite:///{db_path}?check_same_thread=False')  # Ref: https://stackoverflow.com/a/43538853/
+            self._posts = db['posts']
+            self._posts.create_column_by_example('channel', '##chan')
+            self._posts.create_column_by_example('post_id', 'p0St1D')
+            self._posts.create_index(['channel', 'post_id', 'id'])
 
     def find_missing(self, channel: str, post_ids: List[str]) -> List[str]:
-        posted = {post['post_id'] for post in self._posts.find(channel=channel, id=post_ids)}
+        posted = {post['post_id'] for post in self._posts.find(channel=channel, post_id=post_ids)}
         unposted = [post_id for post_id in post_ids if post_id not in posted]
         return unposted
 
