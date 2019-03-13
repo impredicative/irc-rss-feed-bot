@@ -11,7 +11,7 @@ def configure_logging() -> None:
 
 INSTANCE: Dict = {}  # Set from YAML config file.
 PACKAGE_NAME = Path(__file__).parent.stem
-DB_FILENAME = 'posts.sqlite'
+DB_FILENAME = 'posts.db'
 FREQ_HOURS_DEFAULT = 1
 MAX_NEW_FEED_POSTS = 5
 POST_FEED_NAME_CHAR = '⧙'
