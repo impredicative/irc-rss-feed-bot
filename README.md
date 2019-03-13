@@ -41,6 +41,13 @@ tokens:
   bitly:
     - 5e71a58b19582f48edcb0235637ac3536dd3b6dc
     - bd90119a7b617e81b293ddebbbfed3e955eac5af
+    - 42f309642a018e6b4d7cfba6854080719dccf0cc
+    - 0819552eb8b42e52dbc8b4c3e1654f5cd96c0dcc
+    - 430a002fe9d4e8f94097f7a5cd974ffce85eb605
+    - 71f9856bc96c6a8eabeac4f763daaec16896e183
+    - 81f6d477cfcef006a6dd35c4b947d1c1fdcbf445
+    - 06441b445c75d2251f0a56ae87506c69dc468af5
+    - 1e71089487fb70f42fff51b7ad49f192ffcb00f2
 feeds:
   "#some_chan1":
     ArXiv:cs.AI:
