@@ -18,6 +18,10 @@ class FeedEntry:
     long_url: str
     short_url: str
 
+    @property
+    def id(self) -> str:
+        return self.short_url.rpartition('/')[-1]
+
 
 @dataclass
 class Feed:
