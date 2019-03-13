@@ -1,12 +1,12 @@
 # irc-rss-feed-bot
 **irc-rss-feed-bot** is a Python 3.7 based IRC RSS and Atom feed posting bot.
 It essentially posts the entries of RSS and Atom feeds in IRC channels, one entry per message.
-Specifically, it posts the titles and shortened URLs of entries.
+More specifically, it posts the titles and shortened URLs of entries.
 
 ## Features
 * Multiple channels on an IRC server are supported, with each channel having its own set of feeds.
 For multiple servers, use an instance per server.
-* Entry URLs are always shortened using [`bitlyshortener`](https://github.com/impredicative/bitlyshortener/).
+* Entry URLs are all shortened using [`bitlyshortener`](https://github.com/impredicative/bitlyshortener/).
 * A SQLite database file records the entries that have been posted, thereby preventing them from being reposted.
 * Entries are posted only if the channel has not had any conversation for at least 15 minutes, thereby preventing the
 interruption of any preexisting conversations.
@@ -14,7 +14,7 @@ interruption of any preexisting conversations.
 * For each new feed with no history in the database, only up to five of its most recent entries are posted.
 The rest are never posted but are nevertheless saved in the database.
 This is done to limit flooding a channel when one or more new feeds are added.
-Future entries of the feed are all posted, of course.
+Future entries of the feed are all posted without reservation, of course.
 
 ## Links
 * Code: https://github.com/impredicative/irc-rss-feed-bot
@@ -62,12 +62,15 @@ Setting it is recommended.
 The sample tokens are for illustration only and are invalid.
 To obtain tokens, refer to these [instructions](https://github.com/impredicative/bitlyshortener#usage).
 Providing multiple tokens, perhaps as many as ten free ones or a single commercial one, is required.
-Failing this, Bitly imposed rate limits for shortening URLs will lead to errors, and groups of posts will be skipped.
+Failing this, Bitly imposed rate limits for shortening URLs will lead to errors.
+If there are errors, the new posts in a feed will be reprocessed if they are still present in the  feed when it is
+read the next time as per its configured frequency.
 
 Feed-specific settings:
-* `freq` indicates how frequently to poll the feed in hours. It is 1 by default. Conservative polling is recommended.
+* `freq` indicates how frequently to poll the feed in hours. Its default value is 1.
+Conservative polling is recommended.
 
-A `posts.sqlite` database file is written by the bot in the same directory as `config.yaml`. It must be preserved.
+A `posts.db` database file is written by the bot in the same directory as `config.yaml`. It must be preserved.
 
 ### Deployment
 * Some but not all warning and error alerts are sent to `##{nick}-alerts`.
