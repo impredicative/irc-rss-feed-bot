@@ -1,3 +1,4 @@
 bitlyshortener==0.2.0
 feedparser==5.2.1
+miniirc==1.0.9
 ruamel.yaml==0.15.89

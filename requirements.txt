@@ -5,10 +5,11 @@
 #    pip-compile 
 #
 bitlyshortener==0.2.0
-certifi==2019.3.9         # via requests
+certifi==2019.3.9         # via miniirc, requests
 chardet==3.0.4            # via requests
 feedparser==5.2.1
 idna==2.8                 # via requests
+miniirc==1.0.9
 requests==2.21.0          # via bitlyshortener
 ruamel.yaml==0.15.89
 urllib3==1.24.1           # via requests
