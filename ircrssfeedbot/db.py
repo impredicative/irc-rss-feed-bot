@@ -8,14 +8,15 @@ DATABASE = peewee.SqliteDatabase(None)
 
 
 class Post(peewee.Model):
-    channel = peewee.CharField(64, null=False, verbose_name='Channel name')
-    feed = peewee.CharField(32, null=False, verbose_name='Feed name')
-    post = peewee.CharField(12, null=False, verbose_name='Post ID')
+    channel = peewee.CharField(64, null=False, verbose_name='channel name')
+    feed = peewee.CharField(32, null=False, verbose_name='feed name')
+    post = peewee.CharField(12, null=False, verbose_name='post ID')
 
     class Meta:
         database = DATABASE
-        indexes = (  # TODO: Consider appending "id" column to indexes.
-            (('channel', 'feed', 'post'), True),
+        primary_key = peewee.CompositeKey('channel', 'feed', 'post')
+        indexes = (
+            # (('channel', 'feed', 'post'), True),
             (('channel', 'post'), False),
         )  # True means unique.
 
