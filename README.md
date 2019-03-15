@@ -8,7 +8,7 @@ More specifically, it posts the titles and shortened URLs of entries.
 For multiple servers, use an instance per server.
 * Entry URLs are all shortened using [`bitlyshortener`](https://github.com/impredicative/bitlyshortener/).
 * A SQLite database file records the entries that have been posted, thereby preventing them from being reposted.
-Deduplication of a post is per channel, not per feed.
+Deduplication of a post can be per-feed or per-channel, with the default being per-feed.
 * Entries are posted only if the channel has not had any conversation for at least 15 minutes, thereby preventing the
 interruption of any preexisting conversations.
 * Poll frequency of each feed is individually customizable.
@@ -51,16 +51,17 @@ tokens:
     - 1e71089487fb70f42fff51b7ad49f192ffcb00f2
 feeds:
   "#some_chan1":
-    ArXiv:cs.AI:
-      url: https://export.arxiv.org/rss/cs.AI
-    InfoWorld:
-      url: https://www.infoworld.com/index.rss
-  "##some_chan2":
     j:AJCN:
       url: https://academic.oup.com/rss/site_6122/3981.xml
       freq: 24
     MedicalXpress:nutrition:
       url: https://medicalxpress.com/rss-feed/search/?search=nutrition
+  "##some_chan2":
+    ArXiv:cs.AI:
+      url: https://export.arxiv.org/rss/cs.AI
+      dedup: channel
+    InfoWorld:
+      url: https://www.infoworld.com/index.rss
 ```
 
 Global settings:
@@ -74,6 +75,9 @@ Failing this, Bitly imposed rate limits for shortening URLs will lead to errors.
 If there are errors, the new posts in a feed may get reprocessed the next time the feed is read.
 
 Feed-specific settings:
+* `dedup` indicates how to deduplicate posts for the feed, thereby preventing them from being reposted.
+The default value is `feed`, and an alternate possible value is `channel`.
+Per-feed deduplication is nevertheless also specific to its channel.
 * `freq` indicates how frequently to poll the feed in hours. Its default value is 1.
 Conservative polling is recommended.
 
