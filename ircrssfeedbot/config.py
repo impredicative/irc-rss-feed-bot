@@ -13,7 +13,7 @@ INSTANCE: Dict = {}  # Set from YAML config file.
 PACKAGE_NAME = Path(__file__).parent.stem
 
 BITLY_SHORTENER_MAX_CACHE_SIZE = 4096
-DB_FILENAME = 'posts.db'
+DB_FILENAME = 'posts.v1.db'
 FREQ_HOURS_DEFAULT = 1
 MAX_POSTS_OF_NEW_FEED = 3
 POST_FEED_NAME_CHAR = '⧙'
