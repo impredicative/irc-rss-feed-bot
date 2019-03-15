@@ -48,6 +48,11 @@ LOGGING = {  # Ref: https://docs.python.org/3/howto/logging.html#configuring-log
             'handlers': ['console'],
             'propagate': False,
         },
+        'peewee': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False,
+        },
         '': {
             'level': 'DEBUG',
             'handlers': ['console'],
