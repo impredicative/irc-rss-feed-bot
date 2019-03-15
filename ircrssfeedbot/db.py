@@ -14,6 +14,7 @@ class Post(peewee.Model):
 
     class Meta:
         database = DATABASE
+        legacy_table_names = False  # This will become a default in peewee>=4
         primary_key = peewee.CompositeKey('channel', 'feed', 'post')
         indexes = (
             # (('channel', 'feed', 'post'), True),
@@ -27,6 +28,9 @@ class Database:
         DATABASE.init(db_path)
         self._db = DATABASE
         self._db.create_tables([Post])
+
+    def is_new_feed(self, channel: str, feed: str) -> bool:
+        pass
 
     def find_missing(self, channel: str, feed: Optional[str], posts: List[str]) -> List[str]:
         if feed:
