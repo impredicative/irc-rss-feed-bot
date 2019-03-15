@@ -77,7 +77,7 @@ If there are errors, the new posts in a feed may get reprocessed the next time t
 Feed-specific settings:
 * `dedup` indicates how to deduplicate posts for the feed, thereby preventing them from being reposted.
 The default value is `feed`, and an alternate possible value is `channel`.
-Per-feed deduplication is nevertheless also specific to its channel.
+Per-feed deduplication is nevertheless implicitly specific to its channel.
 * `freq` indicates how frequently to poll the feed in hours. Its default value is 1.
 Conservative polling is recommended.
 
