@@ -16,7 +16,7 @@ class Post(peewee.Model):
         database = DATABASE
         indexes = (  # TODO: Consider appending "id" column to indexes.
             (('channel', 'feed', 'post'), True),
-            (('channel', 'post'), True),
+            (('channel', 'post'), False),
         )  # True means unique.
 
 
