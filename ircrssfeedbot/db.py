@@ -35,7 +35,7 @@ class Database:
         _DATABASE.init(db_path)  # If facing threading issues, consider https://stackoverflow.com/a/39024742/
         self._db = _DATABASE
         self._db.create_tables([Post])
-        self._write_lock = threading.Lock()
+        self._write_lock = threading.Lock()  # Unclear if necessary, but used anyway for safety.
         log.info('Initialized database having path %s and size %s.', db_path, humanize_bytes(db_path.stat().st_size))
 
     @staticmethod
