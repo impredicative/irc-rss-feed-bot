@@ -74,6 +74,7 @@ To obtain tokens, refer to these [instructions](https://github.com/impredicative
 Providing multiple tokens, perhaps as many as 10 to 20 free ones or a single commercial one, is required.
 Failing this, Bitly imposed rate limits for shortening URLs will lead to errors.
 If there are errors, the batched new posts in a feed may get reprocessed the next time the feed is read.
+It is safer to provide more tokens than are necessary.
 
 Feed-specific settings:
 * `dedup` indicates how to deduplicate posts for the feed, thereby preventing them from being reposted.
