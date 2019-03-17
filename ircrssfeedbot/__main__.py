@@ -25,8 +25,11 @@ def main() -> None:
     logged_instance_config = instance_config.copy()
     for key in ('nick_password', 'tokens', 'feeds'):
         del logged_instance_config[key]
-    log.info('Read user configuration file "%s" having excerpted configuration: %s',
-             instance_config_path, logged_instance_config)
+    log.info('Read user configuration file "%s" having excerpted configuration %s for %s channels %s with %s feeds.',
+             instance_config_path, logged_instance_config,
+             len(instance_config['feeds']), list(instance_config['feeds']),
+             len([feed for channel in instance_config['feeds'].values() for feed in channel]))
+
     for channel, channeL_config in instance_config['feeds'].items():
         for feed, feed_config in channeL_config.items():
             log.debug('User configuration for channel %s has feed %s with configuration: %s',
@@ -40,7 +43,7 @@ def main() -> None:
     config.INSTANCE = instance_config
 
     # Start bot
-    Bot().serve()
+    Bot()
 
 
 if __name__ == '__main__':
