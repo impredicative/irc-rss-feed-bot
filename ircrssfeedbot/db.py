@@ -40,8 +40,7 @@ class Database:
 
     def is_new_feed(self, channel: str, feed: str) -> bool:
         conditions = (Post.channel == channel) & (Post.feed == feed)
-        posts = Post.select(Post.post).where(conditions).limit(1).tuples()
-        return not posts
+        return not Post.select(Post.post).where(conditions).limit(1)
 
     @staticmethod
     def select_missing(channel: str, feed: Optional[str], posts: List[str]) -> List[str]:
