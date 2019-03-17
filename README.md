@@ -119,8 +119,8 @@ From the directory containing `docker-compose.yml`, run `docker-compose up -d ir
 ### Maintenance
 * If `config.yaml` is updated, the container must be restarted to use the updated file.
 * Any external changes to the database should be made only when the bot is stopped, but no such changes are expected.
-* The database file grows as new posts are made. For the most part this growth can be ignored.
-Currently the standard approach for handling this unlimited growth, if necessary, is to stop the bot and delete the
+* The database file grows as new posts are made. For the most part this indefinite growth can be ignored.
+Currently the standard approach for handling this, if necessary, is to stop the bot and delete the
 database file if it has grown unacceptably large.
 Restarting the bot will then create a new database file, and all configured feeds will be handled as new.
 This deletion is however discouraged as a routine measure.
