@@ -5,7 +5,7 @@ from pathlib import Path
 
 from ruamel.yaml import YAML
 
-from ircrssfeedbot import config
+from ircrssfeedbot import Bot, config
 
 log = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ def main() -> None:
     config.INSTANCE = instance_config
 
     # Start bot
-    #Bot().serve()
+    Bot().serve()
 
 
 if __name__ == '__main__':
