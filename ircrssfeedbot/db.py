@@ -1,3 +1,4 @@
+import logging
 import threading
 from typing import List, Optional
 
@@ -6,6 +7,7 @@ from ircrssfeedbot import config
 import peewee
 from peewee import chunked
 
+log = logging.getLogger(__name__)
 _DATABASE = peewee.SqliteDatabase(None)
 
 
