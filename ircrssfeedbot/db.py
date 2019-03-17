@@ -54,17 +54,17 @@ class Database:
         return not Post.select(Post.url).where(conditions).limit(1)
 
     def select_unposted_for_channel(self, channel: str, urls: List[str]) -> List[str]:
-        log.debug('Requesting unposted URLs for channel %s out of %s.', channel, len(urls))
+        log.debug('Requesting unposted URLs for channel %s out of %s URLs.', channel, len(urls))
         conditions = (Post.channel == channel)
         unposted_urls = self._select_unposted(conditions, urls)
-        log.info('Returning %s unposted URLs for channel %s out of %s.', len(unposted_urls), channel, len(urls))
+        log.info('Returning %s unposted URLs for channel %s out of %s URLs.', len(unposted_urls), channel, len(urls))
         return unposted_urls
 
     def select_unposted_for_channel_feed(self, channel: str, feed: Union[str, None], urls: List[str]) -> List[str]:
-        log.debug('Requesting unposted URLs for channel %s having feed %s out of %s.', channel, feed, len(urls))
+        log.debug('Requesting unposted URLs for channel %s having feed %s out of %s URLs.', channel, feed, len(urls))
         conditions = (Post.channel == channel) & (Post.feed == feed)
         unposted_urls = self._select_unposted(conditions, urls)
-        log.info('Returning %s unposted URLs for channel %s having feed %s out of %s.',
+        log.info('Returning %s unposted URLs for channel %s having feed %s out of %s URLs.',
                  len(unposted_urls), channel, feed, len(urls))
         return unposted_urls
 
