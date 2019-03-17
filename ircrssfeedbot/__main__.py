@@ -21,8 +21,9 @@ def main() -> None:
     instance_config = YAML().load(instance_config_path)
     instance_config = json.loads(json.dumps(instance_config))  # Recursively use a dict as the data structure.
     logged_instance_config = instance_config.copy()
-    del logged_instance_config['nick_password']
-    log.info('Read user configuration file "%s" having configuration: %s',
+    for key in ('nick_password', 'tokens', 'feeds'):
+        del logged_instance_config[key]
+    log.info('Read user configuration file "%s" having excerpted configuration: %s',
              instance_config_path, json.dumps(logged_instance_config))
 
     # Process user config
