@@ -49,6 +49,7 @@ tokens:
     - 81f6d477cfcef006a6dd35c4b947d1c1fdcbf445
     - 06441b445c75d2251f0a56ae87506c69dc468af5
     - 1e71089487fb70f42fff51b7ad49f192ffcb00f2
+    - d67d83ab3af6ea840f712bc7a9f48a89393a66c3
 feeds:
   "#some_chan1":
     j:AJCN:
@@ -70,9 +71,9 @@ Setting it is recommended.
 * `tokens/bitly`: Bitly tokens are required for shortening URLs. They are mandatory.
 The sample tokens are for illustration only and are invalid.
 To obtain tokens, refer to these [instructions](https://github.com/impredicative/bitlyshortener#usage).
-Providing multiple tokens, perhaps as many as ten free ones or a single commercial one, is required.
+Providing multiple tokens, perhaps as many as 10 to 20 free ones or a single commercial one, is required.
 Failing this, Bitly imposed rate limits for shortening URLs will lead to errors.
-If there are errors, the new posts in a feed may get reprocessed the next time the feed is read.
+If there are errors, the batched new posts in a feed may get reprocessed the next time the feed is read.
 
 Feed-specific settings:
 * `dedup` indicates how to deduplicate posts for the feed, thereby preventing them from being reposted.
