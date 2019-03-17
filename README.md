@@ -81,7 +81,8 @@ Per-feed deduplication is nevertheless implicitly specific to its channel.
 * `freq` indicates how frequently to poll the feed in hours. Its default value is 1.
 Conservative polling is recommended.
 
-A `posts.v1.db` database file is written by the bot in the same directory as `config.yaml`. It must be preserved.
+A `posts.v1.db` database file is written by the bot in the same directory as `config.yaml`.
+This database file must be preserved but not version controlled.
 
 ### Deployment
 * Some but not all warning and error alerts are sent to `##{nick}-alerts`.
