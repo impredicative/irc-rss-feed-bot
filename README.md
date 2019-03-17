@@ -66,9 +66,9 @@ feeds:
 ```
 
 Global settings:
-* `mode`: This is optional and can for example be `+igR` for [Freenode](https://freenode.net/kb/answer/usermodes).
+* **`mode`**: This is optional and can for example be `+igR` for [Freenode](https://freenode.net/kb/answer/usermodes).
 Setting it is recommended.
-* `tokens/bitly`: Bitly tokens are required for shortening URLs. They are mandatory.
+* **`tokens/bitly`**: Bitly tokens are required for shortening URLs. They are mandatory.
 The sample tokens are for illustration only and are invalid.
 To obtain tokens, refer to these [instructions](https://github.com/impredicative/bitlyshortener#usage).
 Providing multiple tokens, perhaps as many as 10 to 20 free ones or a single commercial one, is required.
@@ -77,10 +77,10 @@ If there are errors, the batched new posts in a feed may get reprocessed the nex
 It is safer to provide more tokens than are necessary.
 
 Feed-specific settings:
-* `dedup` indicates how to deduplicate posts for the feed, thereby preventing them from being reposted.
+* **`dedup`** indicates how to deduplicate posts for the feed, thereby preventing them from being reposted.
 The default value is `feed`, and an alternate possible value is `channel`.
 Per-feed deduplication is nevertheless implicitly specific to its channel.
-* `freq` indicates how frequently to poll the feed in hours. Its default value is 1.
+* **`freq`** indicates how frequently to poll the feed in hours. Its default value is 1.
 Conservative polling is recommended.
 
 A `posts.v1.db` database file is written by the bot in the same directory as `config.yaml`.
