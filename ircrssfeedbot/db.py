@@ -1,11 +1,13 @@
 import logging
+from pathlib import Path
 import threading
 from typing import List, Optional
 
-from ircrssfeedbot import config
-
 import peewee
 from peewee import chunked
+
+from . import config
+from .util.humanize import humanize_bytes
 
 log = logging.getLogger(__name__)
 _DATABASE = peewee.SqliteDatabase(None)
@@ -28,11 +30,13 @@ class Post(peewee.Model):
 
 class Database:
     def __init__(self):
-        db_path = '/tmp/sq.db'  # TODO: Use config.INSTANCE['dir'] / config.DB_FILENAME
+        log.debug('Initializing database.')
+        db_path = Path('/tmp/sq.db')  # TODO: Use config.INSTANCE['dir'] / config.DB_FILENAME
         _DATABASE.init(db_path)
         self._db = _DATABASE
         self._db.create_tables([Post])
         self._write_lock = threading.Lock()
+        log.info('Initialized database having path %s and size %s.', db_path, humanize_bytes(db_path.stat().st_size))
 
     def is_new_feed(self, channel: str, feed: str) -> bool:
         conditions = (Post.channel == channel) & (Post.feed == feed)
