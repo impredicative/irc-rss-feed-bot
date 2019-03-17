@@ -25,7 +25,7 @@ class Post(peewee.Model):
 
 class Database:
     def __init__(self):
-        db_path = '/tmp/sq.db'  # config.INSTANCE['dir'] / config.DB_FILENAME
+        db_path = '/tmp/sq.db'  # TODO: Use config.INSTANCE['dir'] / config.DB_FILENAME
         _DATABASE.init(db_path)
         self._db = _DATABASE
         self._db.create_tables([Post])
@@ -41,8 +41,9 @@ class Database:
         else:
             conditions = (Post.channel == channel) & Post.post.not_in(posts)
         missing = Post.select(Post.post).where(conditions).tuples().iterator()
-        missing = [post for post in posts if post in missing]  # Sort by original order.
-        return missing
+        missing_ordered = [post for post in posts if post in missing]  # Sort by original order.
+        assert missing == missing_ordered  # TODO: Remove assertion after thoroughly confirming it.
+        return missing_ordered
 
     def insert(self, channel: str, feed: str, posts: List[str]) -> None:
         data = ({'channel': channel, 'feed': feed, 'post': post} for post in posts)
