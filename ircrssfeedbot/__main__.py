@@ -20,11 +20,17 @@ def main() -> None:
     log.debug('Reading instance configuration file %s', instance_config_path)
     instance_config = YAML().load(instance_config_path)
     instance_config = json.loads(json.dumps(instance_config))  # Recursively use a dict as the data structure.
+
+    # Log user config
     logged_instance_config = instance_config.copy()
     for key in ('nick_password', 'tokens', 'feeds'):
         del logged_instance_config[key]
     log.info('Read user configuration file "%s" having excerpted configuration: %s',
-             instance_config_path, json.dumps(logged_instance_config))
+             instance_config_path, logged_instance_config)
+    for channel, channeL_config in instance_config['feeds'].items():
+        for feed, feed_config in channeL_config.items():
+            log.debug('User configuration for channel %s has feed %s with configuration: %s',
+                      channel, feed, feed_config)
 
     # Process user config
     instance_config['dir'] = instance_config_path.parent
