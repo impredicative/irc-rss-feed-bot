@@ -49,7 +49,8 @@ class Database:
         missing = [post for post in posts if post not in present]  # This also implicitly avoids returning duplicates.
         return missing
 
-    def is_new_feed(self, channel: str, feed: str) -> bool:
+    @staticmethod
+    def is_new_feed(channel: str, feed: str) -> bool:
         conditions = (Post.channel == channel) & (Post.feed == feed)
         return not Post.select(Post.post).where(conditions).limit(1)
 
