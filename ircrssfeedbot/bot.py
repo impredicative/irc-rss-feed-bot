@@ -57,19 +57,21 @@ class Bot:
         channels_str = ', '.join(channels)
         log.debug('Setting up threads and queues for %s channels (%s) and their feeds with %s currently active '
                   'threads.', len(channels), channels_str, threading.active_count())
+        num_feeds = 0
         for channel, channel_config in channels.items():
             log.debug('Setting up threads and queue for %s.', channel)
             self.CHANNEL_JOIN_EVENTS[channel] = threading.Event()
             self.CHANNEL_QUEUES[channel] = queue.SimpleQueue()  # type: ignore
             threading.Thread(target=self._msg_channel, name=f'ChannelMessenger-{channel}',
-                             args=(self, channel)).start()
+                             args=(channel,)).start()
             for feed in channel_config:
                 threading.Thread(target=self._read_feed, name=f'FeedReader-{channel}-{feed}',
-                                 args=(self, channel, feed)).start()
+                                 args=(channel, feed)).start()
+                num_feeds += 1
             log.debug('Finished setting up threads and queue for %s and its %s feeds with %s currently active threads.',
                      channel, len(channel_config), threading.active_count())
-        log.info('Finished setting up threads and queues for %s channels (%s) and their feeds with %s currently active '
-                 'threads.', len(channels), channels_str, threading.active_count())
+        log.info('Finished setting up threads and queues for %s channels (%s) and their %s feeds with %s currently '
+                 'active threads.', len(channels), channels_str, num_feeds, threading.active_count())
 
     def _msg_channel(self, channel: str) -> None:
         log.debug('Channel messenger for %s is starting and is waiting to be notified of channel join.', channel)
