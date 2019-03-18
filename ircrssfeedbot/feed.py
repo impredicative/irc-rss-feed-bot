@@ -1,5 +1,5 @@
 import dataclasses
-from typing import List
+from typing import List, Union
 
 import bitlyshortener
 from descriptors import cachedproperty
@@ -15,10 +15,18 @@ class FeedEntry:
     title: str
     long_url: str
 
+    @property
+    def url(self) -> str:
+        return self.long_url
+
 
 @dataclasses.dataclass
 class ShortenedFeedEntry(FeedEntry):
     short_url: str
+
+    @property
+    def url(self) -> str:
+        return self.short_url
 
 
 @dataclasses.dataclass
@@ -44,13 +52,14 @@ class Feed:
         return [FeedEntry(title=e['title'], long_url=e['link']) for e in feedparser.parse(self._feed)['entries']]
 
     @cachedproperty
-    def postable_entries(self) -> List[ShortenedFeedEntry]:
+    def postable_entries(self) -> List[Union[FeedEntry, ShortenedFeedEntry]]:
         entries = self.unposted_entries[:config.MAX_POSTS_OF_NEW_FEED] if self._is_new_feed else self.unposted_entries
 
         # Shorten URLs
-        long_urls = [entry.long_url for entry in entries]
-        short_urls = self.url_shortener.shorten_urls(long_urls)
-        entries = [ShortenedFeedEntry(e.title, e.long_url, short_urls[i]) for i, e in enumerate(entries)]
+        if self._feed_config.get('shorten', True):
+            long_urls = [entry.long_url for entry in entries]
+            short_urls = self.url_shortener.shorten_urls(long_urls)
+            entries = [ShortenedFeedEntry(e.title, e.long_url, short_urls[i]) for i, e in enumerate(entries)]
 
         return entries
 

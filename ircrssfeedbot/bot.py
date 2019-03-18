@@ -98,7 +98,7 @@ class Bot:
 
                     log.debug('Posting %s entries for %s.', len(feed.postable_entries), feed)
                     for entry in feed.postable_entries:
-                        msg = message_template.format(feed=feed.name, title=entry.title, url=entry.short_url)
+                        msg = message_template.format(feed=feed.name, title=entry.title, url=entry.url)
                         irc.msg(channel, msg)
                     log.info('Posted %s entries for %s.', len(feed.postable_entries), feed)
 

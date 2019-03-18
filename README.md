@@ -61,6 +61,8 @@ feeds:
     ArXiv:cs.AI:
       url: https://export.arxiv.org/rss/cs.AI
       dedup: channel
+      freq: 2
+      shorten: false
     InfoWorld:
       url: https://www.infoworld.com/index.rss
 ```
@@ -82,6 +84,8 @@ The default value is `feed`, and an alternate possible value is `channel`.
 Per-feed deduplication is nevertheless implicitly specific to its channel.
 * **`freq`**: This indicates how frequently to poll the feed in hours. Its default value is 1.
 Conservative polling is recommended.
+* **`shorten`**: This indicates whether to post shortened URLs for the feed.
+The default value is `true`; the alternative is `false`.
 
 A `posts.v1.db` database file is written by the bot in the same directory as `config.yaml`.
 This database file must be preserved but not version controlled.
