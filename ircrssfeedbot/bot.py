@@ -51,28 +51,6 @@ class Bot:
         self._setup_channels()
         log.info('Alerts will be sent to %s.', instance['alerts_channel'])
 
-    def _setup_channels(self) -> None:
-        instance = config.INSTANCE
-        channels = instance['feeds']
-        channels_str = ', '.join(channels)
-        log.debug('Setting up threads and queues for %s channels (%s) and their feeds with %s currently active '
-                  'threads.', len(channels), channels_str, threading.active_count())
-        num_feeds = 0
-        for channel, channel_config in channels.items():
-            log.debug('Setting up threads and queue for %s.', channel)
-            self.CHANNEL_JOIN_EVENTS[channel] = threading.Event()
-            self.CHANNEL_QUEUES[channel] = queue.Queue(config.MAX_CHANNEL_QUEUE_SIZE)
-            threading.Thread(target=self._msg_channel, name=f'ChannelMessenger-{channel}',
-                             args=(channel,)).start()
-            for feed in channel_config:
-                threading.Thread(target=self._read_feed, name=f'FeedReader-{channel}-{feed}',
-                                 args=(channel, feed)).start()
-                num_feeds += 1
-            log.debug('Finished setting up threads and queue for %s and its %s feeds with %s currently active threads.',
-                     channel, len(channel_config), threading.active_count())
-        log.info('Finished setting up threads and queues for %s channels (%s) and their %s feeds with %s currently '
-                 'active threads.', len(channels), channels_str, num_feeds, threading.active_count())
-
     def _msg_channel(self, channel: str) -> None:
         log.debug('Channel messenger for %s is starting and is waiting to be notified of channel join.', channel)
         Bot.CHANNEL_JOIN_EVENTS[channel].wait()
@@ -111,6 +89,28 @@ class Bot:
 
     def _read_feed(self, channel: str, feed: str) -> None:
         pass
+
+    def _setup_channels(self) -> None:
+        instance = config.INSTANCE
+        channels = instance['feeds']
+        channels_str = ', '.join(channels)
+        log.debug('Setting up threads and queues for %s channels (%s) and their feeds with %s currently active '
+                  'threads.', len(channels), channels_str, threading.active_count())
+        num_feeds = 0
+        for channel, channel_config in channels.items():
+            log.debug('Setting up threads and queue for %s.', channel)
+            self.CHANNEL_JOIN_EVENTS[channel] = threading.Event()
+            self.CHANNEL_QUEUES[channel] = queue.Queue(config.MAX_CHANNEL_QUEUE_SIZE)
+            threading.Thread(target=self._msg_channel, name=f'ChannelMessenger-{channel}',
+                             args=(channel,)).start()
+            for feed in channel_config:
+                threading.Thread(target=self._read_feed, name=f'FeedReader-{channel}-{feed}',
+                                 args=(channel, feed)).start()
+                num_feeds += 1
+            log.debug('Finished setting up threads and queue for %s and its %s feeds with %s currently active threads.',
+                     channel, len(channel_config), threading.active_count())
+        log.info('Finished setting up threads and queues for %s channels (%s) and their %s feeds with %s currently '
+                 'active threads.', len(channels), channels_str, num_feeds, threading.active_count())
 
 # Ref: https://tools.ietf.org/html/rfc1459
 
