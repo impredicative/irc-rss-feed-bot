@@ -10,8 +10,6 @@ from . import config
 
 log = logging.getLogger(__name__)
 
-_CHANNEL_LAST_MESSAGE_TIMES = {}
-
 
 def _alert(irc: miniirc.IRC, msg: str, loglevel: int = logging.ERROR) -> None:
     log.log(loglevel, msg)
@@ -19,6 +17,8 @@ def _alert(irc: miniirc.IRC, msg: str, loglevel: int = logging.ERROR) -> None:
 
 
 class Bot:
+    CHANNEL_LAST_MESSAGE_TIMES = {}
+
     def __init__(self) -> None:
         log.info('Initializing bot as: %s', subprocess.check_output('id', text=True).rstrip())
         instance = config.INSTANCE
@@ -68,8 +68,8 @@ def _handle_join(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[s
         return
 
     # Update channel last message time
-    _CHANNEL_LAST_MESSAGE_TIMES[channel] = monotonic()
-    log.debug('Set the last message time for %s to %s.', channel, _CHANNEL_LAST_MESSAGE_TIMES[channel])
+    Bot.CHANNEL_LAST_MESSAGE_TIMES[channel] = monotonic()
+    log.debug('Set the last message time for %s to %s.', channel, Bot.CHANNEL_LAST_MESSAGE_TIMES[channel])
 
 
 @miniirc.Handler('PRIVMSG')
@@ -90,5 +90,5 @@ def _handle_privmsg(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List
         return
 
     # Update channel last message time
-    _CHANNEL_LAST_MESSAGE_TIMES[channel] = monotonic()
-    log.debug('Updated the last message time for %s to %s.', channel, _CHANNEL_LAST_MESSAGE_TIMES[channel])
+    Bot.CHANNEL_LAST_MESSAGE_TIMES[channel] = monotonic()
+    log.debug('Updated the last message time for %s to %s.', channel, Bot.CHANNEL_LAST_MESSAGE_TIMES[channel])
