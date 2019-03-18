@@ -6,6 +6,7 @@ import time
 from typing import Dict, List, Tuple
 
 import bitlyshortener
+import humanize
 import miniirc
 
 from . import config
@@ -71,28 +72,40 @@ class Bot:
                  'threads.', len(channels), channels_str, threading.active_count())
 
     def _msg_channel(self, channel: str) -> None:
-        log.debug('Starting channel messenger for %s. Waiting to join channel.', channel)
+        log.debug('Channel messenger for %s is starting and is waiting to be notified of channel join.', channel)
         Bot.CHANNEL_JOIN_EVENTS[channel].wait()
         channel_queue = Bot.CHANNEL_QUEUES[channel]
         db = self._db
         irc = self._irc
         message_template = config.MESSAGE_TEMPLATE
         min_channel_idle_time = config.MIN_CHANNEL_IDLE_TIME
-        log.debug('Started channel messenger for %s.', channel)
+        log.debug('Channel messenger for %s has started.', channel)
         while True:
             feed = channel_queue.get()
+            log.debug('Received %s from channel queue.', feed)
 
-            while True:
-                time_elapsed_since_last_message = time.monotonic() - Bot.CHANNEL_LAST_MESSAGE_TIMES[channel]
-                sleep_time = max(0, min_channel_idle_time - time_elapsed_since_last_message)
-                if not sleep_time:
-                    break
-                time.sleep(sleep_time)
+            try:
+                if feed.postable_entries:
+                    while True:
+                        time_elapsed_since_last_message = time.monotonic() - Bot.CHANNEL_LAST_MESSAGE_TIMES[channel]
+                        sleep_time = max(0, min_channel_idle_time - time_elapsed_since_last_message)
+                        if sleep_time == 0:
+                            break
+                        time.sleep(sleep_time)
+                        log.debug('Waiting %s to post %s.', humanize.naturaldelta(sleep_time), feed)
 
-            for entry in feed.postable_entries:
-                msg = message_template.format(feed=feed.name, title=entry.title, url=entry.short_url)
-                irc.msg(channel, msg)
-            db.insert_posted(channel, feed.name, [entry.long_url for entry in feed.unposted_entries])
+                    log.debug('Posting %s entries for %s.', len(feed.postable_entries), feed)
+                    for entry in feed.postable_entries:
+                        msg = message_template.format(feed=feed.name, title=entry.title, url=entry.short_url)
+                        irc.msg(channel, msg)
+                    log.info('Posted %s entries for %s.', len(feed.postable_entries), feed)
+
+                if feed.unposted_entries:  # Note: feed.postable_entries is intentionally not used here.
+                    db.insert_posted(channel, feed.name, [entry.long_url for entry in feed.unposted_entries])
+
+            except Exception as exc:
+                msg = f'Error processing {feed}: {exc}'
+                _alert(irc, msg)
 
     def _read_feed(self, channel: str, feed: str) -> None:
         pass
