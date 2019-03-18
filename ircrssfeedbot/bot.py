@@ -24,7 +24,7 @@ def _alert(irc: miniirc.IRC, msg: str, loglevel: int = logging.ERROR) -> None:
 class Bot:
     CHANNEL_JOIN_EVENTS: Dict[str, threading.Event] = {}
     CHANNEL_LAST_MESSAGE_TIMES: Dict[str, float] = {}
-    CHANNEL_QUEUES: Dict[str, queue.SimpleQueue] = {}  # type: ignore
+    CHANNEL_QUEUES: Dict[str, queue.Queue] = {}
 
     def __init__(self) -> None:
         log.info('Initializing bot as: %s', subprocess.check_output('id', text=True).rstrip())
@@ -61,7 +61,7 @@ class Bot:
         for channel, channel_config in channels.items():
             log.debug('Setting up threads and queue for %s.', channel)
             self.CHANNEL_JOIN_EVENTS[channel] = threading.Event()
-            self.CHANNEL_QUEUES[channel] = queue.SimpleQueue()  # type: ignore
+            self.CHANNEL_QUEUES[channel] = queue.Queue(config.MAX_CHANNEL_QUEUE_SIZE)
             threading.Thread(target=self._msg_channel, name=f'ChannelMessenger-{channel}',
                              args=(channel,)).start()
             for feed in channel_config:
