@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+import dataclasses
 from typing import List
 
 import bitlyshortener
@@ -10,24 +10,24 @@ from . import config
 from .db import Database
 
 
-@dataclass
+@dataclasses.dataclass
 class FeedEntry:
     title: str
     long_url: str
 
 
-@dataclass
+@dataclasses.dataclass
 class ShortenedFeedEntry(FeedEntry):
     short_url: str
 
 
-@dataclass
+@dataclasses.dataclass
 class Feed:
     channel: str
     name: str
-    url: str
-    db: Database
-    url_shortener: bitlyshortener.Shortener
+    url: str = dataclasses.field(repr=False)
+    db: Database = dataclasses.field(repr=False)
+    url_shortener: bitlyshortener.Shortener = dataclasses.field(repr=False)
 
     def __post_init__(self):
         self._feed_config = config.INSTANCE[self.channel][self.name]
