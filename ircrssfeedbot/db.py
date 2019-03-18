@@ -30,7 +30,7 @@ class Post(peewee.Model):
 
 
 class Database:
-    def __init__(self):
+    def __init__(self) -> None:
         log.debug('Initializing database.')
         db_path = config.INSTANCE['dir'] / config.DB_FILENAME
         _DATABASE.init(db_path)  # If facing threading issues, consider https://stackoverflow.com/a/39024742/
