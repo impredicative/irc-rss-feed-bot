@@ -6,7 +6,7 @@ More specifically, it posts the titles and shortened URLs of entries.
 ## Features
 * Multiple channels on an IRC server are supported, with each channel having its own set of feeds.
 For multiple servers, use an instance per server.
-* Entry URLs are all shortened using [`bitlyshortener`](https://github.com/impredicative/bitlyshortener/).
+* Entry URLs are configurably shortened using [`bitlyshortener`](https://github.com/impredicative/bitlyshortener/).
 * A SQLite database file records the entries that have been posted, thereby preventing them from being reposted.
 Deduplication of a post can be per-feed or per-channel, with the default being per-feed.
 * Entries are posted only if the channel has not had any conversation for at least 15 minutes, thereby preventing the
@@ -23,8 +23,8 @@ Future entries of the feed are all posted without reservation.
 
 ## Examples
 ```text
-<Feed[bot]> ⧘ArXiv:cs.AI⧙ Concurrent Meta Reinforcement Learning (v1) → https://j.mp/2J6RNda
-<Feed[bot]> ⧘ArXiv:cs.AI⧙ Attack Graph Obfuscation (v1) → https://j.mp/2TJ2UNp
+<Feed[bot]> ⧘ArXiv:cs.AI⧙ Concurrent Meta Reinforcement Learning (v1) → https://arxiv.org/abs/1903.02710v1
+<Feed[bot]> ⧘ArXiv:cs.AI⧙ Attack Graph Obfuscation (v1) → https://arxiv.org/abs/1903.02601v1
 <Feed[bot]> ⧘InfoWorld⧙ What is a devops engineer? And how do you become one? → https://j.mp/2NOgQ3g
 <Feed[bot]> ⧘InfoWorld⧙ What is Jupyter Notebook? Data analysis made easier → https://j.mp/2NMailP
 ```
