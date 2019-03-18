@@ -69,7 +69,7 @@ def _handle_join(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[s
 
     # Update channel last message time
     _CHANNEL_LAST_MESSAGE_TIMES[channel] = monotonic()
-    log.debug('Initialized the last message time for %s to %s.', channel, _CHANNEL_LAST_MESSAGE_TIMES[channel])
+    log.debug('Set the last message time for %s to %s.', channel, _CHANNEL_LAST_MESSAGE_TIMES[channel])
 
 
 @miniirc.Handler('PRIVMSG')
