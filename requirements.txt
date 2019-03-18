@@ -7,6 +7,7 @@
 bitlyshortener==0.2.0
 certifi==2019.3.9         # via miniirc, requests
 chardet==3.0.4            # via requests
+dickens==1.0.1
 feedparser==5.2.1
 humanize==0.5.1
 idna==2.8                 # via requests
