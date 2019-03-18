@@ -40,6 +40,8 @@ def main() -> None:
     instance_config['alerts_channel'] = f'##{instance_config["nick"]}-alerts'
     if instance_config['alerts_channel'] not in instance_config['feeds']:
         instance_config['feeds'][instance_config['alerts_channel']] = {}
+    instance_config['nick:casefold'] = instance_config['nick'].casefold()
+    instance_config['channels:casefold'] = [channel.casefold() for channel in instance_config['feeds']]
     config.INSTANCE = instance_config
 
     # Start bot
