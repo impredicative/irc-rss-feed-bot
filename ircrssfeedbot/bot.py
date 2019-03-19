@@ -65,7 +65,7 @@ class Bot:
         log.info('Channel messenger for %s has started.', channel)
         while True:
             feed = channel_queue.get()
-            log.debug('Received %s from channel queue.', feed)
+            log.debug('Dequeued %s.', feed)
 
             try:
                 if feed.postable_entries:  # Result gets cached.
