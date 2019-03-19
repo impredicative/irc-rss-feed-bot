@@ -58,7 +58,7 @@ class Bot:
         channel_queue = Bot.CHANNEL_QUEUES[channel]
         db = self._db
         irc = self._irc
-        message_template = config.MESSAGE_TEMPLATE
+        message_format = config.MESSAGE_FORMAT
         min_channel_idle_time = config.MIN_CHANNEL_IDLE_TIME
         Bot.CHANNEL_JOIN_EVENTS[channel].wait()
         Bot.CHANNEL_JOIN_EVENTS[instance['alerts_channel']].wait()
@@ -79,7 +79,7 @@ class Bot:
 
                     log.debug('Posting %s entries for %s.', len(feed.postable_entries), feed)
                     for entry in feed.postable_entries:
-                        msg = message_template.format(feed=feed.name, title=entry.title, url=entry.url)
+                        msg = message_format.format(feed=feed.name, title=entry.title, url=entry.url)
                         irc.msg(channel, msg)
                     log.info('Posted %s entries for %s.', len(feed.postable_entries), feed)
 
