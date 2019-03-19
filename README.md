@@ -5,17 +5,19 @@ More specifically, it posts the titles and shortened URLs of entries.
 
 ## Features
 * Multiple channels on an IRC server are supported, with each channel having its own set of feeds.
-For multiple servers, use an instance per server.
-* Entry URLs are configurably shortened using [`bitlyshortener`](https://github.com/impredicative/bitlyshortener/).
-* A SQLite database file records the entries that have been posted, thereby preventing them from being reposted.
-Deduplication of a post can be per-feed or per-channel, with the default being per-feed.
+For multiple servers, run an instance of the bot process for each server.
 * Entries are posted only if the channel has not had any conversation for at least 15 minutes, thereby preventing the
 interruption of any preexisting conversations.
-* Poll frequency of each feed is individually customizable.
 * For each new feed with no history in the database, only up to three of its most recent entries are posted.
 The rest are never posted but are nevertheless saved in the database.
 This is done to limit flooding a channel when one or more new feeds are added.
 Future entries of the feed are all posted without reservation.
+
+Feed-specific:
+* A SQLite database file records the entries that have been posted, thereby preventing them from being reposted.
+Deduplication of a post can be per-feed or per-channel, with the default being per-feed.
+* Poll frequency of each feed is individually customizable.
+* Entry URLs are configurably shortened using [`bitlyshortener`](https://github.com/impredicative/bitlyshortener/).
 
 ## Links
 * Code: https://github.com/impredicative/irc-rss-feed-bot
