@@ -60,11 +60,13 @@ feeds:
   "##some_chan2":
     ArXiv:cs.AI:
       url: https://export.arxiv.org/rss/cs.AI
-      dedup: channel
       freq: 2
       shorten: false
     InfoWorld:
       url: https://www.infoworld.com/index.rss
+    PwC:Trending:
+      url: https://us-east1-ml-feeds.cloudfunctions.net/pwc/trending
+      dedup: feed
 ```
 
 #### Global settings
@@ -80,8 +82,8 @@ It is safer to provide more tokens than are necessary.
 
 #### Feed-specific settings
 * **`dedup`**: This indicates how to deduplicate posts for the feed, thereby preventing them from being reposted.
-The default value is `feed`, and an alternate possible value is `channel`.
-Per-feed deduplication is nevertheless implicitly specific to its channel.
+The default value is `channel` (per-channel), and an alternate possible value is `feed` (per-feed).
+Note that per-feed deduplication is implicitly specific to its channel.
 * **`freq`**: This indicates how frequently to poll the feed in hours. Its default value is 1.
 Conservative polling is recommended.
 * **`shorten`**: This indicates whether to post shortened URLs for the feed.
