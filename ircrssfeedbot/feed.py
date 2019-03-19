@@ -66,7 +66,7 @@ class Feed:
         entries = self.unposted_entries[:config.MAX_POSTS_OF_NEW_FEED] if is_new_feed else self.unposted_entries
 
         # Shorten URLs
-        if self._feed_config.get('shorten', True):
+        if entries and self._feed_config.get('shorten', True):
             log.debug('Shortening %s postable long URLs for %s.', len(entries), self)
             long_urls = [entry.long_url for entry in entries]
             short_urls = self.url_shortener.shorten_urls(long_urls)
