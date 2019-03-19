@@ -54,12 +54,14 @@ class Bot:
 
     def _msg_channel(self, channel: str) -> None:
         log.debug('Channel messenger for %s is starting and is waiting to be notified of channel join.', channel)
-        Bot.CHANNEL_JOIN_EVENTS[channel].wait()
+        instance = config.INSTANCE
         channel_queue = Bot.CHANNEL_QUEUES[channel]
         db = self._db
         irc = self._irc
         message_template = config.MESSAGE_TEMPLATE
         min_channel_idle_time = config.MIN_CHANNEL_IDLE_TIME
+        Bot.CHANNEL_JOIN_EVENTS[channel].wait()
+        Bot.CHANNEL_JOIN_EVENTS[instance['alerts_channel']].wait()
         log.info('Channel messenger for %s has started.', channel)
         while True:
             feed = channel_queue.get()
@@ -89,16 +91,20 @@ class Bot:
                 _alert(irc, msg)
 
     def _read_feed(self, channel: str, feed_name: str) -> None:
-        log.debug('Feed reader for %s feed of %s is starting.', feed_name, channel)
+        log.debug('Feed reader for feed %s of %s is starting and is waiting to be notified of channel join.',
+                  feed_name, channel)
+        instance = config.INSTANCE
+        feed_config = instance['feeds'][channel][feed_name]
         channel_queue = Bot.CHANNEL_QUEUES[channel]
-        feed_config = config.INSTANCE[channel][feed_name]
         feed_url = feed_config['url']
         feed_freq = feed_config.get('freq', 1) * 3600
         irc = self._irc
         db = self._db
         url_shortener = self._url_shortener
         query_time = -math.inf
-        log.info('Feed reader for %s feed of %s has started.', feed_name, channel)
+        Bot.CHANNEL_JOIN_EVENTS[channel].wait()
+        Bot.CHANNEL_JOIN_EVENTS[instance['alerts_channel']].wait()
+        log.info('Feed reader for feed %s of %s has started.', feed_name, channel)
         while True:
             query_time = max(time.monotonic(), query_time + feed_freq)  # "max" is used in case of delay using "put".
             sleep_time = max(0, query_time - time.monotonic())
