@@ -102,7 +102,7 @@ class Bot:
         db = self._db
         url_shortener = self._url_shortener
         query_time = -math.inf
-        Bot.CHANNEL_JOIN_EVENTS[channel].wait()
+        Bot.CHANNEL_JOIN_EVENTS[channel].wait()  # Optional.
         Bot.CHANNEL_JOIN_EVENTS[instance['alerts_channel']].wait()
         log.info('Feed reader for feed %s of %s has started.', feed_name, channel)
         while True:
