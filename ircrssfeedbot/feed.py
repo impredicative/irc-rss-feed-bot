@@ -44,29 +44,26 @@ class Feed:
     def __post_init__(self):
         log.debug('Initializing instance of %s.', self)
         self._feed_config = config.INSTANCE[self.channel][self.name]
-        self._is_new_feed = self.db.is_new_feed(self.channel, self.name)
+        self.entries = self._entries()
         log.debug('Initialized instance of %s.', self)
 
-    @property
-    def _feed(self) -> bytes:
+    def _entries(self) -> List[FeedEntry]:
         log.debug('Retrieving content for %s.', self)
         response = requests.get(self.url, timeout=config.REQUEST_TIMEOUT, headers={'User-Agent': config.USER_AGENT})
         response.raise_for_status()
         content = response.content
-        log.debug('Returning content of size %s for %s.', humanize_len(content), self)
-        return content
+        log.debug('Retrieved content of size %s for %s.', humanize_len(content), self)
 
-    @cachedproperty
-    def entries(self) -> List[FeedEntry]:
         log.debug('Retrieving entries for %s.', self)
-        entries = [FeedEntry(title=e['title'], long_url=e['link']) for e in feedparser.parse(self._feed)['entries']]
+        entries = [FeedEntry(title=e['title'], long_url=e['link']) for e in feedparser.parse(content)['entries']]
         log.debug('Returning %s entries for %s.', len(entries), self)
         return entries
 
     @cachedproperty
     def postable_entries(self) -> List[Union[FeedEntry, ShortenedFeedEntry]]:
         log.debug('Retrieving postable entries for %s.', self)
-        entries = self.unposted_entries[:config.MAX_POSTS_OF_NEW_FEED] if self._is_new_feed else self.unposted_entries
+        is_new_feed = self.db.is_new_feed(self.channel, self.name)
+        entries = self.unposted_entries[:config.MAX_POSTS_OF_NEW_FEED] if is_new_feed else self.unposted_entries
 
         # Shorten URLs
         if self._feed_config.get('shorten', True):
