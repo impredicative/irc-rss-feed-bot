@@ -43,7 +43,7 @@ class Feed:
 
     def __post_init__(self):
         log.debug('Initializing instance of %s.', self)
-        self._feed_config = config.INSTANCE[self.channel][self.name]
+        self._feed_config = config.INSTANCE['feeds'][self.channel][self.name]
         self.entries = self._entries()
         log.debug('Initialized instance of %s.', self)
 
