@@ -8,16 +8,14 @@ More specifically, it posts the titles and shortened URLs of entries.
 For multiple servers, run an instance of the bot process for each server.
 * Entries are posted only if the channel has not had any conversation for at least 15 minutes, thereby preventing the
 interruption of any preexisting conversations.
+* A SQLite database file records the entries that have been posted, thereby preventing them from being reposted.
 * For each new feed with no history in the database, only up to three of its most recent entries are posted.
 The rest are never posted but are nevertheless saved in the database.
 This is done to limit flooding a channel when one or more new feeds are added.
 Future entries of the feed are all posted without reservation.
 
-Feed-specific:
-* A SQLite database file records the entries that have been posted, thereby preventing them from being reposted.
-Deduplication of a post can be per-feed or per-channel, with the default being per-feed.
-* Poll frequency of each feed is individually customizable.
-* Entry URLs are configurably shortened using [`bitlyshortener`](https://github.com/impredicative/bitlyshortener/).
+For more features, see the customizable [global settings](#global-settings) and
+[feed-specific settings](#feed-specific-settings).
 
 ## Links
 * Code: https://github.com/impredicative/irc-rss-feed-bot
@@ -69,7 +67,7 @@ feeds:
       url: https://www.infoworld.com/index.rss
 ```
 
-Global settings:
+#### Global settings
 * **`mode`**: This is optional and can for example be `+igR` for [Freenode](https://freenode.net/kb/answer/usermodes).
 Setting it is recommended.
 * **`tokens/bitly`**: Bitly tokens are required for shortening URLs. They are mandatory.
@@ -80,7 +78,7 @@ Failing this, Bitly imposed rate limits for shortening URLs will lead to errors.
 If there are errors, the batched new posts in a feed may get reprocessed the next time the feed is read.
 It is safer to provide more tokens than are necessary.
 
-Feed-specific settings:
+#### Feed-specific settings
 * **`dedup`**: This indicates how to deduplicate posts for the feed, thereby preventing them from being reposted.
 The default value is `feed`, and an alternate possible value is `channel`.
 Per-feed deduplication is nevertheless implicitly specific to its channel.
