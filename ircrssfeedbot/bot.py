@@ -30,7 +30,6 @@ class Bot:
     def __init__(self) -> None:
         log.info('Initializing bot as: %s', subprocess.check_output('id', text=True).rstrip())
         instance = config.INSTANCE
-        self._last_outgoing_msg_time = -math.inf
         self._outgoing_msg_lock = threading.Lock()  # Used for rate limiting across multiple channels.
         self._db = Database()
         self._url_shortener = bitlyshortener.Shortener(tokens=instance['tokens']['bitly'],
@@ -72,22 +71,30 @@ class Bot:
 
             try:
                 if feed.postable_entries:  # Result gets cached.
-                    while True:
-                        time_elapsed_since_last_ic_msg = time.monotonic() - Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel]
-                        sleep_time = max(0, min_channel_idle_time - time_elapsed_since_last_ic_msg)
-                        if sleep_time == 0:
-                            break
-                        log.info('Will wait %s to post %s.', humanize.naturaldelta(sleep_time), feed)
-                        time.sleep(sleep_time)
+                    try:
+                        while True:
+                            if self._outgoing_msg_lock.locked():
+                                log.info('Waiting to acquire outgoing message lock to post %s.', feed)
+                            self._outgoing_msg_lock.acquire()
+                            last_incoming_msg_time = Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel]
+                            time_elapsed_since_last_ic_msg = time.monotonic() - last_incoming_msg_time
+                            sleep_time = max(0, min_channel_idle_time - time_elapsed_since_last_ic_msg)
+                            if sleep_time == 0:
+                                break  # Lock will be released later after posting messages.
+                            self._outgoing_msg_lock.release()  # Releasing lock before sleeping.
+                            log.info('Will wait %s for channel inactivity to post %s.',
+                                     humanize.naturaldelta(sleep_time), feed)
+                            time.sleep(sleep_time)
 
-                    log.debug('Posting %s entries for %s.', len(feed.postable_entries), feed)
-                    for entry in feed.postable_entries:
-                        msg = message_format.format(feed=feed.name, title=entry.title, url=entry.post_url)
-                        with self._outgoing_msg_lock:
-                            time.sleep(max(0., self._last_outgoing_msg_time + seconds_per_msg - time.monotonic()))
+                        log.debug('Posting %s entries for %s.', len(feed.postable_entries), feed)
+                        for entry in feed.postable_entries:
+                            msg = message_format.format(feed=feed.name, title=entry.title, url=entry.post_url)
+                            outgoing_msg_time = time.monotonic()
                             irc.msg(channel, msg)
-                            self._last_outgoing_msg_time = time.monotonic()
                             log.debug('Sent message to %s: %s', channel, msg)
+                            time.sleep(max(0., outgoing_msg_time + seconds_per_msg - time.monotonic()))
+                    finally:
+                        self._outgoing_msg_lock.release()
                     log.info('Posted %s entries for %s.', len(feed.postable_entries), feed)
 
                 if feed.unposted_entries:  # Note: feed.postable_entries is intentionally not used here.
