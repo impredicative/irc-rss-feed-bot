@@ -107,7 +107,7 @@ class Bot:
         log.info('Feed reader for feed %s of %s has started.', feed_name, channel)
         while True:
             query_time = max(time.monotonic(), query_time + feed_freq)  # "max" is used in case of delay using "put".
-            sleep_time = max(0, query_time - time.monotonic())
+            sleep_time = max(0., query_time - time.monotonic())
             if sleep_time != 0:
                 log.info('Waiting %s to read feed %s of %s.', humanize.naturaldelta(sleep_time), feed_name, channel)
                 time.sleep(sleep_time)
