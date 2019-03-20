@@ -7,12 +7,12 @@ import time
 from typing import Dict, List, Tuple
 
 import bitlyshortener
-import humanize
 import miniirc
 
 from . import config
 from .db import Database
 from .feed import Feed
+from .util.datetime import timedelta_desc
 
 log = logging.getLogger(__name__)
 
@@ -83,7 +83,7 @@ class Bot:
                                 break  # Lock will be released later after posting messages.
                             self._outgoing_msg_lock.release()  # Releasing lock before sleeping.
                             log.info('Will wait %s for channel inactivity to post %s.',
-                                     humanize.naturaldelta(sleep_time), feed)
+                                     timedelta_desc(sleep_time), feed)
                             time.sleep(sleep_time)
 
                         log.debug('Posting %s entries for %s.', len(feed.postable_entries), feed)
@@ -123,8 +123,7 @@ class Bot:
             query_time = max(time.monotonic(), query_time + feed_freq)  # "max" is used in case of wait using "put".
             sleep_time = max(0., query_time - time.monotonic())
             if sleep_time != 0:
-                log.info('Will wait %s to reread feed %s of %s.',
-                         humanize.naturaldelta(sleep_time), feed_name, channel)
+                log.info('Will wait %s to reread feed %s of %s.', timedelta_desc(sleep_time), feed_name, channel)
                 time.sleep(sleep_time)
 
             try:
