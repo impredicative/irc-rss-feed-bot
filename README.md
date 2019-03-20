@@ -55,6 +55,9 @@ feeds:
     j:AJCN:
       url: https://academic.oup.com/rss/site_6122/3981.xml
       freq: 24
+      blacklist:
+        title:
+          - ^Calendar\ of\ Events$
     MedicalXpress:nutrition:
       url: https://medicalxpress.com/rss-feed/search/?search=nutrition
   "##some_chan2":
@@ -81,6 +84,10 @@ If there are errors, the batched new posts in a feed may get reprocessed the nex
 It is safer to provide more tokens than are necessary.
 
 #### Feed-specific settings
+* **`blacklist/title`**: This is a list of [regular expression](https://docs.python.org/3/library/re.html) patterns that
+result in a title being skipped if a [search](https://docs.python.org/3/library/re.html#re.search) finds any of the
+patterns in the title.
+* **`blacklist/url`**: Similar to `blacklist/title`.
 * **`dedup`**: This indicates how to deduplicate posts for the feed, thereby preventing them from being reposted.
 The default value is `channel` (per-channel), and an alternate possible value is `feed` (per-feed).
 Note that per-feed deduplication is implicitly specific to its channel.

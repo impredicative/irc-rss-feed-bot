@@ -1,6 +1,7 @@
 import dataclasses
 import logging
-from typing import List, Union
+import re
+from typing import Dict, List, Union
 
 import bitlyshortener
 from descriptors import cachedproperty
@@ -20,8 +21,15 @@ class FeedEntry:
     long_url: str
 
     @property
-    def url(self) -> str:
+    def post_url(self) -> str:
         return self.long_url
+
+    def is_blacklisted(self, blacklist: Dict[str, List]) -> bool:
+        for blacklist_key, val in {'title': self.title, 'url': self.long_url}.items():
+            for blacklisted_entry in blacklist.get(blacklist_key, []):
+                if re.search(blacklisted_entry, val):
+                    return True
+        return False
 
 
 @dataclasses.dataclass
@@ -29,7 +37,7 @@ class ShortenedFeedEntry(FeedEntry):
     short_url: str
 
     @property
-    def url(self) -> str:
+    def post_url(self) -> str:
         return self.short_url
 
 
@@ -56,6 +64,14 @@ class Feed:
 
         log.debug('Retrieving entries for %s.', self)
         entries = [FeedEntry(title=e['title'], long_url=e['link']) for e in feedparser.parse(content)['entries']]
+        log.debug('Retrieved %s entries for %s.', len(entries), self)
+
+        blacklist = self._feed_config.get('blacklist', {})
+        if blacklist:
+            log.debug('Filtering %s entries for %s.', len(entries), self)
+            entries = [entry for entry in entries if not entry.is_blacklisted(blacklist)]
+            log.debug('Filtered to %s entries for %s.', len(entries), self)
+
         log.debug('Returning %s entries for %s.', len(entries), self)
         return entries
 
