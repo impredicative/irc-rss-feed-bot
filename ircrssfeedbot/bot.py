@@ -30,6 +30,8 @@ class Bot:
     def __init__(self) -> None:
         log.info('Initializing bot as: %s', subprocess.check_output('id', text=True).rstrip())
         instance = config.INSTANCE
+        self._last_outgoing_msg_time = -math.inf
+        self._outgoing_msg_lock = threading.Lock()  # Used for rate limiting across multiple channels.
         self._db = Database()
         self._url_shortener = bitlyshortener.Shortener(tokens=instance['tokens']['bitly'],
                                                        max_cache_size=config.BITLY_SHORTENER_MAX_CACHE_SIZE)
@@ -60,6 +62,7 @@ class Bot:
         irc = self._irc
         message_format = config.MESSAGE_FORMAT
         min_channel_idle_time = config.MIN_CHANNEL_IDLE_TIME
+        seconds_per_msg = config.SECONDS_PER_MESSAGE
         Bot.CHANNEL_JOIN_EVENTS[channel].wait()
         Bot.CHANNEL_JOIN_EVENTS[instance['alerts_channel']].wait()
         log.info('Channel messenger for %s has started.', channel)
@@ -80,7 +83,10 @@ class Bot:
                     log.debug('Posting %s entries for %s.', len(feed.postable_entries), feed)
                     for entry in feed.postable_entries:
                         msg = message_format.format(feed=feed.name, title=entry.title, url=entry.post_url)
-                        irc.msg(channel, msg)
+                        with self._outgoing_msg_lock:
+                            time.sleep(max(0., self._last_outgoing_msg_time + seconds_per_msg - time.monotonic()))
+                            irc.msg(channel, msg)
+                            self._last_outgoing_msg_time = time.monotonic()
                     log.info('Posted %s entries for %s.', len(feed.postable_entries), feed)
 
                 if feed.unposted_entries:  # Note: feed.postable_entries is intentionally not used here.
@@ -106,7 +112,7 @@ class Bot:
         Bot.CHANNEL_JOIN_EVENTS[instance['alerts_channel']].wait()
         log.info('Feed reader for feed %s of %s has started.', feed_name, channel)
         while True:
-            query_time = max(time.monotonic(), query_time + feed_freq)  # "max" is used in case of delay using "put".
+            query_time = max(time.monotonic(), query_time + feed_freq)  # "max" is used in case of wait using "put".
             sleep_time = max(0., query_time - time.monotonic())
             if sleep_time != 0:
                 log.info('Will wait %s to reread feed %s of %s.',
@@ -188,6 +194,5 @@ def _handle_privmsg(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List
     log.debug('Updated the last incoming message time for %s to %s.',
               channel, Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel])
 
-# TODO: Use Arxiv title and URL re.
 # TODO: Use better time describer.
-# TODO: Use voice/op detection and delay posts accordingly.
+# TODO: Use Arxiv title and URL re.
