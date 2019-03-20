@@ -24,7 +24,7 @@ def _alert(irc: miniirc.IRC, msg: str, loglevel: int = logging.ERROR) -> None:
 
 class Bot:
     CHANNEL_JOIN_EVENTS: Dict[str, threading.Event] = {}
-    CHANNEL_LAST_MESSAGE_TIMES: Dict[str, float] = {}
+    CHANNEL_LAST_INCOMING_MSG_TIMES: Dict[str, float] = {}
     CHANNEL_QUEUES: Dict[str, queue.Queue] = {}
 
     def __init__(self) -> None:
@@ -70,8 +70,8 @@ class Bot:
             try:
                 if feed.postable_entries:  # Result gets cached.
                     while True:
-                        time_elapsed_since_last_message = time.monotonic() - Bot.CHANNEL_LAST_MESSAGE_TIMES[channel]
-                        sleep_time = max(0, min_channel_idle_time - time_elapsed_since_last_message)
+                        time_elapsed_since_last_ic_msg = time.monotonic() - Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel]
+                        sleep_time = max(0, min_channel_idle_time - time_elapsed_since_last_ic_msg)
                         if sleep_time == 0:
                             break
                         log.info('Will wait %s to post %s.', humanize.naturaldelta(sleep_time), feed)
@@ -161,8 +161,9 @@ def _handle_join(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[s
 
     # Update channel last message time
     Bot.CHANNEL_JOIN_EVENTS[channel].set()
-    Bot.CHANNEL_LAST_MESSAGE_TIMES[channel] = time.monotonic()
-    log.debug('Set the last message time for %s to %s.', channel, Bot.CHANNEL_LAST_MESSAGE_TIMES[channel])
+    Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel] = time.monotonic()
+    log.debug('Set the last incoming message time for %s to %s.',
+              channel, Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel])
 
 
 @miniirc.Handler('PRIVMSG')
@@ -183,8 +184,9 @@ def _handle_privmsg(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List
         return
 
     # Update channel last message time
-    Bot.CHANNEL_LAST_MESSAGE_TIMES[channel] = time.monotonic()
-    log.debug('Updated the last message time for %s to %s.', channel, Bot.CHANNEL_LAST_MESSAGE_TIMES[channel])
+    Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel] = time.monotonic()
+    log.debug('Updated the last incoming message time for %s to %s.',
+              channel, Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel])
 
 # TODO: Use Arxiv title and URL re.
 # TODO: Use better time describer.
