@@ -54,25 +54,27 @@ class Database:
         return not Post.select(Post.url).where(conditions).limit(1)
 
     def select_unposted_for_channel(self, channel: str, urls: List[str]) -> List[str]:
-        log.debug('Retrieving unposted URLs for channel %s out of %s URLs.', channel, len(urls))
+        log.debug('Retrieving unposted URLs from the database for channel %s out of %s URLs.', channel, len(urls))
         conditions = (Post.channel == channel)
         unposted_urls = self._select_unposted(conditions, urls)
-        log.info('Returning %s unposted URLs for channel %s out of %s URLs.', len(unposted_urls), channel, len(urls))
+        log.info('Returning %s unposted URLs from the database for channel %s out of %s URLs.',
+                 len(unposted_urls), channel, len(urls))
         return unposted_urls
 
     def select_unposted_for_channel_feed(self, channel: str, feed: str, urls: List[str]) -> List[str]:
-        log.debug('Retrieving unposted URLs for channel %s having feed %s out of %s URLs.', channel, feed, len(urls))
+        log.debug('Retrieving unposted URLs from the database for channel %s having feed %s out of %s URLs.',
+                  channel, feed, len(urls))
         conditions = (Post.channel == channel) & (Post.feed == feed)
         unposted_urls = self._select_unposted(conditions, urls)
-        log.info('Returning %s unposted URLs for channel %s having feed %s out of %s URLs.',
+        log.info('Returning %s unposted URLs from the database for channel %s having feed %s out of %s URLs.',
                  len(unposted_urls), channel, feed, len(urls))
         return unposted_urls
 
     def insert_posted(self, channel: str, feed: str, urls: List[str]) -> None:
-        log.debug('Inserting %s URLs for channel %s having feed %s.', len(urls), channel, feed)
+        log.debug('Inserting %s URLs into the database for channel %s having feed %s.', len(urls), channel, feed)
         data = ({'channel': channel, 'feed': feed, 'url': url} for url in urls)
         with self._write_lock, self._db.atomic():
             for batch in chunked(data, 100):  # Ref: https://www.sqlite.org/limits.html#max_variable_number
                 Post.insert_many(batch).execute()
                 # Note: Try prepending ".on_conflict_ignore()" before ".execute()" if needed.
-        log.info('Inserted %s URLs for channel %s having feed %s.', len(urls), channel, feed)
+        log.info('Inserted %s URLs into the database for channel %s having feed %s.', len(urls), channel, feed)
