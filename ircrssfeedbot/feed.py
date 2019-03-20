@@ -53,7 +53,7 @@ class Feed:
     def __post_init__(self):
         log.debug('Initializing instance of %s.', self)
         self._feed_config = config.INSTANCE['feeds'][self.channel][self.name]
-        self.entries = self._entries()
+        self.entries = self._entries()  # Entries are effectively cached at this point in time.
         log.debug('Initialized instance of %s.', self)
 
     def _entries(self) -> List[FeedEntry]:
