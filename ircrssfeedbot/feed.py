@@ -26,8 +26,9 @@ class FeedEntry:
 
     def is_blacklisted(self, blacklist: Dict[str, List]) -> bool:
         for blacklist_key, val in {'title': self.title, 'url': self.long_url}.items():
-            for blacklisted_entry in blacklist.get(blacklist_key, []):
-                if re.search(blacklisted_entry, val):
+            for blacklisted_pattern in blacklist.get(blacklist_key, []):
+                if re.search(blacklisted_pattern, val):
+                    log.info('Feed entry %s matches %s blacklist pattern %s.', self, blacklist_key, blacklisted_pattern)
                     return True
         return False
 
