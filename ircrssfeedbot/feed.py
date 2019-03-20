@@ -100,7 +100,7 @@ class Feed:
         long_urls = [entry.long_url for entry in entries]
         dedup_strategy = self._feed_config.get('dedup', config.DEDUP_STRATEGY_DEFAULT)
         if dedup_strategy == 'channel':
-            long_urls = self.db.select_unposted_for_channel(self.channel, long_urls)
+            long_urls = self.db.select_unposted_for_channel(self.channel, self.name, long_urls)
         else:
             assert dedup_strategy == 'feed'
             long_urls = self.db.select_unposted_for_channel_feed(self.channel, self.name, long_urls)

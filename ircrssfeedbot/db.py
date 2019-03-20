@@ -53,12 +53,13 @@ class Database:
         conditions = (Post.channel == channel) & (Post.feed == feed)
         return not Post.select(Post.url).where(conditions).limit(1)
 
-    def select_unposted_for_channel(self, channel: str, urls: List[str]) -> List[str]:
-        log.debug('Retrieving unposted URLs from the database for channel %s out of %s URLs.', channel, len(urls))
+    def select_unposted_for_channel(self, channel: str, feed: str, urls: List[str]) -> List[str]:
+        log.debug('Retrieving unposted URLs from the database for channel %s having ignored feed %s out of %s URLs.',
+                  channel, feed, len(urls))
         conditions = (Post.channel == channel)
         unposted_urls = self._select_unposted(conditions, urls)
-        log.info('Returning %s unposted URLs from the database for channel %s out of %s URLs.',
-                 len(unposted_urls), channel, len(urls))
+        log.info('Returning %s unposted URLs from the database for channel %s having ignored feed %s out of %s URLs.',
+                 len(unposted_urls), channel, feed, len(urls))
         return unposted_urls
 
     def select_unposted_for_channel_feed(self, channel: str, feed: str, urls: List[str]) -> List[str]:
