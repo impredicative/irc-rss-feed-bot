@@ -52,7 +52,7 @@ LOGGING = {  # Ref: https://docs.python.org/3/howto/logging.html#configuring-log
             'propagate': False,
         },
         'peewee': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'handlers': ['console'],
             'propagate': False,
         },
