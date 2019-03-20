@@ -104,8 +104,9 @@ This database file must be preserved but not version controlled.
 For example, if the nick is `Feed[bot]`, these alerts will be sent to `##Feed[bot]-alerts`.
 It is recommended that the alerts channel be registered and monitored.
 
-* It is required that the bot be auto-voiced (+V) in each channel.
-Failing this, rapid-fire messages from the bot can easily be silently dropped by the server.
+* It is recommended that the bot be auto-voiced (+V) in each channel.
+Failing this, messages from the bot risk being silently dropped by the server.
+This is despite the bot-enforced limit of two seconds per message across the server.
 
 * It is recommended that the bot be run as a Docker container using using Docker ≥18.09.3, possibly with
 Docker Compose ≥1.24.0-rc1, etc.
