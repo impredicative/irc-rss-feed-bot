@@ -74,7 +74,7 @@ class Bot:
                         sleep_time = max(0, min_channel_idle_time - time_elapsed_since_last_message)
                         if sleep_time == 0:
                             break
-                        log.info('Waiting %s to post %s.', humanize.naturaldelta(sleep_time), feed)
+                        log.info('Will wait %s to post %s.', humanize.naturaldelta(sleep_time), feed)
                         time.sleep(sleep_time)
 
                     log.debug('Posting %s entries for %s.', len(feed.postable_entries), feed)
@@ -109,7 +109,7 @@ class Bot:
             query_time = max(time.monotonic(), query_time + feed_freq)  # "max" is used in case of delay using "put".
             sleep_time = max(0., query_time - time.monotonic())
             if sleep_time != 0:
-                log.info('Waiting %s to reread feed %s of %s.',
+                log.info('Will wait %s to reread feed %s of %s.',
                          humanize.naturaldelta(sleep_time), feed_name, channel)
                 time.sleep(sleep_time)
 
@@ -185,3 +185,7 @@ def _handle_privmsg(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List
     # Update channel last message time
     Bot.CHANNEL_LAST_MESSAGE_TIMES[channel] = time.monotonic()
     log.debug('Updated the last message time for %s to %s.', channel, Bot.CHANNEL_LAST_MESSAGE_TIMES[channel])
+
+# TODO: Use Arxiv title and URL re.
+# TODO: Use better time describer.
+# TODO: Use voice/op detection and delay posts accordingly.
