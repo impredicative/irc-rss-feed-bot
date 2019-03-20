@@ -49,7 +49,6 @@ tokens:
     - 81f6d477cfcef006a6dd35c4b947d1c1fdcbf445
     - 06441b445c75d2251f0a56ae87506c69dc468af5
     - 1e71089487fb70f42fff51b7ad49f192ffcb00f2
-    - d67d83ab3af6ea840f712bc7a9f48a89393a66c3
 feeds:
   "#some_chan1":
     j:AJCN:
@@ -78,7 +77,7 @@ Setting it is recommended.
 * **`tokens/bitly`**: Bitly tokens are required for shortening URLs. They are mandatory.
 The sample tokens are for illustration only and are invalid.
 To obtain tokens, refer to these [instructions](https://github.com/impredicative/bitlyshortener#usage).
-Providing multiple tokens, perhaps as many as 10 to 20 free ones or a single commercial one, is required.
+Providing multiple tokens, perhaps as many as 9 free ones or a single commercial one, is required.
 Failing this, Bitly imposed rate limits for shortening URLs will lead to errors.
 If there are errors, the batched new posts in a feed may get reprocessed the next time the feed is read.
 It is safer to provide more tokens than are necessary.
@@ -94,7 +93,8 @@ Note that per-feed deduplication is implicitly specific to its channel.
 * **`freq`**: This indicates how frequently to poll the feed in hours. Its default value is 1.
 Conservative polling is recommended.
 * **`shorten`**: This indicates whether to post shortened URLs for the feed.
-The default value is `true`; the alternative is `false`.
+The default value is `true`.
+The alternative value `false` is recommended if the URL is naturally small.
 
 A `posts.v1.db` database file is written by the bot in the same directory as `config.yaml`.
 This database file must be preserved but not version controlled.
