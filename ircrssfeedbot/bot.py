@@ -87,6 +87,7 @@ class Bot:
                             time.sleep(max(0., self._last_outgoing_msg_time + seconds_per_msg - time.monotonic()))
                             irc.msg(channel, msg)
                             self._last_outgoing_msg_time = time.monotonic()
+                            log.debug('Sent message to %s: %s', channel, msg)
                     log.info('Posted %s entries for %s.', len(feed.postable_entries), feed)
 
                 if feed.unposted_entries:  # Note: feed.postable_entries is intentionally not used here.
