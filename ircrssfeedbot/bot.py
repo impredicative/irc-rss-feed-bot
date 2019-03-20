@@ -201,5 +201,4 @@ def _handle_privmsg(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List
     log.debug('Updated the last incoming message time for %s to %s.',
               channel, Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel])
 
-# TODO: Use better time describer.
 # TODO: Use Arxiv title and URL re.
