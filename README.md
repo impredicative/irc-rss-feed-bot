@@ -110,7 +110,7 @@ forwarded unchanged.
 If a pattern is specified, it is advisable to set `shorten` to `false` for the feed.
 * **`sub/url/repl`**: Similar to `sub/title/repl`.
 
-The order of some of the above operations is: blacklist, sub, shorten.
+The order of execution of some of the above operations is: blacklist, sub, shorten.
 
 A `posts.v1.db` database file is written by the bot in the same directory as `config.yaml`.
 This database file must be preserved but not version controlled.
