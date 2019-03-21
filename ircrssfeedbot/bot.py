@@ -85,7 +85,7 @@ class Bot:
                                      timedelta_desc(sleep_time), feed)
                             time.sleep(sleep_time)
 
-                        log.debug('Posting %s entries for %s.', len(feed.postable_entries), feed)
+                        log.info('Posting %s entries for %s.', len(feed.postable_entries), feed)
                         for entry in feed.postable_entries:
                             msg = message_format.format(feed=feed.name, title=entry.title, url=entry.post_url)
                             outgoing_msg_time = time.monotonic()
