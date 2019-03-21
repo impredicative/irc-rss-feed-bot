@@ -68,7 +68,6 @@ class Bot:
         while True:
             feed = channel_queue.get()
             log.debug('Dequeued %s.', feed)
-
             try:
                 if feed.postable_entries:  # Result gets cached.
                     try:
@@ -103,6 +102,7 @@ class Bot:
             except Exception as exc:
                 msg = f'Error processing {feed}: {exc}'
                 _alert(irc, msg)
+            channel_queue.task_done()
 
     def _read_feed(self, channel: str, feed_name: str) -> None:
         log.debug('Feed reader for feed %s of %s is starting and is waiting to be notified of channel join.',
