@@ -72,9 +72,9 @@ class Bot:
                 if feed.postable_entries:  # Result gets cached.
                     try:
                         while True:
-                            if self._outgoing_msg_lock.locked():
+                            if not self._outgoing_msg_lock.acquire(blocking=False):
                                 log.info('Waiting to acquire outgoing message lock to post %s.', feed)
-                            self._outgoing_msg_lock.acquire()
+                                self._outgoing_msg_lock.acquire()
                             last_incoming_msg_time = Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel]
                             time_elapsed_since_last_ic_msg = time.monotonic() - last_incoming_msg_time
                             sleep_time = max(0, min_channel_idle_time - time_elapsed_since_last_ic_msg)
