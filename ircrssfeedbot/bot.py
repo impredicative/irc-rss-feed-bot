@@ -130,8 +130,14 @@ class Bot:
                 log.debug('Reading feed %s of %s.', feed_name, channel)
                 feed = Feed(channel=channel, name=feed_name, url=feed_url, db=db, url_shortener=url_shortener)
                 log.info('Read %s with %s entries.', feed, len(feed.entries))
-                channel_queue.put(feed)
-                log.info('Queued %s with %s entries.', feed, len(feed.entries))
+                try:
+                    channel_queue.put_nowait(feed)
+                except queue.Full:
+                    msg = f'Queue for {channel} is full. {feed} will be put in the queue in blocking mode.'
+                    _alert(irc, msg, logging.WARNING)
+                    channel_queue.put(feed)
+                else:
+                    log.debug('Queued %s with %s entries.', feed, len(feed.entries))
             except Exception as exc:
                 msg = f'Error reading feed {feed_name} of {channel}: {exc}'
                 _alert(irc, msg)
