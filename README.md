@@ -59,6 +59,13 @@ feeds:
           - ^Calendar\ of\ Events$
     MedicalXpress:nutrition:
       url: https://medicalxpress.com/rss-feed/search/?search=nutrition
+    r/FoodNerds:
+      url: https://www.reddit.com/r/FoodNerds/new/.rss
+      shorten: false
+      sub:
+        url:
+          pattern: ^https://www\.reddit\.com/r/.+?/comments/(?P<id>.+?)/.+$
+          repl: https://redd.it/\g<id>
   "##some_chan2":
     ArXiv:cs.AI:
       url: https://export.arxiv.org/rss/cs.AI
@@ -74,7 +81,8 @@ feeds:
 #### Global settings
 * **`mode`**: This is optional and can for example be `+igR` for [Freenode](https://freenode.net/kb/answer/usermodes).
 Setting it is recommended.
-* **`tokens/bitly`**: Bitly tokens are required for shortening URLs. They are mandatory.
+* **`tokens/bitly`**: URL shortening is enabled for each feed by default but can be disabled selectively.
+Bitly tokens are required for shortening URLs.
 The sample tokens are for illustration only and are invalid.
 To obtain tokens, refer to these [instructions](https://github.com/impredicative/bitlyshortener#usage).
 Providing multiple tokens, perhaps as many as 9 free ones or a single commercial one, is required.
@@ -83,9 +91,8 @@ If there are errors, the batched new posts in a feed may get reprocessed the nex
 It is safer to provide more tokens than are necessary.
 
 #### Feed-specific settings
-* **`blacklist/title`**: This is a list of [regular expression](https://docs.python.org/3/library/re.html) patterns that
-result in a title being skipped if a [search](https://docs.python.org/3/library/re.html#re.search) finds any of the
-patterns in the title.
+* **`blacklist/title`**: This is a list of regular expression patterns that result in a title being skipped if a
+[search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in the title.
 * **`blacklist/url`**: Similar to `blacklist/title`.
 * **`dedup`**: This indicates how to deduplicate posts for the feed, thereby preventing them from being reposted.
 The default value is `channel` (per-channel), and an alternate possible value is `feed` (per-feed).
@@ -94,7 +101,16 @@ Note that per-feed deduplication is implicitly specific to its channel.
 Conservative polling is recommended.
 * **`shorten`**: This indicates whether to post shortened URLs for the feed.
 The default value is `true`.
-The alternative value `false` is recommended if the URL is naturally small.
+The alternative value `false` is recommended if the URL is naturally small, or if `sub` can be used to make it small.
+* **`sub/title/pattern`**: This is a single regular expression pattern that if found results in the entry title being
+[substituted](https://docs.python.org/3/library/re.html#re.sub).
+* **`sub/title/repl`**: If `pattern` is found, the entry title is replaced with this replacement, otherwise it is
+forwarded unchanged.
+* **`sub/url/pattern`**: Similar to `sub/title/pattern`.
+If a pattern is specified, it is advisable to set `shorten` to `false` for the feed.
+* **`sub/url/repl`**: Similar to `sub/title/repl`.
+
+The order of some of the above operations is: blacklist, sub, shorten.
 
 A `posts.v1.db` database file is written by the bot in the same directory as `config.yaml`.
 This database file must be preserved but not version controlled.
