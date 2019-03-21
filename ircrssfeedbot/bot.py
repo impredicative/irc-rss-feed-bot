@@ -111,7 +111,7 @@ class Bot:
         feed_config = instance['feeds'][channel][feed_name]
         channel_queue = Bot.CHANNEL_QUEUES[channel]
         feed_url = feed_config['url']
-        feed_freq = feed_config.get('freq', config.FREQ_HOURS_DEFAULT) * 3600
+        feed_freq = max(config.FREQ_HOURS_MIN, feed_config.get('freq', config.FREQ_HOURS_DEFAULT)) * 3600
         irc = self._irc
         db = self._db
         url_shortener = self._url_shortener
