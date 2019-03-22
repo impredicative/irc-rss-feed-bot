@@ -117,8 +117,10 @@ These are independently optional:
 * **`dedup`**: This indicates how to deduplicate posts for the feed, thereby preventing them from being reposted.
 The default value is `channel` (per-channel), and an alternate possible value is `feed` (per-feed).
 Note that per-feed deduplication is implicitly specific to its channel.
-* **`freq`**: This indicates how frequently to poll the feed in hours. Its default value is 1.
-Conservative polling is recommended.
+* **`freq`**: This indicates how frequently to read the feed in hours on an average. Its default value is 1.
+Conservative polling is recommended. A value below 0.25 is changed to a minimum of 0.25.
+The actual value is varied each time by a uniformly distributed random ±5% so as to better distribute the load of
+multiple feeds.
 * **`https`**: If `true`, links that start with `http://` are changed to start with `https://` instead.
 Its default value is `false`.
 * **`shorten`**: This indicates whether to post shortened URLs for the feed.

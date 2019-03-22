@@ -1,6 +1,7 @@
 import logging
 import math
 import queue
+import random
 import subprocess
 import threading
 import time
@@ -111,7 +112,9 @@ class Bot:
         feed_config = instance['feeds'][channel][feed_name]
         channel_queue = Bot.CHANNEL_QUEUES[channel]
         feed_url = feed_config['url']
-        feed_freq = max(config.FREQ_HOURS_MIN, feed_config.get('freq', config.FREQ_HOURS_DEFAULT)) * 3600
+        feed_freq_avg = max(config.FREQ_HOURS_MIN, feed_config.get('freq', config.FREQ_HOURS_DEFAULT)) * 3600
+        feed_freq_min = feed_freq_avg * (1 - config.FREQ_RANDOM_PERCENT / 100)
+        feed_freq_max = feed_freq_avg * (1 + config.FREQ_RANDOM_PERCENT / 100)
         irc = self._irc
         db = self._db
         url_shortener = self._url_shortener
@@ -120,6 +123,7 @@ class Bot:
         Bot.CHANNEL_JOIN_EVENTS[instance['alerts_channel']].wait()
         log.info('Feed reader for feed %s of %s has started.', feed_name, channel)
         while True:
+            feed_freq = random.uniform(feed_freq_min, feed_freq_max)
             query_time = max(time.monotonic(), query_time + feed_freq)  # "max" is used in case of wait using "put".
             sleep_time = max(0., query_time - time.monotonic())
             if sleep_time != 0:
