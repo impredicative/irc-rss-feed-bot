@@ -183,6 +183,8 @@ services:
 ```
 In the YAML, customize the relative path, e.g. `./irc-rss-feed-bot` of the volume source.
 This should be the directory containing `config.yaml`.
+This directory must be writable by Docker using the UID defined in the Dockerfile; it is 999.
+A simple way to ensure it is writable is to run a command such as `chmod a+w ./irc-rss-feed-bot` once on the host.
 
 From the directory containing `docker-compose.yml`, run `docker-compose up -d irc-rss-feed-bot`.
 
