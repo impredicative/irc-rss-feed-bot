@@ -179,7 +179,7 @@ services:
         max-size: 10m
         max-file: "3"
     volumes:
-      - ./irc-rss-feed-bot:/config:ro
+      - ./irc-rss-feed-bot:/config
 ```
 In the YAML, customize the relative path, e.g. `./irc-rss-feed-bot` of the volume source.
 This should be the directory containing `config.yaml`.
