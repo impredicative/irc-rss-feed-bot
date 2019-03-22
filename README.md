@@ -131,7 +131,7 @@ The alternative value `false` is recommended if the URL is naturally small, or i
 it small.
 
 ##### Conditional
-The same configuration above contains examples of these:
+The sample configuration above contains examples of these:
 * **`format/re/title`**: This is a single regular expression pattern that is
 [searched](https://docs.python.org/3/library/re.html#re.search) for in the title.
 It is used to collect named [key-value pairs](https://docs.python.org/3/library/re.html#re.Match.groupdict) from the
