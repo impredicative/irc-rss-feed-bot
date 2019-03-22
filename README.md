@@ -86,7 +86,7 @@ feeds:
 
 #### Global settings
 
-##### Mandatory:
+##### Mandatory
 * **`host`**
 * **`ssl_port`**
 * **`nick`**
@@ -100,7 +100,7 @@ Failing this, Bitly imposed rate limits for shortening URLs will lead to errors.
 If there are errors, the batched new posts in a feed may get reprocessed the next time the feed is read.
 It is safer to provide more tokens than are necessary.
 
-##### Optional:
+##### Optional
 * **`mode`**: This can for example be `+igR` for [Freenode](https://freenode.net/kb/answer/usermodes).
 Setting it is recommended.
 
