@@ -62,8 +62,10 @@ class Database:
                   channel, feed, len(urls))
         conditions = (Post.channel == channel)
         unposted_urls = self._select_unposted(conditions, urls)
-        log.info('Returning %s unposted URLs from the database for channel %s having ignored feed %s out of %s URLs.',
-                 len(unposted_urls), channel, feed, len(urls))
+        loglevel = logging.INFO if len(unposted_urls) > 0 else logging.DEBUG
+        log.log(loglevel,
+                'Returning %s unposted URLs from the database for channel %s having ignored feed %s out of %s URLs.',
+                len(unposted_urls), channel, feed, len(urls))
         return unposted_urls
 
     def select_unposted_for_channel_feed(self, channel: str, feed: str, urls: List[str]) -> List[str]:
