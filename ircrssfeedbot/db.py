@@ -37,7 +37,11 @@ class Database:
         self._db = _DATABASE
         self._db.create_tables([Post])
         self._write_lock = threading.Lock()  # Unclear if necessary, but used anyway for safety.
-        log.info('Initialized database having path %s and size %s.', db_path, humanize_bytes(db_path.stat().st_size))
+        log.info('Initialized database having path %s.', db_path)
+
+        log.info('Vacuuming database having pre-vacuum size %s.', humanize_bytes(db_path.stat().st_size))
+        self._db.execute_sql('VACUUM;')
+        log.info('Vacuumed database having post-vacuum size %s.', humanize_bytes(db_path.stat().st_size))
 
     @staticmethod
     def _select_unposted(conditions: peewee.Expression, urls: List[str]) -> List[str]:
