@@ -118,7 +118,7 @@ class Bot:
         irc = self._irc
         db = self._db
         url_shortener = self._url_shortener
-        query_time = -math.inf
+        query_time = time.monotonic() - feed_freq_min  # Adds a random delay for first read, as opposed to -math.inf.
         Bot.CHANNEL_JOIN_EVENTS[channel].wait()  # Optional.
         Bot.CHANNEL_JOIN_EVENTS[instance['alerts_channel']].wait()
         log.info('Feed reader for feed %s of %s has started.', feed_name, channel)

@@ -119,8 +119,10 @@ The default value is `channel` (per-channel), and an alternate possible value is
 Note that per-feed deduplication is implicitly specific to its channel.
 * **`freq`**: This indicates how frequently to read the feed in hours on an average. Its default value is 1.
 Conservative polling is recommended. A value below 0.25 is changed to a minimum of 0.25.
-The actual value is varied each time by a uniformly distributed random ±5% so as to better distribute the load of
-multiple feeds.
+The first read is delayed by up to a uniformly distributed random 10% so as to better distribute the load of multiple
+feeds.
+Subsequent reads are varied by up to a uniformly distributed random ±5% for the same reason.
+
 * **`https`**: If `true`, links that start with `http://` are changed to start with `https://` instead.
 Its default value is `false`.
 * **`shorten`**: This indicates whether to post shortened URLs for the feed.
