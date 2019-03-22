@@ -69,7 +69,7 @@ feeds:
   "##some_chan2":
     ArXiv:cs.AI:
       url: https://export.arxiv.org/rss/cs.AI
-      freq: 2
+      freq: 1.5
       shorten: false
       format:
         re:
