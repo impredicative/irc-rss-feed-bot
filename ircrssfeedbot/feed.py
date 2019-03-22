@@ -68,14 +68,14 @@ class Feed:
         entries = [FeedEntry(title=e['title'], long_url=e['link']) for e in feedparser.parse(content)['entries']]
         log.debug('Retrieved %s entries for %s.', len(entries), self)
 
-        # Blacklist
+        # Remove blacklisted entries
         blacklist = feed_config.get('blacklist', {})
         if blacklist:
             log.debug('Filtering %s entries using blacklist for %s.', len(entries), self)
             entries = [entry for entry in entries if not entry.is_blacklisted(blacklist)]
             log.debug('Filtered to %s entries using blacklist for %s.', len(entries), self)
 
-        # HTTPS
+        # Enforce HTTPS URLs as configured
         if feed_config.get('https', False):
             log.debug('Enforcing HTTPS for URLs in %s.', self)
             for entry in entries:
@@ -83,7 +83,7 @@ class Feed:
                     entry.long_url = entry.long_url.replace('http://', 'https://', 1)
             log.debug('Enforced HTTPS for URLs in %s.', self)
 
-        # Substitute
+        # Substitute entries as configured
         sub = feed_config.get('sub')
         if sub:
             log.debug('Substituting entries for %s.', self)
@@ -92,6 +92,23 @@ class Feed:
             entries = [FeedEntry(title=re_sub(e.title, sub.get('title')), long_url=re_sub(e.long_url, sub.get('url')))
                        for e in entries]
             log.debug('Substituted entries for %s.', self)
+
+        # Format entries as configured
+        format_config = feed_config.get('format')
+        if format_config:
+            log.debug('Formatting entries for %s.', self)
+            format_re = format_config.get('re', {})
+            format_str = format_config['str']
+            for index, entry in enumerate(entries.copy()):  # May not strictly need `copy()`.
+                params = {'title': entry.title, 'url': entry.long_url}
+                for key, val in params.copy().items():
+                    if key in format_re:
+                        match = re.search(format_re[key], val)
+                        if match:
+                            params.update(match.groupdict())
+                entries[index] = FeedEntry(title=format_str.get('title', '{title}').format_map(params),
+                                           long_url=format_str.get('url', '{url}').format_map(params))
+            log.debug('Formatted entries for %s.', self)
 
         log.debug('Returning %s entries for %s.', len(entries), self)
         return entries

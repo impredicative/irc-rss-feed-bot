@@ -71,6 +71,12 @@ feeds:
       url: https://export.arxiv.org/rss/cs.AI
       freq: 2
       shorten: false
+      format:
+        re:
+          title: ^(?P<name>.+?)\.?\ \(arXiv:\d+\.\d+(?P<ver>v\d+)
+        str:
+          title: '{name}'
+          url: '{url}{ver}'
     InfoWorld:
       url: https://www.infoworld.com/index.rss
     PwC:Trending:
@@ -79,8 +85,12 @@ feeds:
 ```
 
 #### Global settings
-* **`mode`**: This is optional and can for example be `+igR` for [Freenode](https://freenode.net/kb/answer/usermodes).
-Setting it is recommended.
+
+##### Mandatory:
+* **`host`**
+* **`ssl_port`**
+* **`nick`**
+* **`nick_password`**
 * **`tokens/bitly`**: URL shortening is enabled for each feed by default but can be disabled selectively.
 Bitly tokens are required for shortening URLs.
 The sample tokens are for illustration only and are invalid.
@@ -90,7 +100,17 @@ Failing this, Bitly imposed rate limits for shortening URLs will lead to errors.
 If there are errors, the batched new posts in a feed may get reprocessed the next time the feed is read.
 It is safer to provide more tokens than are necessary.
 
+##### Optional:
+* **`mode`**: This can for example be `+igR` for [Freenode](https://freenode.net/kb/answer/usermodes).
+Setting it is recommended.
+
 #### Feed-specific settings
+
+##### Mandatory
+* **`url`**: This is the URL of the feed. 
+
+##### Optional
+These are independently optional:
 * **`blacklist/title`**: This is a list of regular expression patterns that result in a title being skipped if a
 [search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in the title.
 * **`blacklist/url`**: Similar to `blacklist/title`.
@@ -99,19 +119,39 @@ The default value is `channel` (per-channel), and an alternate possible value is
 Note that per-feed deduplication is implicitly specific to its channel.
 * **`freq`**: This indicates how frequently to poll the feed in hours. Its default value is 1.
 Conservative polling is recommended.
+* **`https`**: If `true`, links that start with `http://` are changed to start with `https://` instead.
+Its default value is `false`.
 * **`shorten`**: This indicates whether to post shortened URLs for the feed.
 The default value is `true`.
-The alternative value `false` is recommended if the URL is naturally small, or if `sub` can be used to make it small.
-* **`sub/title/pattern`**: This is a single regular expression pattern that if found results in the entry title being
-[substituted](https://docs.python.org/3/library/re.html#re.sub).
-* **`sub/title/repl`**: If `pattern` is found, the entry title is replaced with this replacement, otherwise it is
-forwarded unchanged.
+The alternative value `false` is recommended if the URL is naturally small, or if `sub` or `format` can be used to make
+it small.
+
+##### Conditional
+The same configuration above contains examples of these:
+* **`format/re/title`**: This is a single regular expression pattern that is
+[searched](https://docs.python.org/3/library/re.html#re.search) for in the title.
+It is used to collect named [key-value pairs](https://docs.python.org/3/library/re.html#re.Match.groupdict) from the
+match if there is one.
+* **`format/re/url`**: Similar to `format/re/title`.
+* **`format/str/title`**: The key-value pairs collected using `format/re/title` and `format/re/url`,
+both of which are optional, are combined along with the default additions of both `title` and `url` as keys.
+The key-value pairs are used to [format](https://docs.python.org/3/library/stdtypes.html#str.format_map) the provided
+quoted title string.
+The default value is `{title}`.
+* **`format/str/url`**: Similar to `format/str/title`. The default value is `{url}`.
+If this is specified, it is advisable to set `shorten` to `false` for the feed.
+
+* **`sub/title/pattern`**: This is a single regular expression pattern that if found results in the entry
+title being [substituted](https://docs.python.org/3/library/re.html#re.sub).
+* **`sub/title/repl`**: If `sub/title/pattern` is found, the entry title is replaced with this replacement, otherwise it
+is forwarded unchanged.
 * **`sub/url/pattern`**: Similar to `sub/title/pattern`.
 If a pattern is specified, it is advisable to set `shorten` to `false` for the feed.
 * **`sub/url/repl`**: Similar to `sub/title/repl`.
 
-The order of execution of some of the above operations is: blacklist, sub, shorten.
-
+#### Remarks
+Refer to the sample configuration above for usage examples.
+The order of execution of some of the above operations is: `blacklist`, `https`, `sub`, `format`, `shorten`.
 A `posts.v1.db` database file is written by the bot in the same directory as `config.yaml`.
 This database file must be preserved but not version controlled.
 
