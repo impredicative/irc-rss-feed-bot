@@ -57,6 +57,7 @@ class Feed:
         log.debug('Initialized instance of %s.', self)
 
     def _entries(self) -> List[FeedEntry]:
+        feed_config = self._feed_config
         log.debug('Retrieving content for %s.', self)
         response = requests.get(self.url, timeout=config.REQUEST_TIMEOUT, headers={'User-Agent': config.USER_AGENT})
         response.raise_for_status()
@@ -68,14 +69,22 @@ class Feed:
         log.debug('Retrieved %s entries for %s.', len(entries), self)
 
         # Blacklist
-        blacklist = self._feed_config.get('blacklist', {})
+        blacklist = feed_config.get('blacklist', {})
         if blacklist:
             log.debug('Filtering %s entries using blacklist for %s.', len(entries), self)
             entries = [entry for entry in entries if not entry.is_blacklisted(blacklist)]
             log.debug('Filtered to %s entries using blacklist for %s.', len(entries), self)
 
+        # HTTPS
+        if feed_config.get('https', False):
+            log.debug('Enforcing HTTPS for URLs in %s.', self)
+            for entry in entries:
+                if entry.long_url.startswith('http://'):
+                    entry.long_url = entry.long_url.replace('http://', 'https://', 1)
+            log.debug('Enforced HTTPS for URLs in %s.', self)
+
         # Substitute
-        sub = self._feed_config.get('sub')
+        sub = feed_config.get('sub')
         if sub:
             log.debug('Substituting entries for %s.', self)
             re_sub: Callable[[str, Optional[Dict[str, str]]], str] = \
