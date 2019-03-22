@@ -24,7 +24,7 @@ For more features, see the customizable [global settings](#global-settings) and
 ## Examples
 ```text
 <Feed[bot]> [ArXiv:cs.AI] Concurrent Meta Reinforcement Learning → https://arxiv.org/abs/1903.02710v1
-<Feed[bot]> [ArXiv:cs.AI] Attack Graph Obfuscation1 → https://arxiv.org/abs/1903.02601v1
+<Feed[bot]> [ArXiv:cs.AI] Attack Graph Obfuscation → https://arxiv.org/abs/1903.02601v1
 <Feed[bot]> [InfoWorld] What is a devops engineer? And how do you become one? → https://j.mp/2NOgQ3g
 <Feed[bot]> [InfoWorld] What is Jupyter Notebook? Data analysis made easier → https://j.mp/2NMailP
 ```
