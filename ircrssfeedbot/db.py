@@ -24,7 +24,7 @@ class Post(peewee.Model):
         legacy_table_names = False  # This will become a default in peewee>=4
         primary_key = peewee.CompositeKey('channel', 'feed', 'url')
         indexes = (
-            # (('channel', 'feed', 'url'), True),
+            # (('channel', 'feed', 'url'), True),  # Not needed per EXPLAIN QUERY PLAN due to sqlite_autoindex_post_1.
             (('channel', 'url'), False),
         )  # True means unique.
 
@@ -42,6 +42,10 @@ class Database:
         log.info('Vacuuming database having pre-vacuum size %s.', humanize_bytes(db_path.stat().st_size))
         self._db.execute_sql('VACUUM;')
         log.info('Vacuumed database having post-vacuum size %s.', humanize_bytes(db_path.stat().st_size))
+
+        # log.info('Analyzing database.')
+        # self._db.execute_sql('ANALYZE;')
+        # log.info('Analyzed database.')
 
     @staticmethod
     def _select_unposted(conditions: peewee.Expression, urls: List[str]) -> List[str]:
