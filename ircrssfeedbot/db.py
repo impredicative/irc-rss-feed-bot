@@ -47,6 +47,8 @@ class Database:
         # self._db.execute_sql('ANALYZE;')
         # log.info('Analyzed database.')
 
+        # Helper function: sql = lambda *s: list(self._db.execute_sql(*s))
+
     @staticmethod
     def _select_unposted(conditions: peewee.Expression, urls: List[str]) -> List[str]:
         posted: Set[str] = set()
