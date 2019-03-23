@@ -75,6 +75,11 @@ feeds:
           url: '{url}{ver}'
     InfoWorld:
       url: https://www.infoworld.com/index.rss
+    libraries.io/pypi/scikit-learn:
+      url: https://libraries.io/pypi/scikit-learn/versions.atom
+      anew: true
+      period: 8
+      shorten: false
     PwC:Trending:
       url: https://us-east1-ml-feeds.cloudfunctions.net/pwc/trending
       dedup: feed
