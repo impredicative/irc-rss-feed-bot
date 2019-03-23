@@ -190,7 +190,7 @@ This directory must be writable by Docker using the UID defined in the Dockerfil
 A simple way to ensure it is writable is to run a command such as `chmod a+w ./irc-rss-feed-bot` once on the host.
 
 From the directory containing `docker-compose.yml`, run `docker-compose up -d irc-rss-feed-bot`.
-Use `docker logs -f irc-rss-feed-bot` to see informational logs.
+Use `docker logs -f irc-rss-feed-bot` to see and follow informational logs.
 
 ### Maintenance
 * If `config.yaml` is updated, the container must be restarted to use the updated file.
