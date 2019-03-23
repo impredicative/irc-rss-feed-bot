@@ -151,21 +151,22 @@ class Bot:
         channels_str = ', '.join(channels)
         log.debug('Setting up threads and queues for %s channels (%s) and their feeds with %s currently active '
                   'threads.', len(channels), channels_str, threading.active_count())
-        num_feeds = 0
+        num_feeds_setup = 0
         for channel, channel_config in channels.items():
             log.debug('Setting up threads and queue for %s.', channel)
+            num_channel_feeds = len(channel_config)
             self.CHANNEL_JOIN_EVENTS[channel] = threading.Event()
-            self.CHANNEL_QUEUES[channel] = queue.Queue(len(channel_config))
+            self.CHANNEL_QUEUES[channel] = queue.Queue(maxsize=num_channel_feeds)
             threading.Thread(target=self._msg_channel, name=f'ChannelMessenger-{channel}',
                              args=(channel,)).start()
             for feed in channel_config:
                 threading.Thread(target=self._read_feed, name=f'FeedReader-{channel}-{feed}',
                                  args=(channel, feed)).start()
-                num_feeds += 1
+                num_feeds_setup += 1
             log.debug('Finished setting up threads and queue for %s and its %s feeds with %s currently active threads.',
-                     channel, len(channel_config), threading.active_count())
+                     channel, num_channel_feeds, threading.active_count())
         log.info('Finished setting up threads and queues for %s channels (%s) and their %s feeds with %s currently '
-                 'active threads.', len(channels), channels_str, num_feeds, threading.active_count())
+                 'active threads.', len(channels), channels_str, num_feeds_setup, threading.active_count())
 
 # Ref: https://tools.ietf.org/html/rfc1459
 
