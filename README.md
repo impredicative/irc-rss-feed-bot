@@ -53,7 +53,7 @@ feeds:
   "#some_chan1":
     j:AJCN:
       url: https://academic.oup.com/rss/site_6122/3981.xml
-      freq: 24
+      period: 24
       blacklist:
         title:
           - ^Calendar\ of\ Events$
@@ -69,7 +69,7 @@ feeds:
   "##some_chan2":
     ArXiv:cs.AI:
       url: https://export.arxiv.org/rss/cs.AI
-      freq: 1.5
+      period: 1.5
       shorten: false
       format:
         re:
@@ -117,14 +117,13 @@ These are independently optional:
 * **`dedup`**: This indicates how to deduplicate posts for the feed, thereby preventing them from being reposted.
 The default value is `channel` (per-channel), and an alternate possible value is `feed` (per-feed).
 Note that per-feed deduplication is implicitly specific to its channel.
-* **`freq`**: This indicates how frequently to read the feed in hours on an average. Its default value is 1.
+* **`https`**: If `true`, links that start with `http://` are changed to start with `https://` instead.
+Its default value is `false`.
+* **`period`**: This indicates how frequently to read the feed in hours on an average. Its default value is 1.
 Conservative polling is recommended. A value below 0.25 is changed to a minimum of 0.25.
 The first read is delayed by up to a uniformly distributed random 10% so as to better distribute the load of multiple
 feeds.
 Subsequent reads are varied by up to a uniformly distributed random ±5% for the same reason.
-
-* **`https`**: If `true`, links that start with `http://` are changed to start with `https://` instead.
-Its default value is `false`.
 * **`shorten`**: This indicates whether to post shortened URLs for the feed.
 The default value is `true`.
 The alternative value `false` is recommended if the URL is naturally small, or if `sub` or `format` can be used to make
