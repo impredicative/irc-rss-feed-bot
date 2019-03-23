@@ -120,7 +120,7 @@ class Bot:
         query_time = time.monotonic() - feed_period_min  # Adds a random delay for first read, as opposed to -math.inf.
         Bot.CHANNEL_JOIN_EVENTS[channel].wait()  # Optional.
         Bot.CHANNEL_JOIN_EVENTS[instance['alerts_channel']].wait()
-        log.info('Feed reader for feed %s of %s has started.', feed_name, channel)
+        log.debug('Feed reader for feed %s of %s has started.', feed_name, channel)
         while True:
             feed_period = random.uniform(feed_period_min, feed_period_max)
             query_time = max(time.monotonic(), query_time + feed_period)  # "max" is used in case of wait using "put".
