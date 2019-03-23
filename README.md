@@ -92,13 +92,13 @@ feeds:
 * **`ssl_port`**
 * **`nick`**
 * **`nick_password`**
-* **`tokens/bitly`**: URL shortening is enabled for each feed by default but can be disabled selectively.
+* **`tokens/bitly`**: URL shortening is enabled for all feeds by default but can be disabled selectively per feed.
 Bitly tokens are required for shortening URLs.
 The sample tokens are for illustration only and are invalid.
-To obtain tokens, refer to these [instructions](https://github.com/impredicative/bitlyshortener#usage).
+To obtain tokens, refer to [these instructions](https://github.com/impredicative/bitlyshortener#usage).
 Providing multiple tokens, perhaps as many as 9 free ones or a single commercial one, is required.
 Failing this, Bitly imposed rate limits for shortening URLs will lead to errors.
-If there are errors, the batched new posts in a feed may get reprocessed the next time the feed is read.
+If there are errors, the batched new entries in a feed may get reprocessed the next time the feed is read.
 It is safer to provide more tokens than are necessary.
 
 ##### Optional
@@ -112,11 +112,12 @@ Setting it is recommended.
 
 ##### Optional
 These are optional and are independent of each other:
-* **`anew`**: If `true`, this skips posting all preexisting entries in a new feed, i.e. it starts anew.
+* **`anew`**: If `true`, this skips posting all preexisting entries in a new feed.
 A new feed is defined as one with no prior posts in its channel.
 The default value is `false`, in which case only up to three of the most recent entries are posted.
 The default exists to limit flooding a channel when one or more new feeds are added.
-Either way, none of the future entries in the feed are affected, and they are all posted without reservation.
+Either way, none of the future entries in the feed are affected on subsequent reads, and they are all posted without
+reservation.
 * **`blacklist/title`**: This is a list of regular expression patterns that result in a title being skipped if a
 [search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in the title.
 * **`blacklist/url`**: Similar to `blacklist/title`.
