@@ -9,10 +9,6 @@ For multiple servers, run an instance of the bot process for each server.
 * Entries are posted only if the channel has not had any conversation for at least 15 minutes, thereby preventing the
 interruption of any preexisting conversations.
 * A SQLite database file records the entries that have been posted, thereby preventing them from being reposted.
-* For each new feed with no history in the database, only up to three of its most recent entries are posted.
-The rest are never posted but are nevertheless saved in the database.
-This is done to limit flooding a channel when one or more new feeds are added.
-Future entries of the feed are all posted without reservation.
 
 For more features, see the customizable [global settings](#global-settings) and
 [feed-specific settings](#feed-specific-settings).
@@ -110,7 +106,12 @@ Setting it is recommended.
 * **`url`**: This is the URL of the feed. 
 
 ##### Optional
-These are independently optional:
+These are optional and are independent of each other:
+* **`anew`**: If `true`, this skips posting all preexisting entries in a new feed, i.e. it starts anew.
+A new feed is defined as one with no prior posts in its channel.
+The default value is `false`, in which case only up to three of the most recent entries are posted.
+The default exists to limit flooding a channel when one or more new feeds are added.
+Either way, none of the future entries in the feed are affected, and they are all posted without reservation.
 * **`blacklist/title`**: This is a list of regular expression patterns that result in a title being skipped if a
 [search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in the title.
 * **`blacklist/url`**: Similar to `blacklist/title`.
