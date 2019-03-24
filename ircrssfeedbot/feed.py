@@ -117,9 +117,11 @@ class Feed:
     @cachedproperty
     def postable_entries(self) -> List[Union[FeedEntry, ShortenedFeedEntry]]:
         log.debug('Retrieving postable entries for %s.', self)
-        is_new_feed = self.db.is_new_feed(self.channel, self.name)
-        max_posts_of_new_feed = 0 if self._feed_config.get('anew') else config.MAX_POSTS_OF_NEW_FEED
-        entries = self.unposted_entries[:max_posts_of_new_feed] if is_new_feed else self.unposted_entries
+        if self.db.is_new_feed(self.channel, self.name):
+            max_posts = 0 if self._feed_config.get('anew') else config.MAX_POSTS_OF_NEW_FEED
+            entries = self.unposted_entries[:max_posts]
+        else:
+            entries = self.unposted_entries
 
         # Shorten URLs
         if entries and self._feed_config.get('shorten', True):
