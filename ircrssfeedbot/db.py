@@ -43,9 +43,9 @@ class Database:
         self._db.execute_sql('VACUUM;')
         log.info('Vacuumed database having post-vacuum size %s.', humanize_bytes(db_path.stat().st_size))
 
-        # log.info('Analyzing database.')
-        # self._db.execute_sql('ANALYZE;')
-        # log.info('Analyzed database.')
+        log.info('Analyzing database.')
+        self._db.execute_sql('ANALYZE;')
+        log.info('Analyzed database.')
 
         # Helper function: sql = lambda *s: list(self._db.execute_sql(*s))
 
