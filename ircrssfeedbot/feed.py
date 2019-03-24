@@ -121,9 +121,12 @@ class Feed:
 
         # Filter entries if new feed
         if self.db.is_new_feed(self.channel, self.name):
+            log.debug('Filtering new feed %s having %s postable entries.', self, len(entries))
             max_posts = self._feed_config.get('new', config.NEW_FEED_POSTS_DEFAULT)
             max_posts = config.NEW_FEED_POSTS_MAX[max_posts]
             entries = entries[:max_posts]
+            log.debug('Filtered new feed %s to %s postable entries given a max limit of %s entries.',
+                      self, len(entries), max_posts)
 
         # Shorten URLs
         if entries and self._feed_config.get('shorten', True):
