@@ -76,7 +76,7 @@ class Feed:
             entries = [entry for entry in entries if not entry.is_blacklisted(blacklist)]
             log.debug('Filtered to %s entries using blacklist for %s.', len(entries), self)
 
-        # Enforce HTTPS URLs as configured
+        # Enforce HTTPS URLs
         if feed_config.get('https', False):
             log.debug('Enforcing HTTPS for URLs in %s.', self)
             for entry in entries:
@@ -84,7 +84,7 @@ class Feed:
                     entry.long_url = entry.long_url.replace('http://', 'https://', 1)
             log.debug('Enforced HTTPS for URLs in %s.', self)
 
-        # Substitute entries as configured
+        # Substitute entries
         sub = feed_config.get('sub')
         if sub:
             log.debug('Substituting entries for %s.', self)
@@ -94,7 +94,7 @@ class Feed:
                        for e in entries]
             log.debug('Substituted entries for %s.', self)
 
-        # Format entries as configured
+        # Format entries
         format_config = feed_config.get('format')
         if format_config:
             log.debug('Formatting entries for %s.', self)
@@ -117,11 +117,12 @@ class Feed:
     @cachedproperty
     def postable_entries(self) -> List[Union[FeedEntry, ShortenedFeedEntry]]:
         log.debug('Retrieving postable entries for %s.', self)
+        entries = self.unposted_entries
+
+        # Filter entries if new feed
         if self.db.is_new_feed(self.channel, self.name):
             max_posts = 0 if self._feed_config.get('anew') else config.MAX_POSTS_OF_NEW_FEED
-            entries = self.unposted_entries[:max_posts]
-        else:
-            entries = self.unposted_entries
+            entries = entries[:max_posts]
 
         # Shorten URLs
         if entries and self._feed_config.get('shorten', True):
