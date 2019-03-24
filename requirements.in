@@ -1,4 +1,4 @@
-bitlyshortener==0.2.0
+bitlyshortener==0.2.1
 dickens==1.0.1
 feedparser==5.2.1
 humanize==0.5.1
