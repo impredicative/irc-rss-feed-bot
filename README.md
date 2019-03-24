@@ -128,7 +128,7 @@ A new feed is defined as one with no prior posts in its channel.
 The default value is `some` which is interpreted as 3.
 The default is intended to limit flooding a channel when one or more new feeds are added.
 A string value of `none` is interpreted as 0 and will skip all entries for a new feed.
-A value of `all` will skip no entries for a new feed, and is not recommended.
+A value of `all` will skip no entries for a new feed; it is not recommended and should be used sparingly if at all.
 In any case, future entries in the feed are not affected by this option on subsequent reads,
 and they are all forwarded without a limit.
 * **`period`**: This indicates how frequently to read the feed in hours on an average. Its default value is 1.
