@@ -121,7 +121,8 @@ class Feed:
 
         # Filter entries if new feed
         if self.db.is_new_feed(self.channel, self.name):
-            max_posts = 0 if self._feed_config.get('anew') else config.MAX_POSTS_OF_NEW_FEED
+            max_posts = self._feed_config.get('new', config.NEW_FEED_POSTS_DEFAULT)
+            max_posts = config.NEW_FEED_POSTS_MAX[max_posts]
             entries = entries[:max_posts]
 
         # Shorten URLs

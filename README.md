@@ -75,9 +75,12 @@ feeds:
           url: '{url}{ver}'
     InfoWorld:
       url: https://www.infoworld.com/index.rss
+    KDnuggets:
+      url: https://us-east1-ml-feeds.cloudfunctions.net/kdnuggets
+      new: all
     libraries.io/pypi/scikit-learn:
       url: https://libraries.io/pypi/scikit-learn/versions.atom
-      anew: true
+      new: none
       period: 8
       shorten: false
     PwC:Trending:
@@ -112,12 +115,6 @@ Setting it is recommended.
 
 ##### Optional
 These are optional and are independent of each other:
-* **`anew`**: If `true`, this skips posting all preexisting entries in a new feed.
-A new feed is defined as one with no prior posts in its channel.
-The default value is `false`, in which case only up to three of the most recent entries are posted.
-The default exists to limit flooding a channel when one or more new feeds are added.
-Either way, none of the future entries in the feed are affected on subsequent reads, and they are all posted without
-reservation.
 * **`blacklist/title`**: This is a list of regular expression patterns that result in a title being skipped if a
 [search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in the title.
 * **`blacklist/url`**: Similar to `blacklist/title`.
@@ -126,6 +123,14 @@ The default value is `channel` (per-channel), and an alternate possible value is
 Note that per-feed deduplication is implicitly specific to its channel.
 * **`https`**: If `true`, links that start with `http://` are changed to start with `https://` instead.
 Its default value is `false`.
+* **`new`**: This indicates up to how many entries of a new feed to post.
+A new feed is defined as one with no prior posts in its channel.
+The default value is `some` which is interpreted as 3.
+The default is intended to limit flooding a channel when one or more new feeds are added.
+A string value of `none` is interpreted as 0 and will skip all entries for a new feed.
+A value of `all` will skip no entries for a new feed, and is not recommended.
+In any case, future entries in the feed are not affected by this option on subsequent reads,
+and they are all forwarded without a limit.
 * **`period`**: This indicates how frequently to read the feed in hours on an average. Its default value is 1.
 Conservative polling is recommended. A value below 0.25 is changed to a minimum of 0.25.
 The first read is delayed by up to a uniformly distributed random 10% so as to better distribute the load of multiple
