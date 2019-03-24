@@ -32,8 +32,8 @@ LOGGING = {  # Ref: https://docs.python.org/3/howto/logging.html#configuring-log
     'version': 1,
     'formatters': {
         'detailed': {
-            'format': '%(asctime)s %(thread)x-%(threadName)s:%(name)s:%(lineno)d:%(funcName)s:%(levelname)s: %(message)s',
-        },
+            'format': '%(asctime)s %(threadName)s:%(name)s:%(lineno)d:%(funcName)s:%(levelname)s: %(message)s',
+        },  # Note: Use %(thread)x- if needed for thread ID.
     },
     'handlers': {
         'console': {
