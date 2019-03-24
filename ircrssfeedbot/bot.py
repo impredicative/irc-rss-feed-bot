@@ -4,7 +4,7 @@ import random
 import subprocess
 import threading
 import time
-from typing import Dict, List, Tuple
+from typing import Callable, Dict, List, Tuple
 
 import bitlyshortener
 import miniirc
@@ -17,8 +17,8 @@ from .util.datetime import timedelta_desc
 log = logging.getLogger(__name__)
 
 
-def _alert(irc: miniirc.IRC, msg: str, loglevel: int = logging.ERROR) -> None:
-    log.log(loglevel, msg)
+def _alert(irc: miniirc.IRC, msg: str, log: Callable[[str], None] = log.exception) -> None:
+    log(msg)
     irc.msg(config.INSTANCE['alerts_channel'], msg)
 
 
@@ -137,7 +137,7 @@ class Bot:
                     channel_queue.put_nowait(feed)
                 except queue.Full:
                     msg = f'Queue for {channel} is full. {feed} will be put in the queue in blocking mode.'
-                    _alert(irc, msg, logging.WARNING)
+                    _alert(irc, msg, log.warning)
                     channel_queue.put(feed)
                 else:
                     log.debug('Queued %s with %s entries.', feed, len(feed.entries))
@@ -203,12 +203,10 @@ def _handle_privmsg(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List
         assert msg.startswith(':')
         msg = msg[1:]
         _alert(irc, f'Ignoring private message from {user} having ident {ident} and hostname {hostname}: {msg}',
-               logging.WARNING)
+               log.warning)
         return
 
     # Update channel last message time
     Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel] = time.monotonic()
     log.debug('Updated the last incoming message time for %s to %s.',
               channel, Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel])
-
-# TODO: Use Arxiv title and URL re.
