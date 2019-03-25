@@ -27,7 +27,7 @@ For more features, see the customizable [global settings](#global-settings) and
 
 ## Usage
 ### Configuration
-* Prepare a private but version-controlled `config.yaml` file using the sample below.
+Prepare a private but version-controlled `config.yaml` file using the sample below.
 ```yaml
 host: chat.freenode.net
 ssl_port: 6697
