@@ -86,6 +86,12 @@ feeds:
     PwC:Trending:
       url: https://us-east1-ml-feeds.cloudfunctions.net/pwc/trending
       dedup: feed
+    YT:LexFridman:
+      url: https://www.youtube.com/feeds/videos.xml?channel_id=UCSHZKyawb77ixDdsGog4iWA
+      sub:
+        url:
+          pattern: ^https://www\.youtube\.com/watch\?v=(?P<id>.+?)$
+          repl: https://youtu.be/\g<id>
 ```
 
 #### Global settings
