@@ -35,7 +35,7 @@ def main() -> None:
             log.info('User configuration for channel %s has feed %s with configuration: %s',
                      channel, feed, feed_config)
 
-    # Setup alerts channel
+    # Set alerts channel
     if 'alerts_channel' not in instance_config:
         instance_config['alerts_channel'] = config.ALERTS_CHANNEL_FORMAT_DEFAULT
     instance_config['alerts_channel'] = instance_config['alerts_channel'].format(nick=instance_config['nick'])
