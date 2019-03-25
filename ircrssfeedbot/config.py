@@ -13,6 +13,7 @@ def configure_logging() -> None:
 INSTANCE: Dict = {}  # Set from YAML config file.
 PACKAGE_NAME = Path(__file__).parent.stem
 
+ALERTS_CHANNEL_FORMAT_DEFAULT = '##{nick}-alerts'
 BITLY_SHORTENER_MAX_CACHE_SIZE = 4096
 DB_FILENAME = 'posts.v1.db'
 DEDUP_STRATEGY_DEFAULT = 'channel'

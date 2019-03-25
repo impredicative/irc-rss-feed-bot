@@ -31,8 +31,9 @@ For more features, see the customizable [global settings](#global-settings) and
 ```yaml
 host: chat.freenode.net
 ssl_port: 6697
-nick: Feed[bot]
+nick: MyFeed[bot]
 nick_password: the_correct_password
+alerts_channel: '##mybot-alerts'
 mode:
 tokens:
   bitly:
@@ -111,10 +112,16 @@ If there are errors, the batched new entries in a feed may get reprocessed the n
 It is safer to provide more tokens than are necessary.
 
 ##### Optional
+* **`alerts_channel`**: Some but not all warning and error alerts are sent to the this channel.
+Its default value is `##{nick}-alerts`. The key `{nick}`, if present in the value, is formatted with the actual nick.
+For example, if the nick is `MyFeed[bot]`, alerts will by default be sent to `##MyFeed[bot]-alerts`.
+Since a channel name starts with #, the name if provided **must be quoted**.
+It is recommended that the alerts channel be registered and monitored.
 * **`mode`**: This can for example be `+igR` for [Freenode](https://freenode.net/kb/answer/usermodes).
 Setting it is recommended.
 
 #### Feed-specific settings
+A feed is defined under a channel as in the sample configuration. The feed's key represents its name.
 
 ##### Mandatory
 * **`url`**: This is the URL of the feed. 
@@ -177,9 +184,7 @@ A `posts.v1.db` database file is written by the bot in the same directory as `co
 This database file must be preserved but not version controlled.
 
 ### Deployment
-* Some but not all warning and error alerts are sent to `##{nick}-alerts`.
-For example, if the nick is `Feed[bot]`, these alerts will be sent to `##Feed[bot]-alerts`.
-It is recommended that the alerts channel be registered and monitored.
+* As a reminder, it is recommended that the alerts channel be registered and monitored.
 
 * It is recommended that the bot be auto-voiced (+V) in each channel.
 Failing this, messages from the bot risk being silently dropped by the server.

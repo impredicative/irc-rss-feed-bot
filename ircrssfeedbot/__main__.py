@@ -37,7 +37,9 @@ def main() -> None:
 
     # Process user config
     instance_config['dir'] = instance_config_path.parent
-    instance_config['alerts_channel'] = f'##{instance_config["nick"]}-alerts'
+    if 'alerts_channel' not in instance_config:
+        instance_config['alerts_channel'] = config.ALERTS_CHANNEL_FORMAT_DEFAULT
+    instance_config['alerts_channel'] = instance_config['alerts_channel'].format(nick=instance_config['nick'])
     if instance_config['alerts_channel'] not in instance_config['feeds']:
         instance_config['feeds'][instance_config['alerts_channel']] = {}
     instance_config['nick:casefold'] = instance_config['nick'].casefold()
