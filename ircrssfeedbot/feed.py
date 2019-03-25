@@ -67,7 +67,8 @@ class Feed:
 
         log.debug('Retrieving entries for %s.', self)
         entries = [FeedEntry(title=e['title'], long_url=e['link']) for e in feedparser.parse(content)['entries']]
-        log.debug('Retrieved %s entries for %s.', len(entries), self)
+        logger = log.debug if entries else log.warning
+        logger('Retrieved %s entries for %s.', len(entries), self)
 
         # Remove blacklisted entries
         blacklist = feed_config.get('blacklist', {})
