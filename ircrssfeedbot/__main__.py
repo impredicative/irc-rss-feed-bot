@@ -35,13 +35,15 @@ def main() -> None:
             log.info('User configuration for channel %s has feed %s with configuration: %s',
                      channel, feed, feed_config)
 
-    # Process user config
-    instance_config['dir'] = instance_config_path.parent
+    # Setup alerts channel
     if 'alerts_channel' not in instance_config:
         instance_config['alerts_channel'] = config.ALERTS_CHANNEL_FORMAT_DEFAULT
     instance_config['alerts_channel'] = instance_config['alerts_channel'].format(nick=instance_config['nick'])
     if instance_config['alerts_channel'] not in instance_config['feeds']:
         instance_config['feeds'][instance_config['alerts_channel']] = {}
+
+    # Process user config
+    instance_config['dir'] = instance_config_path.parent
     instance_config['nick:casefold'] = instance_config['nick'].casefold()
     instance_config['channels:casefold'] = [channel.casefold() for channel in instance_config['feeds']]
     config.INSTANCE = instance_config
