@@ -64,7 +64,7 @@ feeds:
           pattern: ^https://www\.reddit\.com/r/.+?/comments/(?P<id>.+?)/.+$
           repl: https://redd.it/\g<id>
   "##some_chan2":
-    ArXiv:cs.AI:
+    ArXiv:cs.AI: &ArXiv
       url: https://export.arxiv.org/rss/cs.AI
       period: 1.5
       shorten: false
@@ -74,6 +74,9 @@ feeds:
         str:
           title: '{name}'
           url: '{url}{ver}'
+    ArXiv:cs.NE:
+      <<: *ArXiv
+      url: https://export.arxiv.org/rss/cs.NE
     InfoWorld:
       url: https://www.infoworld.com/index.rss
     KDnuggets:
@@ -87,12 +90,17 @@ feeds:
     PwC:Trending:
       url: https://us-east1-ml-feeds.cloudfunctions.net/pwc/trending
       dedup: feed
-    YT:LexFridman:
-      url: https://www.youtube.com/feeds/videos.xml?channel_id=UCSHZKyawb77ixDdsGog4iWA
+    YT:3Blue1Brown: &YT
+      url: https://www.youtube.com/feeds/videos.xml?channel_id=UCYO_jab_esuFRV4b17AJtAw
+      period: 24
+      shorten: false
       sub:
         url:
           pattern: ^https://www\.youtube\.com/watch\?v=(?P<id>.+?)$
           repl: https://youtu.be/\g<id>
+    YT:LexFridman:
+      <<: *YT
+      url: https://www.youtube.com/feeds/videos.xml?channel_id=UCSHZKyawb77ixDdsGog4iWA
 ```
 
 #### Global settings
@@ -127,6 +135,7 @@ The order of execution of the interacting operations is: `blacklist`, `https`, `
 Refer to the sample configuration for usage examples.
 
 YAML [anchors and references](https://en.wikipedia.org/wiki/YAML#Advanced_components) can be used to reuse nodes.
+Examples of this are in the sample.
 
 ##### Mandatory
 * **`url`**: This is the URL of the feed. 
