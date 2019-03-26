@@ -123,6 +123,11 @@ Setting it is recommended.
 #### Feed-specific settings
 A feed is defined under a channel as in the sample configuration. The feed's key represents its name.
 
+The order of execution of the interacting operations is: `blacklist`, `https`, `sub`, `format`, `shorten`.
+Refer to the sample configuration for usage examples.
+
+YAML [anchors and references](https://en.wikipedia.org/wiki/YAML#Advanced_components) can be used to reuse nodes.
+
 ##### Mandatory
 * **`url`**: This is the URL of the feed. 
 
@@ -177,12 +182,6 @@ is forwarded unchanged.
 If a pattern is specified, it is advisable to set `shorten` to `false` for the feed.
 * **`sub/url/repl`**: Similar to `sub/title/repl`.
 
-#### Remarks
-Refer to the sample configuration above for usage examples.
-The order of execution of some of the above operations is: `blacklist`, `https`, `sub`, `format`, `shorten`.
-A `posts.v1.db` database file is written by the bot in the same directory as `config.yaml`.
-This database file must be preserved but not version controlled.
-
 ### Deployment
 * As a reminder, it is recommended that the alerts channel be registered and monitored.
 
@@ -216,8 +215,9 @@ From the directory containing `docker-compose.yml`, run `docker-compose up -d ir
 Use `docker logs -f irc-rss-feed-bot` to see and follow informational logs.
 
 ### Maintenance
+* A `posts.v1.db` database file is written by the bot in the same directory as `config.yaml`.
+This database file must be preserved but not version controlled.
 * If `config.yaml` is updated, the container must be restarted to use the updated file.
-* Any external changes to the database should be made only when the bot is stopped, but no such changes are expected.
 * The database file grows as new posts are made. For the most part this indefinite growth can be ignored.
 Currently the standard approach for handling this, if necessary, is to stop the bot and delete the
 database file if it has grown unacceptably large.
