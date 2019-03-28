@@ -198,8 +198,8 @@ If a pattern is specified, it is advisable to set `shorten` to `false` for the f
 Failing this, messages from the bot risk being silently dropped by the server.
 This is despite the bot-enforced limit of two seconds per message across the server.
 
-* It is recommended that the bot be run as a Docker container using using Docker ≥18.09.3, possibly with
-Docker Compose ≥1.24.0-rc1, etc.
+* It is recommended that the bot be run as a Docker container using using Docker ≥18.09.2, possibly with
+Docker Compose ≥1.24.0.
 To run the bot using Docker Compose, create or add to a version-controlled `docker-compose.yml` file:
 ```yaml
 version: '3.7'
