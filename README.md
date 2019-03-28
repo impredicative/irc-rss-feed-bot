@@ -5,7 +5,7 @@ More specifically, it posts the titles and shortened URLs of entries.
 
 ## Features
 * Multiple channels on an IRC server are supported, with each channel having its own set of feeds.
-For multiple servers, run an instance of the bot process for each server.
+For use with multiple servers, a separate instance of the bot process can be run for each server.
 * Entries are posted only if the channel has not had any conversation for at least 15 minutes, thereby preventing the
 interruption of any preexisting conversations.
 * A SQLite database file records the entries that have been posted, thereby preventing them from being reposted.
@@ -160,8 +160,8 @@ In any case, future entries in the feed are not affected by this option on subse
 and they are all forwarded without a limit.
 * **`period`**: This indicates how frequently to read the feed in hours on an average. Its default value is 1.
 Conservative polling is recommended. A value below 0.25 is changed to a minimum of 0.25.
-The first read is delayed by up to a uniformly distributed random 10% so as to better distribute the load of multiple
-feeds.
+The first read upon starting or restarting the bot is delayed by up to a uniformly distributed random 10% so as to
+better distribute the load of multiple feeds.
 Subsequent reads are varied by up to a uniformly distributed random ±5% for the same reason.
 * **`shorten`**: This indicates whether to post shortened URLs for the feed.
 The default value is `true`.
