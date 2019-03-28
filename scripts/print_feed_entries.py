@@ -1,8 +1,10 @@
 import feedparser, requests
 
-url = 'https://feeds.feedburner.com/blogspot/gJZg'
+from ircrssfeedbot import config
 
-content = requests.get(url).content
+url = 'https://www.reddit.com/r/AGI/hot/.rss'
+
+content = requests.get(url, timeout=config.REQUEST_TIMEOUT, headers={'User-Agent': config.USER_AGENT}).content
 entries = feedparser.parse(content)['entries']
 
 for index, entry in enumerate(entries):
