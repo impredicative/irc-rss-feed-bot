@@ -5,7 +5,7 @@ import peewee
 
 from ircrssfeedbot import config
 from ircrssfeedbot.util.humanize import humanize_bytes
-from ircrssfeedbot.util.random import str_to_num
+from ircrssfeedbot.util.random import strtoint
 
 # Customize:
 DB_PATH_V1 = Path('/home/devuser/Documents/db-backups/posts.v1.db')
@@ -120,9 +120,8 @@ def migrate():
 
     for rows in db1.select():
         for row in rows:
-            row['channel'] = str_to_num(row['channel'], 8)
-            row['feed'] = str_to_num(row['feed'], 8)
-            row['url'] = str_to_num(row['url'], 8)
+            for key in row:
+                row[key] = strtoint(row[key])
         db2.insert(rows)
 
     db2.optimize()
