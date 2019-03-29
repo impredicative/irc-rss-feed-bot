@@ -5,7 +5,7 @@ import peewee
 
 from ircrssfeedbot import config
 from ircrssfeedbot.util.humanize import humanize_bytes
-from ircrssfeedbot.util.random import strtoint
+from ircrssfeedbot.util.hashlib import DBHash
 
 # Customize:
 DB_PATH_V1 = Path('/home/devuser/Documents/db-backups/posts.v1.db')
@@ -118,10 +118,11 @@ def migrate():
     db1 = DatabaseV1()
     db2 = DatabaseV2()
 
+    toint = DBHash.toint
     for rows in db1.select():
         for row in rows:
             for key in row:
-                row[key] = strtoint(row[key])
+                row[key] = toint(row[key])
         db2.insert(rows)
 
     db2.optimize()
