@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Dict, Iterable, List
 
 import peewee
 
@@ -37,9 +38,9 @@ class ModelV1:
 
 class ModelV2:
     class Post(peewee.Model):
-        channel = peewee.BigIntegerField(null=False, verbose_name='channel name')
-        feed = peewee.BigIntegerField(null=False, verbose_name='feed name')
-        url = peewee.BigIntegerField(null=False, verbose_name='long URL')
+        channel = peewee.BigIntegerField(null=False, verbose_name='signed hash of channel name')
+        feed = peewee.BigIntegerField(null=False, verbose_name='signed hash of feed name')
+        url = peewee.BigIntegerField(null=False, verbose_name='signed hash of long URL')
         # Note: The reason for using the "long URL" instead of the "short URL path" is that the latter can change
         # surprisingly if the array of Bitly tokens is changed in any way, leading to deduplication errors.
 
@@ -62,7 +63,7 @@ class DatabaseV1:
         log.info('Initialized v1 database having path %s.', DB_PATH_V1)
         self.optimize()
 
-    def optimize(self):
+    def optimize(self) -> None:
         log.info('Vacuuming v1 database having pre-vacuum size %s.', humanize_bytes(DB_PATH_V1.stat().st_size))
         self._db.execute_sql('VACUUM;')
         log.info('Vacuumed v1 database having post-vacuum size %s.', humanize_bytes(DB_PATH_V1.stat().st_size))
@@ -71,7 +72,7 @@ class DatabaseV1:
         self._db.execute_sql('ANALYZE;')
         log.info('Analyzed v1 database.')
 
-    def select(self):
+    def select(self) -> Iterable[List[Dict[str, str]]]:
         page_num = 1
         while True:
             rows = list(ModelV1.Post.select().paginate(page_num, 1000).dicts().iterator())
@@ -99,7 +100,7 @@ class DatabaseV2:
         log.info('Initialized v2 database having path %s.', DB_PATH_V2)
         # self.optimize()
 
-    def optimize(self):
+    def optimize(self) -> None:
         log.info('Vacuuming v2 database having pre-vacuum size %s.', humanize_bytes(DB_PATH_V2.stat().st_size))
         self._db.execute_sql('VACUUM;')
         log.info('Vacuumed v2 database having post-vacuum size %s.', humanize_bytes(DB_PATH_V2.stat().st_size))
@@ -108,21 +109,21 @@ class DatabaseV2:
         self._db.execute_sql('ANALYZE;')
         log.info('Analyzed v2 database.')
 
-    def insert(self, rows):
+    def insert(self, rows: List[Dict[str, int]]) -> None:
         with self._db.atomic():
             ModelV2.Post.insert_many(rows).execute()
         log.info('Inserted %s rows.', len(rows))
 
 
-def migrate():
+def migrate() -> None:
     db1 = DatabaseV1()
     db2 = DatabaseV2()
 
     for rows in db1.select():
         for row in rows:
             for key in row:
-                row[key] = Int8Hash.as_int(row[key])
-        db2.insert(rows)
+                row[key] = Int8Hash.as_int(row[key])  # type: ignore
+        db2.insert(rows)  # type: ignore
 
     db2.optimize()
 
