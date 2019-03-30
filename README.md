@@ -8,7 +8,8 @@ More specifically, it posts the titles and shortened URLs of entries.
 For use with multiple servers, a separate instance of the bot process can be run for each server.
 * Entries are posted only if the channel has not had any conversation for at least 15 minutes, thereby preventing the
 interruption of any preexisting conversations.
-* A SQLite database file records the entries that have been posted, thereby preventing them from being reposted.
+* A SQLite database file records hashes of the entries that have been posted, thereby preventing them from being
+reposted.
 
 For more features, see the customizable [global settings](#global-settings) and
 [feed-specific settings](#feed-specific-settings).
@@ -224,7 +225,7 @@ From the directory containing `docker-compose.yml`, run `docker-compose up -d ir
 Use `docker logs -f irc-rss-feed-bot` to see and follow informational logs.
 
 ### Maintenance
-* A `posts.v1.db` database file is written by the bot in the same directory as `config.yaml`.
+* A `posts.v2.db` database file is written by the bot in the same directory as `config.yaml`.
 This database file must be preserved but not version controlled.
 * If `config.yaml` is updated, the container must be restarted to use the updated file.
 * The database file grows as new posts are made. For the most part this indefinite growth can be ignored.
