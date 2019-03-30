@@ -12,12 +12,12 @@ class Int8Hash:
     MAX = 2**BITS_MINUS1 - 1
 
     @classmethod
-    def todict(cls, texts: List[str]) -> Dict[str, int]:
-        return {text: cls.toint(text) for text in texts}
+    def as_dict(cls, texts: List[str]) -> Dict[int, str]:
+        return {cls.as_int(text): text for text in texts}  # Intentionally reversed.
 
     @classmethod
     @functools.lru_cache(1024)
-    def toint(cls, text: str) -> int:
+    def as_int(cls, text: str) -> int:
         seed = text.encode()
         hash_digest = hashlib.shake_128(seed).digest(cls.BYTES)
         hash_int = int.from_bytes(hash_digest, byteorder='big', signed=True)
@@ -25,8 +25,8 @@ class Int8Hash:
         return hash_int
 
     @classmethod
-    def tolist(cls, texts: List[str]) -> List[int]:
-        return [cls.toint(text) for text in texts]
+    def as_list(cls, texts: List[str]) -> List[int]:
+        return [cls.as_int(text) for text in texts]
 
 
 import random
@@ -36,11 +36,10 @@ import unittest
 
 class TestInt8Hash(unittest.TestCase):
     def test_range(self):
-        toint = Int8Hash.toint
         localrandom = random.Random(0)
         for _ in range(10_000):
             text_len = localrandom.randrange(128)
             text = ''.join(localrandom.choice(string.printable) for _ in range(text_len))
-            int8 = toint(text)
+            int8 = Int8Hash.as_int(text)
             self.assertLessEqual(Int8Hash.MIN, int8)
             self.assertGreaterEqual(Int8Hash.MAX, int8)

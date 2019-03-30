@@ -118,11 +118,10 @@ def migrate():
     db1 = DatabaseV1()
     db2 = DatabaseV2()
 
-    toint = Int8Hash.toint
     for rows in db1.select():
         for row in rows:
             for key in row:
-                row[key] = toint(row[key])
+                row[key] = Int8Hash.as_int(row[key])
         db2.insert(rows)
 
     db2.optimize()
