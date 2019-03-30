@@ -111,7 +111,7 @@ class DatabaseV2:
 
     def insert(self, rows: List[Dict[str, int]]) -> None:
         with self._db.atomic():
-            ModelV2.Post.insert_many(rows).execute()
+            ModelV2.Post.insert_many(rows).execute()  # Can fail in case of hash collision.
         log.info('Inserted %s rows.', len(rows))
 
 
@@ -124,7 +124,6 @@ def migrate() -> None:
             for key in row:
                 row[key] = Int8Hash.as_int(row[key])  # type: ignore
         db2.insert(rows)  # type: ignore
-
     db2.optimize()
 
 
