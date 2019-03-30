@@ -5,8 +5,11 @@ from typing import Dict, List
 
 class Int8Hash:
 
-    MIN = -9_223_372_036_854_775_808
-    MAX = +9_223_372_036_854_775_807
+    BYTES = 8
+    BITS = BYTES * 8
+    BITS_MINUS1 = BITS - 1
+    MIN = -(2**BITS_MINUS1)
+    MAX = 2**BITS_MINUS1 - 1
 
     @classmethod
     def todict(cls, texts: List[str]) -> Dict[str, int]:
@@ -16,7 +19,7 @@ class Int8Hash:
     @functools.lru_cache(1024)
     def toint(cls, text: str) -> int:
         seed = text.encode()
-        hash_digest = hashlib.shake_128(seed).digest(8)
+        hash_digest = hashlib.shake_128(seed).digest(cls.BYTES)
         hash_int = int.from_bytes(hash_digest, byteorder='big', signed=True)
         assert cls.MIN <= hash_int <= cls.MAX
         return hash_int
