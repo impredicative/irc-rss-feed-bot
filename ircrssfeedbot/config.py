@@ -15,7 +15,7 @@ PACKAGE_NAME = Path(__file__).parent.stem
 
 ALERTS_CHANNEL_FORMAT_DEFAULT = '##{nick}-alerts'
 BITLY_SHORTENER_MAX_CACHE_SIZE = 1024
-DB_FILENAME = 'posts.v1.db'
+DB_FILENAME = 'posts.v2.db'
 DEDUP_STRATEGY_DEFAULT = 'channel'
 MESSAGE_FORMAT = '[{feed}] {title} → {url}'
 MIN_CHANNEL_IDLE_TIME = 15 * 60

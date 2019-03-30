@@ -7,17 +7,16 @@ from peewee import chunked
 
 from . import config
 from .util.humanize import humanize_bytes
+from .util.hashlib import Int8Hash
 
 log = logging.getLogger(__name__)
 _DATABASE = peewee.SqliteDatabase(None)
 
 
 class Post(peewee.Model):
-    channel = peewee.CharField(64, null=False, verbose_name='channel name')
-    feed = peewee.CharField(32, null=False, verbose_name='feed name')
-    url = peewee.CharField(512, null=False, verbose_name='long URL')
-    # Note: The reason for using the "long URL" instead of the "short URL path" is that the latter can change
-    # surprisingly if the array of Bitly tokens is changed in any way, leading to deduplication errors.
+    channel = peewee.BigIntegerField(null=False, verbose_name='signed hash of channel name')
+    feed = peewee.BigIntegerField(null=False, verbose_name='signed hash of feed name')
+    url = peewee.BigIntegerField(null=False, verbose_name='signed hash of long URL')
 
     class Meta:
         database = _DATABASE
@@ -47,26 +46,28 @@ class Database:
         self._db.execute_sql('ANALYZE;')
         log.info('Analyzed database.')
 
-        # Helper function: sql = lambda *s: list(self._db.execute_sql(*s))
+        # Helper function:
+        # sql = lambda *s: list(self._db.execute_sql(*s))
 
     @staticmethod
     def _select_unposted(conditions: peewee.Expression, urls: List[str]) -> List[str]:
-        posted: Set[str] = set()
-        for urls_batch in chunked(urls, 100):  # Ref: https://www.sqlite.org/limits.html#max_variable_number
-            conditions_batch = (conditions & Post.url.in_(urls_batch))
-            posted |= {post[0] for post in Post.select(Post.url).where(conditions_batch).tuples().iterator()}
-        unposted = [url for url in urls if url not in posted]
-        return unposted
+        hashes2urls = Int8Hash.as_dict(urls)
+        posted_hashes: Set[int] = set()
+        for hashes_batch in chunked(hashes2urls, 100):  # Ref: https://www.sqlite.org/limits.html#max_variable_number
+            conditions_batch = (conditions & Post.url.in_(hashes_batch))
+            posted_hashes |= {post[0] for post in Post.select(Post.url).where(conditions_batch).tuples().iterator()}
+        unposted_urls = [url for url_hash, url in hashes2urls.items() if url_hash not in posted_hashes]
+        return unposted_urls
 
     @staticmethod
     def is_new_feed(channel: str, feed: str) -> bool:
-        conditions = (Post.channel == channel) & (Post.feed == feed)
+        conditions = (Post.channel == Int8Hash.as_int(channel)) & (Post.feed == Int8Hash.as_int(feed))
         return not Post.select(Post.url).where(conditions).limit(1)
 
     def select_unposted_for_channel(self, channel: str, feed: str, urls: List[str]) -> List[str]:
         log.debug('Retrieving unposted URLs from the database for channel %s having ignored feed %s out of %s URLs.',
                   channel, feed, len(urls))
-        conditions = (Post.channel == channel)
+        conditions = (Post.channel == Int8Hash.as_int(channel))
         unposted_urls = self._select_unposted(conditions, urls)
         loglevel = logging.INFO if len(unposted_urls) > 0 else logging.DEBUG
         log.log(loglevel,
@@ -77,7 +78,7 @@ class Database:
     def select_unposted_for_channel_feed(self, channel: str, feed: str, urls: List[str]) -> List[str]:
         log.debug('Retrieving unposted URLs from the database for channel %s having feed %s out of %s URLs.',
                   channel, feed, len(urls))
-        conditions = (Post.channel == channel) & (Post.feed == feed)
+        conditions = (Post.channel == Int8Hash.as_int(channel)) & (Post.feed == Int8Hash.as_int(feed))
         unposted_urls = self._select_unposted(conditions, urls)
         log.info('Returning %s unposted URLs from the database for channel %s having feed %s out of %s URLs.',
                  len(unposted_urls), channel, feed, len(urls))
@@ -85,7 +86,8 @@ class Database:
 
     def insert_posted(self, channel: str, feed: str, urls: List[str]) -> None:
         log.debug('Inserting %s URLs into the database for channel %s having feed %s.', len(urls), channel, feed)
-        data = ({'channel': channel, 'feed': feed, 'url': url} for url in urls)
+        channel_hash, feed_hash, urls_hashes = Int8Hash.as_int(channel), Int8Hash.as_int(feed), Int8Hash.as_list(urls)
+        data = ({'channel': channel_hash, 'feed': feed_hash, 'url': url_hash} for url_hash in urls_hashes)
         with self._write_lock, self._db.atomic():
             for batch in chunked(data, 100):  # Ref: https://www.sqlite.org/limits.html#max_variable_number
                 Post.insert_many(batch).execute()
