@@ -2,6 +2,6 @@ bitlyshortener==0.2.1
 dickens==1.0.1
 feedparser==5.2.1
 humanize==0.5.1
-miniirc==1.1.1
+miniirc==1.1.4
 peewee==3.9.3
 ruamel.yaml==0.15.89
