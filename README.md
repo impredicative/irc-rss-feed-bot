@@ -71,7 +71,7 @@ feeds:
       shorten: false
       format:
         re:
-          title: ^(?P<name>.+?)\.?\ \(arXiv:\d+\.\d+(?P<ver>v\d+)
+          title: '^(?P<name>.+?)\.?\ \(arXiv:.+(?P<ver>v\d+)\ '
         str:
           title: '{name}'
           url: '{url}{ver}'
