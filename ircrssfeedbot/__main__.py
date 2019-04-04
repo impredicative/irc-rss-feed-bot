@@ -30,8 +30,8 @@ def main() -> None:
              len(instance_config['feeds']), list(instance_config['feeds']),
              len([feed for channel in instance_config['feeds'].values() for feed in channel]))
 
-    for channel, channeL_config in instance_config['feeds'].items():
-        for feed, feed_config in channeL_config.items():
+    for channel, channel_config in instance_config['feeds'].items():
+        for feed, feed_config in channel_config.items():
             log.info('User configuration for channel %s has feed %s with configuration: %s',
                      channel, feed, feed_config)
 
