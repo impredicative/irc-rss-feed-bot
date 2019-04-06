@@ -47,6 +47,7 @@ class Bot:
             ns_identity=(instance['nick'], instance['nick_password']),
             connect_modes=instance.get('mode'),
             quit_message='',
+            ping_interval=30,
             )
         log.info('Initialized IRC client.')
 
