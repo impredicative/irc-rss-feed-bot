@@ -80,8 +80,10 @@ class Database:
                   channel, feed, len(urls))
         conditions = (Post.channel == Int8Hash.as_int(channel)) & (Post.feed == Int8Hash.as_int(feed))
         unposted_urls = self._select_unposted(conditions, urls)
-        log.info('Returning %s unposted URLs from the database for channel %s having feed %s out of %s URLs.',
-                 len(unposted_urls), channel, feed, len(urls))
+        loglevel = logging.INFO if len(unposted_urls) > 0 else logging.DEBUG
+        log.log(loglevel,
+                'Returning %s unposted URLs from the database for channel %s having feed %s out of %s URLs.',
+                len(unposted_urls), channel, feed, len(urls))
         return unposted_urls
 
     def insert_posted(self, channel: str, feed: str, urls: List[str]) -> None:
