@@ -11,7 +11,7 @@ dickens==1.0.1
 feedparser==5.2.1
 humanize==0.5.1
 idna==2.8                 # via requests
-miniirc==1.2.3
+miniirc==1.2.4.post1
 peewee==3.9.3
 requests==2.21.0          # via bitlyshortener
 ruamel.yaml==0.15.91
