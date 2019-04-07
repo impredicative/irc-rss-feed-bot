@@ -57,6 +57,9 @@ class Feed:
         self.entries = self._entries()  # Entries are effectively cached at this point in time.
         log.debug('Initialized instance of %s.', self)
 
+    def __str__(self):
+        return f'feed {self.name} of {self.channel}'
+
     def _entries(self) -> List[FeedEntry]:
         feed_config = self._feed_config
         log.debug('Retrieving content for %s.', self)
