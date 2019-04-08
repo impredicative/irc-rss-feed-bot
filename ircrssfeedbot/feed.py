@@ -24,12 +24,11 @@ class FeedEntry:
     def post_url(self) -> str:
         return self.long_url
 
-    def is_blacklisted(self, blacklist: Dict[str, List]) -> bool:
-        for blacklist_key, val in {'title': self.title, 'url': self.long_url}.items():
-            for blacklisted_pattern in blacklist.get(blacklist_key, []):
-                if re.search(blacklisted_pattern, val):
-                    log.debug('Feed entry %s matches %s blacklist pattern %s.',
-                              self, blacklist_key, blacklisted_pattern)
+    def is_listed(self, searchlist: Dict[str, List]) -> bool:
+        for searchlist_key, val in {'title': self.title, 'url': self.long_url}.items():
+            for searchlisted_pattern in searchlist.get(searchlist_key, []):
+                if re.search(searchlisted_pattern, val):
+                    log.debug('Feed entry %s matches %s pattern %s.', self, searchlist_key, searchlisted_pattern)
                     return True
         return False
 
@@ -73,11 +72,18 @@ class Feed:
         logger = log.debug if entries else log.warning
         logger('Retrieved %s entries for %s.', len(entries), self)
 
+        # Keep only whitelisted entries
+        whitelist = feed_config.get('whitelist', {})
+        if whitelist:
+            log.debug('Filtering %s entries using whitelist for %s.', len(entries), self)
+            entries = [entry for entry in entries if entry.is_listed(whitelist)]
+            log.debug('Filtered to %s entries using whitelist for %s.', len(entries), self)
+
         # Remove blacklisted entries
         blacklist = feed_config.get('blacklist', {})
         if blacklist:
             log.debug('Filtering %s entries using blacklist for %s.', len(entries), self)
-            entries = [entry for entry in entries if not entry.is_blacklisted(blacklist)]
+            entries = [entry for entry in entries if not entry.is_listed(blacklist)]
             log.debug('Filtered to %s entries using blacklist for %s.', len(entries), self)
 
         # Enforce HTTPS URLs

@@ -102,6 +102,9 @@ feeds:
     YT:LexFridman:
       <<: *YT
       url: https://www.youtube.com/feeds/videos.xml?channel_id=UCSHZKyawb77ixDdsGog4iWA
+      whitelist:
+        title:
+          - \bAGI\b
 ```
 
 #### Global settings
@@ -132,7 +135,7 @@ Setting it is recommended.
 #### Feed-specific settings
 A feed is defined under a channel as in the sample configuration. The feed's key represents its name.
 
-The order of execution of the interacting operations is: `blacklist`, `https`, `sub`, `format`, `shorten`.
+The order of execution of the interacting operations is: `whitelist`, `blacklist`, `https`, `sub`, `format`, `shorten`.
 Refer to the sample configuration for usage examples.
 
 YAML [anchors and references](https://en.wikipedia.org/wiki/YAML#Advanced_components) can be used to reuse nodes.
@@ -168,6 +171,9 @@ Subsequent reads are varied by up to a uniformly distributed random ±5% for the
 The default value is `true`.
 The alternative value `false` is recommended if the URL is naturally small, or if `sub` or `format` can be used to make
 it small.
+* **`whitelist/title`**: This is a list of regular expression patterns that result in a title being skipped unless a
+[search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in the title.
+* **`whitelist/url`**: Similar to `whitelist/title`.
 
 ##### Conditional
 The sample configuration above contains examples of these:
