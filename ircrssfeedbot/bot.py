@@ -17,8 +17,8 @@ from .util.datetime import timedelta_desc
 log = logging.getLogger(__name__)
 
 
-def _alert(irc: miniirc.IRC, msg: str, log: Callable[[str], None] = log.exception) -> None:
-    log(msg)
+def _alert(irc: miniirc.IRC, msg: str, logger: Callable[[str], None] = log.exception) -> None:
+    logger(msg)
     irc.msg(config.INSTANCE['alerts_channel'], msg)
 
 
