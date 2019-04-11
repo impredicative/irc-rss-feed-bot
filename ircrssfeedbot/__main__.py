@@ -32,8 +32,7 @@ def main() -> None:
 
     for channel, channel_config in instance_config['feeds'].items():
         for feed, feed_config in channel_config.items():
-            log.info('User configuration for channel %s has feed %s with configuration: %s',
-                     channel, feed, feed_config)
+            log.info('User config for %s has feed %s with config: %s', channel, feed, feed_config)
 
     # Set alerts channel
     if 'alerts_channel' not in instance_config:
