@@ -86,6 +86,16 @@ class Bot:
                                      timedelta_desc(sleep_time), feed)
                             time.sleep(sleep_time)
 
+                        log.debug('Checking IRC client connection state.')
+                        if not irc.connected:  # In case of netsplit.
+                            log.warning('Will wait for IRC client to connect so as to post %s.', feed)
+                            disconnect_time = time.monotonic()
+                            while not irc.connected:
+                                time.sleep(5)
+                            disconnection_time = time.monotonic() - disconnect_time
+                            log.info('IRC client is connected after waiting %s.',
+                                     timedelta_desc(disconnection_time))
+
                         log.info('Posting %s entries for %s.', len(feed.postable_entries), feed)
                         for entry in feed.postable_entries:
                             msg = message_format.format(feed=feed.name, title=entry.title, url=entry.post_url)
