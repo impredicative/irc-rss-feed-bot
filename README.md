@@ -27,7 +27,23 @@ For more features, see the customizable [global settings](#global-settings) and
 ```
 
 ## Usage
-### Configuration
+### Configuration: secret
+Prepare a private `secrets.env` environment file using the sample below.
+```ini
+IRC_PASSWORD=YourActualPassword
+BITLY_TOKENS=5e71a58b19582f48edcb0235637ac3536dd3b6dc,bd90119a7b617e81b293ddebbbfed3e955eac5af,42f309642a018e6b4d7cfba6854080719dccf0cc,0819552eb8b42e52dbc8b4c3e1654f5cd96c0dcc,430a002fe9d4e8f94097f7a5cd974ffce85eb605,71f9856bc96c6a8eabeac4f763daaec16896e183,81f6d477cfcef006a6dd35c4b947d1c1fdcbf445,06441b445c75d2251f0a56ae87506c69dc468af5,1e71089487fb70f42fff51b7ad49f192ffcb00f2
+```
+
+Bitly tokens are required for shortening URLs.
+URL shortening is enabled for all feeds by default but can be disabled selectively per feed.
+The sample tokens above are for illustration only and are invalid.
+To obtain tokens, refer to [these instructions](https://github.com/impredicative/bitlyshortener#usage).
+Providing multiple comma-separated tokens, perhaps as many as 9 free ones or a single commercial one, is required.
+Failing this, Bitly imposed rate limits for shortening URLs will lead to errors.
+If there are errors, the batched new entries in a feed may get reprocessed the next time the feed is read.
+It is safer to provide more tokens than are necessary.
+
+### Configuration: non-secret
 Prepare a version-controlled `config.yaml` file using the sample below.
 ```yaml
 host: chat.freenode.net
@@ -203,26 +219,10 @@ services:
     env_file:
       - ./irc-rss-feed-bot/secrets.env
 ```
+In the above service definition in `docker-compose.yml`, customize its relative paths to `config.yaml` (as defined in
+the volume source, e.g. `./irc-rss-feed-bot`) and also to `secrets.env`.
 
-Create or add to a private file `secrets.env`:
-```editorconfig
-IRC_PASSWORD=YourActualPassword
-BITLY_TOKENS=5e71a58b19582f48edcb0235637ac3536dd3b6dc,bd90119a7b617e81b293ddebbbfed3e955eac5af,42f309642a018e6b4d7cfba6854080719dccf0cc,0819552eb8b42e52dbc8b4c3e1654f5cd96c0dcc,430a002fe9d4e8f94097f7a5cd974ffce85eb605,71f9856bc96c6a8eabeac4f763daaec16896e183,81f6d477cfcef006a6dd35c4b947d1c1fdcbf445,06441b445c75d2251f0a56ae87506c69dc468af5,1e71089487fb70f42fff51b7ad49f192ffcb00f2
-```
-Customize the relative path to `secrets.env` in the service definition in `docker-compose.yml`
-
-Bitly tokens are required for shortening URLs.
-URL shortening is enabled for all feeds by default but can be disabled selectively per feed.
-The sample tokens above are for illustration only and are invalid.
-To obtain tokens, refer to [these instructions](https://github.com/impredicative/bitlyshortener#usage).
-Providing multiple comma-separated tokens, perhaps as many as 9 free ones or a single commercial one, is required.
-Failing this, Bitly imposed rate limits for shortening URLs will lead to errors.
-If there are errors, the batched new entries in a feed may get reprocessed the next time the feed is read.
-It is safer to provide more tokens than are necessary.
-
-Also in the service definition in `docker-compose.yml`, customize the relative path, e.g. `./irc-rss-feed-bot` of the
-volume source. This should be the directory containing `config.yaml`.
-This directory must be writable by Docker using the UID defined in the Dockerfile; it is 999.
+This volume source directory must be writable by Docker using the UID defined in the Dockerfile; it is 999.
 A simple way to ensure it is writable is to run a command such as `chmod a+w ./irc-rss-feed-bot` once on the host.
 
 From the directory containing `docker-compose.yml`, run `docker-compose up -d irc-rss-feed-bot`.
@@ -231,7 +231,7 @@ Use `docker logs -f irc-rss-feed-bot` to see and follow informational logs.
 ### Maintenance
 * A `posts.v2.db` database file is written by the bot in the same directory as `config.yaml`.
 This database file must be preserved with routine backups.
-* If `config.yaml` is updated, the container must be restarted to use the updated file.
+* If any configuration file is updated, the container must be restarted to use the updated file.
 * The database file grows as new posts are made. For the most part this indefinite growth can be ignored.
 Currently the standard approach for handling this, if necessary, is to stop the bot and delete the
 database file if it has grown unacceptably large.
