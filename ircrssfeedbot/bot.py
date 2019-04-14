@@ -1,4 +1,5 @@
 import logging
+import os
 import queue
 import random
 import subprocess
@@ -32,8 +33,9 @@ class Bot:
         instance = config.INSTANCE
         self._outgoing_msg_lock = threading.Lock()  # Used for rate limiting across multiple channels.
         self._db = Database()
-        self._url_shortener = bitlyshortener.Shortener(tokens=instance['tokens']['bitly'],
-                                                       max_cache_size=config.BITLY_SHORTENER_MAX_CACHE_SIZE)
+        self._url_shortener = bitlyshortener.Shortener(
+            tokens=[token.strip() for token in os.environ['BITLY_TOKENS'].strip().split(',')],
+            max_cache_size=config.BITLY_SHORTENER_MAX_CACHE_SIZE)
 
         # Setup miniirc
         log.debug('Initializing IRC client.')
@@ -44,7 +46,7 @@ class Bot:
             channels=instance['feeds'],
             ssl=True,
             debug=False,
-            ns_identity=(instance['nick'], instance['nick_password']),
+            ns_identity=(instance['nick'], os.environ['IRC_PASSWORD']),
             connect_modes=instance.get('mode'),
             quit_message='',
             ping_interval=30,

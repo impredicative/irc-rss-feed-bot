@@ -23,9 +23,8 @@ def main() -> None:
 
     # Log user config
     logged_instance_config = instance_config.copy()
-    for key in ('nick_password', 'tokens', 'feeds'):
-        del logged_instance_config[key]
-    log.info('Read user configuration file "%s" having excerpted configuration %s for %s channels %s with %s feeds.',
+    del logged_instance_config['feeds']
+    log.info('Read user configuration file %s having excerpted configuration %s for %s channels %s with %s feeds.',
              instance_config_path, logged_instance_config,
              len(instance_config['feeds']), list(instance_config['feeds']),
              len([feed for channel in instance_config['feeds'].values() for feed in channel]))
