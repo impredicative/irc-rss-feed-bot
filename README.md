@@ -161,9 +161,9 @@ In any case, future entries in the feed are not affected by this option on subse
 and they are all forwarded without a limit.
 * **`period`**: This indicates how frequently to read the feed in hours on an average. Its default value is 1.
 Conservative polling is recommended. A value below 0.25 is changed to a minimum of 0.25.
-The first read upon starting or restarting the bot is delayed by up to a uniformly distributed random 10% so as to
-better distribute the load of multiple feeds.
-Subsequent reads are varied by up to a uniformly distributed random ±5% for the same reason.
+To make service restarts safer by preventing excessive reads, the first read is delayed by the period.
+To better distribute the load of reading multiple feeds, a uniformly distributed random ±5% is applied to the period for
+each read.
 * **`shorten`**: This indicates whether to post shortened URLs for the feed.
 The default value is `true`.
 The alternative value `false` is recommended if the URL is naturally small, or if `sub` or `format` can be used to make
@@ -211,7 +211,7 @@ services:
   irc-rss-feed-bot:
     container_name: irc-rss-feed-bot
     image: ascensive/irc-rss-feed-bot:latest
-    restart: on-failure:3
+    restart: always
     logging:
       options:
         max-size: 10m
