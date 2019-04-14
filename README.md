@@ -45,6 +45,8 @@ It is safer to provide more tokens than are necessary.
 
 ### Configuration: non-secret
 Prepare a version-controlled `config.yaml` file using the sample below.
+A full-fledged real-world example is also
+[available](https://github.com/impredicative/freenode-bots/blob/master/irc-rss-feed-bot/config.yaml).
 ```yaml
 host: chat.freenode.net
 ssl_port: 6697
