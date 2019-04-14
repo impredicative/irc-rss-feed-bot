@@ -158,7 +158,7 @@ class Bot:
                 msg = f'Error reading feed {feed_name} of {channel}: {exc}'
                 _alert(irc, msg)
             else:
-                del feed  # Experimental.
+                del feed
 
     def _setup_channels(self) -> None:
         instance = config.INSTANCE
