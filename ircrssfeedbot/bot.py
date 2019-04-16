@@ -130,8 +130,7 @@ class Bot:
         irc = self._irc
         db = self._db
         url_shortener = self._url_shortener
-        query_time = time.monotonic()  # Delays first read by feed_period.
-        # query_time -= feed_period_min  # Decreases delay for first read.
+        query_time = time.monotonic() - (feed_period_avg / 2)  # Delays first read by half of feed period.
         Bot.CHANNEL_JOIN_EVENTS[channel].wait()  # Optional.
         Bot.CHANNEL_JOIN_EVENTS[instance['alerts_channel']].wait()
         log.debug('Feed reader for feed %s of %s has started.', feed_name, channel)
@@ -140,7 +139,7 @@ class Bot:
             query_time = max(time.monotonic(), query_time + feed_period)  # "max" is used in case of wait using "put".
             sleep_time = max(0., query_time - time.monotonic())
             if sleep_time != 0:
-                log.debug('Will wait %s to read feed %s of %s.', timedelta_desc(sleep_time), feed_name, channel)
+                log.info('Will wait %s to read feed %s of %s.', timedelta_desc(sleep_time), feed_name, channel)
                 time.sleep(sleep_time)
 
             try:

@@ -161,7 +161,7 @@ In any case, future entries in the feed are not affected by this option on subse
 and they are all forwarded without a limit.
 * **`period`**: This indicates how frequently to read the feed in hours on an average. Its default value is 1.
 Conservative polling is recommended. A value below 0.25 is changed to a minimum of 0.25.
-To make service restarts safer by preventing excessive reads, the first read is delayed by the period.
+To make service restarts safer by preventing excessive reads, the first read is delayed by half the period.
 To better distribute the load of reading multiple feeds, a uniformly distributed random ±5% is applied to the period for
 each read.
 * **`shorten`**: This indicates whether to post shortened URLs for the feed.
