@@ -139,7 +139,7 @@ class Bot:
             query_time = max(time.monotonic(), query_time + feed_period)  # "max" is used in case of wait using "put".
             sleep_time = max(0., query_time - time.monotonic())
             if sleep_time != 0:
-                log.info('Will wait %s to read feed %s of %s.', timedelta_desc(sleep_time), feed_name, channel)
+                log.debug('Will wait %s to read feed %s of %s.', timedelta_desc(sleep_time), feed_name, channel)
                 time.sleep(sleep_time)
 
             try:
