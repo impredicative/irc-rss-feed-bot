@@ -154,8 +154,9 @@ These are optional and are independent of each other:
 * **`dedup`**: This indicates how to deduplicate posts for the feed, thereby preventing them from being reposted.
 The default value is `channel` (per-channel), and an alternate possible value is `feed` (per-feed).
 Note that per-feed deduplication is implicitly specific to its channel.
-* **`group`**: If a string, this delays queueing a feed that has just been read until all other feeds having the same
-group are also read. This allows multiple feeds to be posted in succession except if interrupted by conversation.
+* **`group`**: If a string, this delays the processing of a feed that has just been read until all other feeds having
+the same group are also read.
+This allows multiple feeds to be posted in succession except if interrupted by conversation.
 To explicitly specify the absence of a group when using a YAML reference, the value can be specified as `null`.
 It is recommended that feeds in the same group have the same `period`.
 * **`https`**: If `true`, links that start with `http://` are changed to start with `https://` instead.
