@@ -29,6 +29,11 @@ SECONDS_PER_MESSAGE = 2
 TEMPDIR = Path(tempfile.gettempdir())
 USER_AGENT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:65.0) Gecko/20100101 Firefox/65.0'
 
+# If debugging:
+# MIN_CHANNEL_IDLE_TIME = 1 * 60
+# PERIOD_HOURS_MIN = .00025
+# PERIOD_RANDOM_PERCENT = 10
+
 LOGGING = {  # Ref: https://docs.python.org/3/howto/logging.html#configuring-logging
     'version': 1,
     'formatters': {

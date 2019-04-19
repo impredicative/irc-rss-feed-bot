@@ -75,6 +75,7 @@ feeds:
       url: https://export.arxiv.org/rss/cs.AI
       period: 1.5
       shorten: false
+      group: ArXiv:cs
       format:
         re:
           title: '^(?P<name>.+?)\.?\ \(arXiv:.+(?P<ver>v\d+)\ '
@@ -97,6 +98,7 @@ feeds:
     PwC:Trending:
       url: https://us-east1-ml-feeds.cloudfunctions.net/pwc/trending
       dedup: feed
+      group:
     YT:3Blue1Brown: &YT
       url: https://www.youtube.com/feeds/videos.xml?channel_id=UCYO_jab_esuFRV4b17AJtAw
       period: 24
@@ -149,6 +151,8 @@ These are optional and are independent of each other:
 * **`dedup`**: This indicates how to deduplicate posts for the feed, thereby preventing them from being reposted.
 The default value is `channel` (per-channel), and an alternate possible value is `feed` (per-feed).
 Note that per-feed deduplication is implicitly specific to its channel.
+* **`group`**: If a string, this delays queueing a feed that has just been read until all other feeds having the same
+group are also read. This allows multiple feeds to be posted in succession except if interrupted by conversation.
 * **`https`**: If `true`, links that start with `http://` are changed to start with `https://` instead.
 Its default value is `false`.
 * **`new`**: This indicates up to how many entries of a new feed to post.

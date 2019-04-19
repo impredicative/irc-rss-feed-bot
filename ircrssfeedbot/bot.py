@@ -27,6 +27,7 @@ class Bot:
     CHANNEL_JOIN_EVENTS: Dict[str, threading.Event] = {}
     CHANNEL_LAST_INCOMING_MSG_TIMES: Dict[str, float] = {}
     CHANNEL_QUEUES: Dict[str, queue.Queue] = {}
+    FEED_GROUP_BARRIERS: Dict[str, threading.Barrier] = {}
 
     def __init__(self) -> None:
         log.info('Initializing bot as: %s', subprocess.check_output('id', text=True).rstrip())
@@ -143,9 +144,25 @@ class Bot:
                 time.sleep(sleep_time)
 
             try:
+                # Read feed
                 log.debug('Reading feed %s of %s.', feed_name, channel)
                 feed = Feed(channel=channel, name=feed_name, url=feed_url, db=db, url_shortener=url_shortener)
                 log.info('Read %s with %s entries.', feed, len(feed.entries))
+
+                # Wait for other feeds in group
+                if feed_config.get('group'):
+                    feed_group = feed_config['group']
+                    group_barrier = Bot.FEED_GROUP_BARRIERS[feed_group]
+                    num_other = group_barrier.parties - 1
+                    num_pending = num_other - group_barrier.n_waiting
+                    if num_pending > 0:  # This is not thread-safe but that's okay for logging.
+                        log.info('Will wait for %s of %s other feeds in group %s to also be read before queuing %s.',
+                                 num_pending, num_other, feed_group, feed)
+                    group_barrier.wait()
+                    log.debug('Finished waiting for other feeds in group %s to be read before queuing %s.',
+                             feed_group, feed)
+
+                # Queue feed
                 try:
                     channel_queue.put_nowait(feed)
                 except queue.Full:
@@ -167,6 +184,7 @@ class Bot:
         log.debug('Setting up threads and queues for %s channels (%s) and their feeds with %s currently active '
                   'threads.', len(channels), channels_str, threading.active_count())
         num_feeds_setup = 0
+        barriers_parties: Dict[str, int] = {}
         for channel, channel_config in channels.items():
             log.debug('Setting up threads and queue for %s.', channel)
             num_channel_feeds = len(channel_config)
@@ -174,14 +192,19 @@ class Bot:
             self.CHANNEL_QUEUES[channel] = queue.Queue(maxsize=num_channel_feeds)
             threading.Thread(target=self._msg_channel, name=f'ChannelMessenger-{channel}',
                              args=(channel,)).start()
-            for feed in channel_config:
+            for feed, feed_config in channel_config.items():
                 threading.Thread(target=self._read_feed, name=f'FeedReader-{channel}-{feed}',
                                  args=(channel, feed)).start()
                 num_feeds_setup += 1
+                if feed_config.get('group'):
+                    group = feed_config['group']
+                    barriers_parties[group] = barriers_parties.get(group, 0) + 1
             log.debug('Finished setting up threads and queue for %s and its %s feeds with %s currently active threads.',
-                     channel, num_channel_feeds, threading.active_count())
-        log.info('Finished setting up threads and queues for %s channels (%s) and their %s feeds with %s currently '
-                 'active threads.', len(channels), channels_str, num_feeds_setup, threading.active_count())
+                      channel, num_channel_feeds, threading.active_count())
+        for barrier, parties in barriers_parties.items():
+            self.FEED_GROUP_BARRIERS[barrier] = threading.Barrier(parties)
+        log.info('Finished setting up %s channels (%s) and their %s feeds with %s currently active threads.',
+                 len(channels), channels_str, num_feeds_setup, threading.active_count())
 
 # Ref: https://tools.ietf.org/html/rfc1459
 
