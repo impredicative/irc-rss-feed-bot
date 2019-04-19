@@ -85,6 +85,10 @@ feeds:
     ArXiv:cs.NE:
       <<: *ArXiv
       url: https://export.arxiv.org/rss/cs.NE
+    ArXiv:stat.ML:
+      <<: *ArXiv
+      url: https://export.arxiv.org/rss/stat.ML
+      group: null
     InfoWorld:
       url: https://www.infoworld.com/index.rss
     KDnuggets:
@@ -98,7 +102,6 @@ feeds:
     PwC:Trending:
       url: https://us-east1-ml-feeds.cloudfunctions.net/pwc/trending
       dedup: feed
-      group:
     YT:3Blue1Brown: &YT
       url: https://www.youtube.com/feeds/videos.xml?channel_id=UCYO_jab_esuFRV4b17AJtAw
       period: 24
@@ -153,6 +156,7 @@ The default value is `channel` (per-channel), and an alternate possible value is
 Note that per-feed deduplication is implicitly specific to its channel.
 * **`group`**: If a string, this delays queueing a feed that has just been read until all other feeds having the same
 group are also read. This allows multiple feeds to be posted in succession except if interrupted by conversation.
+To explicitly specify the absence of a group when using a YAML reference, the value can be specified as `null`.
 * **`https`**: If `true`, links that start with `http://` are changed to start with `https://` instead.
 Its default value is `false`.
 * **`new`**: This indicates up to how many entries of a new feed to post.
