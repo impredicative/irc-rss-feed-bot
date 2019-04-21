@@ -234,7 +234,7 @@ services:
 In the above service definition in `docker-compose.yml`, customize its relative paths to `config.yaml` (as defined in
 the volume source, e.g. `./irc-rss-feed-bot`) and also to `secrets.env`.
 
-This volume source directory must be writable by Docker using the UID defined in the Dockerfile; it is 999.
+This volume source directory must be writable by the container using the UID defined in the Dockerfile; it is 999.
 A simple way to ensure it is writable is to run a command such as `chmod a+w ./irc-rss-feed-bot` once on the host.
 
 From the directory containing `docker-compose.yml`, run `docker-compose up -d irc-rss-feed-bot`.
@@ -242,7 +242,8 @@ Use `docker logs -f irc-rss-feed-bot` to see and follow informational logs.
 
 ### Maintenance
 * A `posts.v2.db` database file is written by the bot in the same directory as `config.yaml`.
-This database file must be preserved with routine backups.
+This database file must be preserved with routine backups. When restoring a backup, ensure it is writable by running a
+command such as `chmod a+w ./irc-rss-feed-bot/posts.v2.db` on the host.
 * If any configuration file is updated, the container must be restarted to use the updated file.
 * The database file grows as new posts are made. For the most part this indefinite growth can be ignored.
 Currently the standard approach for handling this, if necessary, is to stop the bot and delete the
