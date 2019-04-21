@@ -243,7 +243,7 @@ Use `docker logs -f irc-rss-feed-bot` to see and follow informational logs.
 ### Maintenance
 * A `posts.v2.db` database file is written by the bot in the same directory as `config.yaml`.
 This database file must be preserved with routine backups. After restoring a backup, before starting the container,
-ensure the file is writable by running a command such as `chmod a+w ./irc-rss-feed-bot/posts.v2.db`.
+ensure the database file is writable by running a command such as `chmod a+w ./irc-rss-feed-bot/posts.v2.db`.
 * If any configuration file is updated, the container must be restarted to use the updated file.
 * The database file grows as new posts are made. For the most part this indefinite growth can be ignored.
 Currently the standard approach for handling this, if necessary, is to stop the bot and delete the
