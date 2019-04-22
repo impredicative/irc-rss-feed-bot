@@ -156,11 +156,11 @@ class Bot:
                     num_other = group_barrier.parties - 1
                     num_pending = num_other - group_barrier.n_waiting
                     if num_pending > 0:  # This is not thread-safe but that's okay for logging.
-                        log.info('Will wait for %s of %s other feeds in group %s to also be read before queuing %s.',
-                                 num_pending, num_other, feed_group, feed)
+                        log.debug('Will wait for %s of %s other feeds in group %s to also be read before queuing %s.',
+                                  num_pending, num_other, feed_group, feed)
                     group_barrier.wait()
                     log.debug('Finished waiting for other feeds in group %s to be read before queuing %s.',
-                             feed_group, feed)
+                              feed_group, feed)
 
                 # Queue feed
                 try:
