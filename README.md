@@ -156,7 +156,9 @@ The default value is `channel` (per-channel), and an alternate possible value is
 Note that per-feed deduplication is implicitly specific to its channel.
 * **`group`**: If a string, this delays the processing of a feed that has just been read until all other feeds having
 the same group are also read.
-This allows multiple feeds to be posted in succession except if interrupted by conversation.
+This encourages multiple feeds having the same group to be be posted in succession, except if interrupted by
+conversation.
+It is sometimes possible that unrelated feeds of any channel gets posted between ones having the same group.
 To explicitly specify the absence of a group when using a YAML reference, the value can be specified as `null`.
 It is recommended that feeds in the same group have the same `period`.
 * **`https`**: If `true`, links that start with `http://` are changed to start with `https://` instead.
