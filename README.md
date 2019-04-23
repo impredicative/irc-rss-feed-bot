@@ -158,7 +158,7 @@ Note that per-feed deduplication is implicitly specific to its channel.
 the same group are also read.
 This encourages multiple feeds having the same group to be be posted in succession, except if interrupted by
 conversation.
-It is in rare cases possible that unrelated feeds of any channel gets posted between ones having the same group.
+It is however possible that unrelated feeds of any channel gets posted between ones having the same group.
 To explicitly specify the absence of a group when using a YAML reference, the value can be specified as `null`.
 It is recommended that feeds in the same group have the same `period`.
 * **`https`**: If `true`, links that start with `http://` are changed to start with `https://` instead.
