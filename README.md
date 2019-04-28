@@ -239,6 +239,9 @@ the volume source, e.g. `./irc-rss-feed-bot`) and also to `secrets.env`.
 This volume source directory must be writable by the container using the UID defined in the Dockerfile; it is 999.
 A simple way to ensure it is writable is to run a command such as `chmod a+w ./irc-rss-feed-bot` once on the host.
 
+For better reproducibility, a specific [versioned tag](https://hub.docker.com/r/ascensive/irc-rss-feed-bot/tags),
+e.g. 0.2.5 can be used instead of `latest`.
+
 From the directory containing `docker-compose.yml`, run `docker-compose up -d irc-rss-feed-bot`.
 Use `docker logs -f irc-rss-feed-bot` to see and follow informational logs.
 
