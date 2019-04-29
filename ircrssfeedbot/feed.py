@@ -45,7 +45,7 @@ class ShortenedFeedEntry(FeedEntry):
         return self.short_url
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(unsafe_hash=True)
 class Feed:
     channel: str
     name: str
