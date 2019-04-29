@@ -233,16 +233,16 @@ services:
     env_file:
       - ./irc-rss-feed-bot/secrets.env
 ```
-In the above service definition in `docker-compose.yml`, customize its relative paths to `config.yaml` (as defined in
-the volume source, e.g. `./irc-rss-feed-bot`) and also to `secrets.env`.
 
-This volume source directory must be writable by the container using the UID defined in the Dockerfile; it is 999.
-A simple way to ensure it is writable is to run a command such as `chmod a+w ./irc-rss-feed-bot` once on the host.
+* In the above service definition in `docker-compose.yml`:
+  * `image`: For better reproducibility, a specific
+  [versioned tag](https://hub.docker.com/r/ascensive/irc-rss-feed-bot/tags), e.g. 0.2.5 can be used instead of `latest`.
+  * `volumes`: Customize the relative path to the previously created `config.yaml` file, e.g. `./irc-rss-feed-bot`.
+  This volume source directory must be writable by the container using the UID defined in the Dockerfile; it is 999.
+  A simple way to ensure it is writable is to run a command such as `chmod a+w ./irc-rss-feed-bot` once on the host.
+  * `env_file`: Customize the relative path to `secrets.env`.
 
-For better reproducibility, a specific [versioned tag](https://hub.docker.com/r/ascensive/irc-rss-feed-bot/tags),
-e.g. 0.2.5 can be used instead of `latest`.
-
-From the directory containing `docker-compose.yml`, run `docker-compose up -d irc-rss-feed-bot`.
+* From the directory containing `docker-compose.yml`, run `docker-compose up -d irc-rss-feed-bot`.
 Use `docker logs -f irc-rss-feed-bot` to see and follow informational logs.
 
 ### Maintenance
