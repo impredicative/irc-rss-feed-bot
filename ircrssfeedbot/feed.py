@@ -45,7 +45,7 @@ class ShortenedFeedEntry(FeedEntry):
         return self.short_url
 
 
-@dataclasses.dataclass(unsafe_hash=True)
+@dataclasses.dataclass
 class Feed:
     channel: str
     name: str
@@ -63,36 +63,13 @@ class Feed:
         return f'feed {self.name} of {self.channel}'
 
     def _entries(self) -> List[FeedEntry]:
-        # Note: A cache is useful if the same URL is to be read for multiple feeds, perhaps for multiple channels.
-        return self._entries_cached(self.url)
-
-    @cachetools.func.ttl_cache(maxsize=sys.maxsize, ttl=config.PERIOD_HOURS_MIN * 3600)
-    def _entries_cached(self, url: str) -> List[FeedEntry]:
         feed_config = self._feed_config
 
-        # Read URL
-        log.debug('Resiliently retrieving content for %s.', self)
-        for num_attempt in range(1, config.READ_ATTEMPTS_MAX + 1):
-            try:
-                response = requests.get(url, timeout=config.REQUEST_TIMEOUT,
-                                        headers={'User-Agent': config.USER_AGENT})
-                response.raise_for_status()
-            except requests.RequestException as exc:
-                log.warning('Error reading feed %s of %s having URL %s in attempt %s of %s: %s',
-                            self.name, self.channel, self.url, num_attempt, config.READ_ATTEMPTS_MAX, exc)
-                if num_attempt == config.READ_ATTEMPTS_MAX:
-                    raise exc from None
-                time.sleep(2 ** num_attempt)
-            else:
-                break
-        content = response.content
-        log.debug('Retrieved content of size %s for %s.', humanize_len(content), self)
-
-        # Parse entries
-        log.debug('Retrieving entries for %s.', self)
-        entries = [FeedEntry(title=e['title'], long_url=e['link']) for e in feedparser.parse(content)['entries']]
-        logger = log.debug if entries else log.warning
-        logger('Retrieved %s entries for %s.', len(entries), self)
+        # Retrieve entries for URL
+        log.info('Entries cache usage is %s', self._url_entries.cache_info())  # TODO: Set loglevel debug.
+        entries = self._url_entries(self.url)
+        # Note: A cache is useful if the same URL is to be read for multiple feeds, sometimes for multiple channels.
+        log.info('Entries cache usage is %s', self._url_entries.cache_info())  # TODO: Set loglevel debug.
 
         # Keep only whitelisted entries
         whitelist = feed_config.get('whitelist', {})
@@ -144,6 +121,35 @@ class Feed:
             log.debug('Formatted entries for %s.', self)
 
         log.debug('Returning %s entries for %s.', len(entries), self)
+        return entries
+
+    @staticmethod
+    @cachetools.func.ttl_cache(maxsize=sys.maxsize, ttl=config.PERIOD_HOURS_MIN * 3600 * 1000)  # TODO: Fix TTL.
+    def _url_entries(url: str) -> List[FeedEntry]:
+        # Read URL
+        log.info('Resiliently retrieving content for %s.', url)  # TODO: Set loglevel debug.
+        for num_attempt in range(1, config.READ_ATTEMPTS_MAX + 1):
+            try:
+                response = requests.get(url, timeout=config.REQUEST_TIMEOUT,
+                                        headers={'User-Agent': config.USER_AGENT})
+                response.raise_for_status()
+            except requests.RequestException as exc:
+                log.warning('Error reading %s in attempt %s of %s: %s', url, num_attempt, config.READ_ATTEMPTS_MAX, exc)
+                if num_attempt == config.READ_ATTEMPTS_MAX:
+                    raise exc from None
+                time.sleep(2 ** num_attempt)
+            else:
+                break
+        content = response.content
+        log.info('Resiliently retrieved content of size %s for %s.', humanize_len(content), url)  # TODO: Set loglevel debug.
+
+        # Parse entries
+        log.debug('Retrieving entries for %s.', url)
+        entries = [FeedEntry(title=e['title'], long_url=e['link']) for e in feedparser.parse(content)['entries']]
+        logger = log.debug if entries else log.warning
+        logger('Retrieved %s entries for %s.', len(entries), url)
+
+        log.debug('Returning %s entries for %s.', len(entries), url)
         return entries
 
     @cachedproperty

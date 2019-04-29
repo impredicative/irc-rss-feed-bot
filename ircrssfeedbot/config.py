@@ -32,8 +32,8 @@ USER_AGENT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:65.0) Gecko/20100101 Fi
 
 # If debugging:
 # MIN_CHANNEL_IDLE_TIME = 1 * 60
-# PERIOD_HOURS_MIN = .00025
-# PERIOD_RANDOM_PERCENT = 10
+# PERIOD_HOURS_MIN = 1 / 60
+# PERIOD_RANDOM_PERCENT = 20
 
 LOGGING = {  # Ref: https://docs.python.org/3/howto/logging.html#configuring-logging
     'version': 1,
