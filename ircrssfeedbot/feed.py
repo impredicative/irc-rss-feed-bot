@@ -66,10 +66,10 @@ class Feed:
         feed_config = self._feed_config
 
         # Retrieve entries for URL
-        log.info('Entries cache usage is %s', self._url_entries.cache_info())  # TODO: Set loglevel debug.
+        log.debug('Entries cache usage is %s', self._url_entries.cache_info())
         entries = self._url_entries(self.url)
         # Note: A cache is useful if the same URL is to be read for multiple feeds, sometimes for multiple channels.
-        log.info('Entries cache usage is %s', self._url_entries.cache_info())  # TODO: Set loglevel debug.
+        log.debug('Entries cache usage is %s', self._url_entries.cache_info())
 
         # Keep only whitelisted entries
         whitelist = feed_config.get('whitelist', {})
@@ -124,10 +124,10 @@ class Feed:
         return entries
 
     @staticmethod
-    @cachetools.func.ttl_cache(maxsize=sys.maxsize, ttl=config.PERIOD_HOURS_MIN * 3600 * 1000)  # TODO: Fix TTL.
+    @cachetools.func.ttl_cache(maxsize=sys.maxsize, ttl=config.PERIOD_HOURS_MIN * 3600)
     def _url_entries(url: str) -> List[FeedEntry]:
         # Read URL
-        log.info('Resiliently retrieving content for %s.', url)  # TODO: Set loglevel debug.
+        log.debug('Resiliently retrieving content for %s.', url)
         for num_attempt in range(1, config.READ_ATTEMPTS_MAX + 1):
             try:
                 response = requests.get(url, timeout=config.REQUEST_TIMEOUT,
@@ -141,7 +141,7 @@ class Feed:
             else:
                 break
         content = response.content
-        log.info('Resiliently retrieved content of size %s for %s.', humanize_len(content), url)  # TODO: Set loglevel debug.
+        log.debug('Resiliently retrieved content of size %s for %s.', humanize_len(content), url)
 
         # Parse entries
         log.debug('Retrieving entries for %s.', url)
