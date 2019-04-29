@@ -145,20 +145,9 @@ class Bot:
 
             try:
                 # Read feed
-                log.debug('Reading feed %s of %s.', feed_name, channel)
-                for num_attempt in range(1, config.READ_ATTEMPTS_MAX + 1):
-                    try:
-                        feed = Feed(channel=channel, name=feed_name, url=feed_url, db=db, url_shortener=url_shortener)
-                    except Exception as exc:
-                        if num_attempt == config.READ_ATTEMPTS_MAX:
-                            raise exc from None
-                        msg = f'Error reading feed {feed_name} of {channel} in attempt {num_attempt} of ' \
-                              f'{config.READ_ATTEMPTS_MAX}: {exc}'
-                        _alert(irc, msg, log.warning)
-                        time.sleep(2 ** num_attempt)
-                    else:
-                        break
-                log.info('Read %s with %s entries in attempt %s.', feed, len(feed.entries), num_attempt)
+                log.debug('Retrieving feed %s of %s.', feed_name, channel)
+                feed = Feed(channel=channel, name=feed_name, url=feed_url, db=db, url_shortener=url_shortener)
+                log.info('Retrieved %s with %s entries.', feed, len(feed.entries))
 
                 # Wait for other feeds in group
                 if feed_config.get('group'):
@@ -183,8 +172,7 @@ class Bot:
                 else:
                     log.debug('Queued %s with %s entries.', feed, len(feed.entries))
             except Exception as exc:
-                msg = f'Error reading feed {feed_name} of {channel} after {config.READ_ATTEMPTS_MAX} attempts: {exc}'
-                _alert(irc, msg)
+                _alert(irc, f'Error reading feed {feed_name} of {channel}: {exc}')
             else:
                 del feed
 
