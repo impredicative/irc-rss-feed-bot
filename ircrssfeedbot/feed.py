@@ -6,7 +6,7 @@ import time
 from typing import Callable, Dict, List, Optional, Union
 
 import bitlyshortener
-import cachetools
+import cachetools.func
 from descriptors import cachedproperty
 import feedparser
 import requests
@@ -66,7 +66,7 @@ class Feed:
         # Note: A cache is useful if the same URL is to be read for multiple feeds, perhaps for multiple channels.
         return self._entries_cached(self.url)
 
-    @cachetools.TTLCache(maxsize=sys.maxsize, ttl=config.PERIOD_HOURS_MIN * 3600)
+    @cachetools.func.ttl_cache(maxsize=sys.maxsize, ttl=config.PERIOD_HOURS_MIN * 3600)
     def _entries_cached(self, url: str) -> List[FeedEntry]:
         feed_config = self._feed_config
 
