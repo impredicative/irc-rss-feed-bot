@@ -147,7 +147,7 @@ class Bot:
                 # Read feed
                 log.debug('Retrieving feed %s of %s.', feed_name, channel)
                 feed = Feed(channel=channel, name=feed_name, url=feed_url, db=db, url_shortener=url_shortener)
-                log.info('Retrieved %s with %s entries.', feed, len(feed.entries))
+                log.info('Retrieved %s with %s validated entries.', feed, len(feed.entries))
 
                 # Wait for other feeds in group
                 if feed_config.get('group'):
@@ -170,7 +170,7 @@ class Bot:
                     _alert(irc, msg, log.warning)
                     channel_queue.put(feed)
                 else:
-                    log.debug('Queued %s with %s entries.', feed, len(feed.entries))
+                    log.debug('Queued %s with %s validated entries.', feed, len(feed.entries))
             except Exception as exc:
                 _alert(irc, f'Error reading feed {feed_name} of {channel}: {exc}')
             else:
