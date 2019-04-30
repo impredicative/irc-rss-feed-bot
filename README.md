@@ -54,6 +54,11 @@ nick: MyFeed[bot]
 alerts_channel: '##mybot-alerts'
 mode:
 feeds:
+  "##mybot-alerts":
+    irc-rss-feed-bot:
+      url: https://github.com/impredicative/irc-rss-feed-bot/releases.atom
+      period: 24
+      shorten: false
   "#some_chan1":
     j:AJCN:
       url: https://academic.oup.com/rss/site_6122/3981.xml
