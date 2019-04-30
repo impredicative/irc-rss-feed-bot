@@ -252,7 +252,8 @@ Use `docker logs -f irc-rss-feed-bot` to see and follow informational logs.
 
 ### Maintenance
 * If `config.yaml` is updated, the container must be restarted to use the updated file.
-* If `secrets.env` is updated, the container must be recreated (and not just restarted) to use the updated file.
+* If `secrets.env` or the service definition in `docker-compose.yml` are updated, the container must be recreated
+(and not merely restarted) to use the updated file.
 * A `posts.v2.db` database file is written by the bot in the same directory as `config.yaml`.
 This database file must be preserved with routine backups. After restoring a backup, before starting the container,
 ensure the database file is writable by running a command such as `chmod a+w ./irc-rss-feed-bot/posts.v2.db`.
