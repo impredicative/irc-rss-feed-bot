@@ -239,8 +239,11 @@ def _handle_privmsg(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List
         msg = args[-1]
         assert msg.startswith(':')
         msg = msg[1:]
-        _alert(irc, f'Ignoring private message from {user} having ident {ident} and hostname {hostname}: {msg}',
-               log.warning)
+        if msg != '\x01VERSION\x01':
+            # Ignoring private message from freenode-connect having ident frigg
+            # and hostname freenode/utility-bot/frigg: VERSION
+            _alert(irc, f'Ignoring private message from {user} having ident {ident} and hostname {hostname}: {msg}',
+                   log.warning)
         return
 
     # Update channel last message time
