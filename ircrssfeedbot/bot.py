@@ -170,7 +170,7 @@ class Bot:
                     _alert(irc, msg, log.warning)
                     channel_queue.put(feed)
                 else:
-                    log.debug('Queued %s with %s validated entries.', feed, len(feed.entries))
+                    log.debug('Queued %s with %s approved entries.', feed, len(feed.entries))
             except Exception as exc:
                 _alert(irc, f'Error reading feed {feed_name} of {channel}: {exc}')
             else:
