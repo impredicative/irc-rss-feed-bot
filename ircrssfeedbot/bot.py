@@ -188,7 +188,7 @@ class Bot:
             log.debug('Setting up threads and queue for %s.', channel)
             num_channel_feeds = len(channel_config)
             self.CHANNEL_JOIN_EVENTS[channel] = threading.Event()
-            self.CHANNEL_QUEUES[channel] = queue.Queue(maxsize=num_channel_feeds)
+            self.CHANNEL_QUEUES[channel] = queue.Queue(maxsize=num_channel_feeds * 2)
             threading.Thread(target=self._msg_channel, name=f'ChannelMessenger-{channel}',
                              args=(channel,)).start()
             for feed, feed_config in channel_config.items():
