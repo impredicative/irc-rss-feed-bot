@@ -93,5 +93,6 @@ class Database:
         with self._write_lock, self._db.atomic():
             for batch in chunked(data, 100):  # Ref: https://www.sqlite.org/limits.html#max_variable_number
                 Post.insert_many(batch).execute()
-                # Note: Try prepending ".on_conflict_ignore()" before ".execute()" if needed.
+                # Note: "sqlite3.IntegrityError: UNIQUE constraint failed" would be indicative of a bug elsewhere.
+                # As such, prepending ".on_conflict_ignore()" before ".execute()" should not be needed.
         log.info('Inserted %s URLs into the database for channel %s having feed %s.', len(urls), channel, feed)
