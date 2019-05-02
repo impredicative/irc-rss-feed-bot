@@ -18,10 +18,10 @@ from .util.humanize import humanize_len
 log = logging.getLogger(__name__)
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(unsafe_hash=True)
 class FeedEntry:
-    title: str
-    long_url: str
+    title: str = dataclasses.field(compare=False)
+    long_url: str = dataclasses.field(compare=True)
 
     @property
     def post_url(self) -> str:
@@ -38,7 +38,7 @@ class FeedEntry:
 
 @dataclasses.dataclass
 class ShortenedFeedEntry(FeedEntry):
-    short_url: str
+    short_url: str = dataclasses.field(compare=False)
 
     @property
     def post_url(self) -> str:
@@ -61,6 +61,17 @@ class Feed:
 
     def __str__(self):
         return f'feed {self.name} of {self.channel}'
+
+    @staticmethod
+    def _dedupe_entries(entries: List[FeedEntry], *, after_what: str, for_what: str) -> List[FeedEntry]:
+        # Remove duplicate entries while preserving order, e.g. for https://projecteuclid.org/feeds/euclid.ba_rss.xml
+        entries_deduped = list(dict.fromkeys(entries))
+        num_removed = len(entries) - len(entries_deduped)
+        if num_removed > 0:
+            log.info('After %s, removed %s duplicate entries out of %s, leaving %s, for %s.',
+                     after_what, num_removed, len(entries), len(entries_deduped), for_what)
+            return entries_deduped
+        return entries
 
     def _entries(self) -> List[FeedEntry]:
         feed_config = self._feed_config
@@ -120,12 +131,17 @@ class Feed:
                                            long_url=format_str.get('url', '{url}').format_map(params))
             log.debug('Formatted entries for %s.', self)
 
+        # Dedupe entries again
+        entries = self._dedupe_entries(entries, after_what='processing feed', for_what=str(self))
+
         log.debug('Returning %s entries for %s.', len(entries), self)
         return entries
 
-    @staticmethod
+    @classmethod
     @cachetools.func.ttl_cache(maxsize=sys.maxsize, ttl=config.PERIOD_HOURS_MIN * 3600)
-    def _url_entries(url: str) -> List[FeedEntry]:
+    def _url_entries(cls, url: str) -> List[FeedEntry]:
+        # This method is feed agnostic. As such, no action requiring feed_config can be done in this method.
+
         # Read URL
         log.debug('Resiliently retrieving content for %s.', url)
         for num_attempt in range(1, config.READ_ATTEMPTS_MAX + 1):
@@ -148,6 +164,9 @@ class Feed:
         entries = [FeedEntry(title=e['title'], long_url=e['link']) for e in feedparser.parse(content)['entries']]
         logger = log.debug if entries else log.warning
         logger('Retrieved %s entries for %s.', len(entries), url)
+
+        # Dedupe entries
+        entries = cls._dedupe_entries(entries, after_what='reading feed', for_what=f'feed URL {url}')
 
         log.debug('Returning %s entries for %s.', len(entries), url)
         return entries
