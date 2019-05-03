@@ -138,7 +138,7 @@ class Feed:
         return entries
 
     @classmethod
-    @cachetools.func.ttl_cache(maxsize=sys.maxsize, ttl=config.PERIOD_HOURS_MIN * 3600)
+    @cachetools.func.ttl_cache(maxsize=sys.maxsize, ttl=config.URL_CACHE_TTL)
     def _url_entries(cls, url: str) -> List[FeedEntry]:
         # This method is feed agnostic. As such, no action requiring feed_config can be done in this method.
 

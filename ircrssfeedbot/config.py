@@ -22,7 +22,7 @@ MIN_CHANNEL_IDLE_TIME = 15 * 60
 NEW_FEED_POSTS_DEFAULT = 'some'
 NEW_FEED_POSTS_MAX = {'none': 0, 'some': 3, 'all': None}
 PERIOD_HOURS_DEFAULT = 1
-PERIOD_HOURS_MIN = .45  # Should be <= 0.5 * (1 - PERIOD_RANDOM_PERCENT/100) = .475
+PERIOD_HOURS_MIN = .5
 PERIOD_RANDOM_PERCENT = 5
 READ_ATTEMPTS_MAX = 3
 REQUEST_TIMEOUT = 90
@@ -34,6 +34,8 @@ USER_AGENT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:65.0) Gecko/20100101 Fi
 # MIN_CHANNEL_IDLE_TIME = 1 * 60
 # PERIOD_HOURS_MIN = 1 / 60
 # PERIOD_RANDOM_PERCENT = 20
+
+URL_CACHE_TTL = PERIOD_HOURS_MIN * 3600 * ((100 - PERIOD_RANDOM_PERCENT) / 100) * .99
 
 LOGGING = {  # Ref: https://docs.python.org/3/howto/logging.html#configuring-logging
     'version': 1,
