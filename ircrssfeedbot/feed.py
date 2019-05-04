@@ -3,7 +3,7 @@ import logging
 import re
 import sys
 import time
-from typing import Callable, Dict, List, Optional, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import bitlyshortener
 import cachetools.func
@@ -27,13 +27,14 @@ class FeedEntry:
     def post_url(self) -> str:
         return self.long_url
 
-    def is_listed(self, searchlist: Dict[str, List]) -> bool:
+    def is_listed(self, searchlist: Dict[str, List]) -> Optional[Tuple[str, re.Match]]:  # type: ignore
         for searchlist_key, val in {'title': self.title, 'url': self.long_url}.items():
             for searchlisted_pattern in searchlist.get(searchlist_key, []):
-                if re.search(searchlisted_pattern, val):
+                match = re.search(searchlisted_pattern, val)
+                if match:
                     log.debug('Feed entry %s matches %s pattern %s.', self, searchlist_key, searchlisted_pattern)
-                    return True
-        return False
+                    return searchlist_key, match
+        return None  # This is redundant but it prevents the mypy message " Missing return statement".
 
 
 @dataclasses.dataclass
@@ -86,7 +87,19 @@ class Feed:
         whitelist = feed_config.get('whitelist', {})
         if whitelist:
             log.debug('Filtering %s entries using whitelist for %s.', len(entries), self)
+            explain = whitelist.get('explain')
             entries = [entry for entry in entries if entry.is_listed(whitelist)]
+            whitelisted_entries: List[FeedEntry] = []
+            for entry in entries:
+                is_listed = entry.is_listed(whitelist)
+                if is_listed:
+                    key, match = is_listed
+                    if explain and (key == 'title'):
+                        span0, span1 = match.span()
+                        title = entry.title
+                        entry.title = title[:span0] + '*' + title[span0:span1] + '*' + title[span1:]
+                    whitelisted_entries.append(entry)
+            entries = whitelisted_entries
             log.debug('Filtered to %s entries using whitelist for %s.', len(entries), self)
 
         # Remove blacklisted entries
