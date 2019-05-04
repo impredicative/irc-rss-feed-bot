@@ -175,6 +175,9 @@ class Bot:
             except Exception as exc:
                 _alert(irc, f'Error reading feed {feed_name} of {channel}: {exc}')
             else:
+                if instance.get('once'):
+                    log.warning('Discontinuing reader for %s.', feed)
+                    return
                 del feed
 
     def _setup_channels(self) -> None:
