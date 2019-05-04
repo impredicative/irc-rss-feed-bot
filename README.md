@@ -138,6 +138,7 @@ Since a channel name starts with #, the name if provided **must be quoted**.
 It is recommended that the alerts channel be registered and monitored.
 * **`mode`**: This can for example be `+igR` for [Freenode](https://freenode.net/kb/answer/usermodes).
 Setting it is recommended.
+* **`once`**: If `true`, each feed is queued only once. The default is `false`. This can be useful for testing purposes.
 
 #### Feed-specific settings
 A feed is defined under a channel as in the sample configuration. The feed's key represents its name.
@@ -185,6 +186,10 @@ each read.
 The default value is `true`.
 The alternative value `false` is recommended if the URL is naturally small, or if `sub` or `format` can be used to make
 it small.
+* **`whitelist/explain`**: This applies to `whitelist/title` but not `whitelist/url`.
+It can be useful for understanding which portion of a post's title matched the whitelist.
+If `true`, the matching text of each title is enclosed by asterisks. For example, "This is a \*matching sample\* title".
+The default value is `false`.
 * **`whitelist/title`**: This is a list of regular expression patterns that result in a title being skipped unless a
 [search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in the title.
 * **`whitelist/url`**: Similar to `whitelist/title`.
