@@ -4,7 +4,7 @@
 #
 #    pip-compile -U
 #
-bitlyshortener==0.2.2
+bitlyshortener==0.3.1
 cachetools==3.1.0
 certifi==2019.3.9         # via miniirc, requests
 chardet==3.0.4            # via requests
@@ -16,4 +16,4 @@ miniirc==1.3.2
 peewee==3.9.3
 requests==2.21.0          # via bitlyshortener
 ruamel.yaml==0.15.91
-urllib3==1.24.2           # via requests
+urllib3==1.24.3           # via requests
