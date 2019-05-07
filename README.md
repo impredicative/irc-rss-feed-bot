@@ -143,7 +143,7 @@ Setting it is recommended.
 #### Feed-specific settings
 A feed is defined under a channel as in the sample configuration. The feed's key represents its name.
 
-The order of execution of the interacting operations is: `whitelist`, `blacklist`, `https`, `sub`, `format`, `shorten`.
+The order of execution of the interacting operations is: `blacklist`, `whitelist`, `https`, `sub`, `format`, `shorten`.
 Refer to the sample configuration for usage examples.
 
 YAML [anchors and references](https://en.wikipedia.org/wiki/YAML#Advanced_components) can be used to reuse nodes.

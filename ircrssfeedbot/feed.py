@@ -83,6 +83,13 @@ class Feed:
         # Note: A cache is useful if the same URL is to be read for multiple feeds, sometimes for multiple channels.
         log.debug('Entries cache usage is %s', self._url_entries.cache_info())
 
+        # Remove blacklisted entries
+        blacklist = feed_config.get('blacklist', {})
+        if blacklist:
+            log.debug('Filtering %s entries using blacklist for %s.', len(entries), self)
+            entries = [entry for entry in entries if not entry.is_listed(blacklist)]
+            log.debug('Filtered to %s entries using blacklist for %s.', len(entries), self)
+
         # Keep only whitelisted entries
         whitelist = feed_config.get('whitelist', {})
         if whitelist:
@@ -101,13 +108,6 @@ class Feed:
                     whitelisted_entries.append(entry)
             entries = whitelisted_entries
             log.debug('Filtered to %s entries using whitelist for %s.', len(entries), self)
-
-        # Remove blacklisted entries
-        blacklist = feed_config.get('blacklist', {})
-        if blacklist:
-            log.debug('Filtering %s entries using blacklist for %s.', len(entries), self)
-            entries = [entry for entry in entries if not entry.is_listed(blacklist)]
-            log.debug('Filtered to %s entries using blacklist for %s.', len(entries), self)
 
         # Enforce HTTPS URLs
         if feed_config.get('https', False):
