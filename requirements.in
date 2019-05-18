@@ -4,5 +4,6 @@ dickens==1.0.1
 feedparser==5.2.1
 humanize==0.5.1
 miniirc==1.3.2
-peewee==3.9.3
-ruamel.yaml==0.15.91
+peewee==3.9.5
+requests==2.22.0
+ruamel.yaml==0.15.96
