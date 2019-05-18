@@ -30,6 +30,7 @@ class Post(peewee.Model):
 
 class Database:
     def __init__(self) -> None:
+        # Initialize db
         log.debug('Initializing database.')
         db_path = config.INSTANCE['dir'] / config.DB_FILENAME
         _DATABASE.init(db_path)  # If facing threading issues, consider https://stackoverflow.com/a/39024742/
@@ -38,10 +39,16 @@ class Database:
         self._write_lock = threading.Lock()  # Unclear if necessary, but used anyway for safety.
         log.info('Initialized database having path %s.', db_path)
 
-        log.info('Vacuuming database having pre-vacuum size %s.', humanize_bytes(db_path.stat().st_size))
+        # Vacuum db
+        pre_vacuum_size = db_path.stat().st_size
+        log.info('Vacuuming database having pre-vacuum size %s.', humanize_bytes(pre_vacuum_size))
         self._db.execute_sql('VACUUM;')
-        log.info('Vacuumed database having post-vacuum size %s.', humanize_bytes(db_path.stat().st_size))
+        post_vacuum_size = db_path.stat().st_size
+        vacuum_size_diff = pre_vacuum_size - post_vacuum_size
+        log.info('Vacuumed database having post-vacuum size %s, saving %s.',
+                 humanize_bytes(post_vacuum_size), humanize_bytes(vacuum_size_diff))
 
+        # Analyze db
         log.info('Analyzing database.')
         self._db.execute_sql('ANALYZE;')
         log.info('Analyzed database.')
