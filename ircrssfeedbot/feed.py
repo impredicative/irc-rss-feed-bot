@@ -63,25 +63,33 @@ class Feed:
     def __str__(self):
         return f'feed {self.name} of {self.channel}'
 
-    @staticmethod
-    def _dedupe_entries(entries: List[FeedEntry], *, after_what: str, for_what: str) -> List[FeedEntry]:
+    def _dedupe_entries(self, entries: List[FeedEntry], *, after_what: str) -> List[FeedEntry]:
         # Remove duplicate entries while preserving order, e.g. for https://projecteuclid.org/feeds/euclid.ba_rss.xml
         entries_deduped = list(dict.fromkeys(entries))
         num_removed = len(entries) - len(entries_deduped)
         if num_removed > 0:
-            log.info('After %s, removed %s duplicate entries out of %s, leaving %s, for %s.',
-                     after_what, num_removed, len(entries), len(entries_deduped), for_what)
+            log.info('After %s, removed %s duplicate entry URLs out of %s, leaving %s, for %s.',
+                     after_what, num_removed, len(entries), len(entries_deduped), self)
             return entries_deduped
         return entries
 
     def _entries(self) -> List[FeedEntry]:
         feed_config = self._feed_config
 
-        # Retrieve entries for URL
-        log.debug('Entries cache usage is %s', self._url_entries.cache_info())
-        entries = self._url_entries(self.url)
+        # Retrieve URL content
+        log.debug('URL content cache usage is %s', self._url_content.cache_info())
+        content = self._url_content(self.url)
         # Note: A cache is useful if the same URL is to be read for multiple feeds, sometimes for multiple channels.
-        log.debug('Entries cache usage is %s', self._url_entries.cache_info())
+        log.debug('URL content cache usage is %s', self._url_content.cache_info())
+
+        # Parse entries
+        log.debug('Retrieving entries for %s.', self.url)
+        entries = [FeedEntry(title=e['title'], long_url=e['link']) for e in feedparser.parse(content)['entries']]
+        logger = log.debug if entries else log.warning
+        logger('Retrieved %s entries for %s.', len(entries), self.url)
+
+        # Deduplicate entries
+        entries = self._dedupe_entries(entries, after_what='reading feed')
 
         # Remove blacklisted entries
         blacklist = feed_config.get('blacklist', {})
@@ -144,16 +152,16 @@ class Feed:
                                            long_url=format_str.get('url', '{url}').format_map(params))
             log.debug('Formatted entries for %s.', self)
 
-        # Dedupe entries again
-        entries = self._dedupe_entries(entries, after_what='processing feed', for_what=str(self))
+        # Deduplicate entries again
+        entries = self._dedupe_entries(entries, after_what='processing feed')
 
         log.debug('Returning %s entries for %s.', len(entries), self)
         return entries
 
     @classmethod
     @cachetools.func.ttl_cache(maxsize=sys.maxsize, ttl=config.URL_CACHE_TTL)
-    def _url_entries(cls, url: str) -> List[FeedEntry]:
-        # This method is feed agnostic. As such, no action requiring feed_config can be done in this method.
+    def _url_content(cls, url: str) -> bytes:
+        # This method is feed agnostic. The return value of this method must be immutable.
 
         # Read URL
         log.debug('Resiliently retrieving content for %s.', url)
@@ -172,17 +180,8 @@ class Feed:
         content = response.content
         log.debug('Resiliently retrieved content of size %s for %s.', humanize_len(content), url)
 
-        # Parse entries
-        log.debug('Retrieving entries for %s.', url)
-        entries = [FeedEntry(title=e['title'], long_url=e['link']) for e in feedparser.parse(content)['entries']]
-        logger = log.debug if entries else log.warning
-        logger('Retrieved %s entries for %s.', len(entries), url)
-
-        # Dedupe entries
-        entries = cls._dedupe_entries(entries, after_what='reading feed', for_what=f'feed URL {url}')
-
-        log.debug('Returning %s entries for %s.', len(entries), url)
-        return entries
+        # Note: Entry parsing is not done in this method in order to permit mutability of individual entries.
+        return content
 
     @cachedproperty
     def postable_entries(self) -> List[Union[FeedEntry, ShortenedFeedEntry]]:
