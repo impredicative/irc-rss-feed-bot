@@ -38,7 +38,7 @@ def main() -> None:
 def investigate_etags() -> None:
     instance = config.INSTANCE
     urls = sorted({feed_config['url'] for channel_config in instance['feeds'].values() for feed_config in channel_config.values()})
-    for url in urls[55:]:
+    for url in urls[:10]:
         time.sleep(.5)
         log.debug('Reading %s', url)
         response1 = requests.get(url, timeout=config.REQUEST_TIMEOUT, headers={'User-Agent': config.USER_AGENT, 'If-None-Match': 'jhok23*%^&%^&D*$*7632984'})
