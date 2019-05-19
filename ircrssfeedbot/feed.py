@@ -202,7 +202,7 @@ class Feed:
             etag = response.headers.get('ETag')
             if etag and content:
                 cls.etag_cache[url] = URLContent(etag, content)
-                log.info('Cached content for %s having ETag %s.', url, etag)  # TODO: Change to debug.
+                log.info('Cached content for %s having etag %s.', url, etag)  # TODO: Change to debug.
             else:
                 try:
                     del cls.etag_cache[url]
