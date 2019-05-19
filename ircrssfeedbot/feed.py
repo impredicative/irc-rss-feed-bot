@@ -3,7 +3,7 @@ import logging
 import re
 import sys
 import time
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, ClassVar, Dict, List, Optional, Tuple, Union
 
 import bitlyshortener
 import cachetools.func
@@ -16,6 +16,12 @@ from .db import Database
 from .util.humanize import humanize_len
 
 log = logging.getLogger(__name__)
+
+
+@dataclasses.dataclass
+class URLContent:
+    etag: str
+    content: bytes
 
 
 @dataclasses.dataclass(unsafe_hash=True)
@@ -53,11 +59,12 @@ class Feed:
     url: str = dataclasses.field(repr=False)
     db: Database = dataclasses.field(repr=False)
     url_shortener: bitlyshortener.Shortener = dataclasses.field(repr=False)
+    etag_cache: ClassVar[Dict[str, URLContent]] = {}
 
     def __post_init__(self):
         log.debug('Initializing instance of %s.', self)
         self._feed_config = config.INSTANCE['feeds'][self.channel][self.name]
-        self.entries = self._entries()  # Entries are effectively cached at this point in time.
+        self.entries = self._entries()  # Entries are effectively cached here at this point in time.
         log.debug('Initialized instance of %s.', self)
 
     def __str__(self):
@@ -161,14 +168,22 @@ class Feed:
     @classmethod
     @cachetools.func.ttl_cache(maxsize=sys.maxsize, ttl=config.URL_CACHE_TTL)
     def _url_content(cls, url: str) -> bytes:
-        # This method is feed agnostic. The return value of this method must be immutable.
+        # Note: This method is feed agnostic. To prevent bugs, the return value of this method must be immutable.
+
+        # Define headers
+        headers = {'User-Agent': config.USER_AGENT}
+        try:
+            etag_cache = cls.etag_cache[url]
+        except KeyError:
+            pass
+        else:
+            headers['If-None-Match'] = etag_cache.etag
 
         # Read URL
         log.debug('Resiliently retrieving content for %s.', url)
         for num_attempt in range(1, config.READ_ATTEMPTS_MAX + 1):
             try:
-                response = requests.get(url, timeout=config.REQUEST_TIMEOUT,
-                                        headers={'User-Agent': config.USER_AGENT})
+                response = requests.get(url, timeout=config.REQUEST_TIMEOUT, headers=headers)
                 response.raise_for_status()
             except requests.RequestException as exc:
                 log.warning('Error reading %s in attempt %s of %s: %s', url, num_attempt, config.READ_ATTEMPTS_MAX, exc)
@@ -177,7 +192,23 @@ class Feed:
                 time.sleep(2 ** num_attempt)
             else:
                 break
-        content = response.content
+
+        # Get and cache content
+        if response.status_code == 304:
+            content = etag_cache.content
+            log.info('Reused cached content for %s.', url)  # TODO: Change to debug.
+        else:  # 200
+            content = response.content
+            etag = response.headers.get('ETag')
+            if etag and content:
+                cls.etag_cache[url] = URLContent(etag, content)
+                log.info('Cached content for %s having ETag %s.', url, etag)  # TODO: Change to debug.
+            else:
+                try:
+                    del cls.etag_cache[url]
+                    log.warning('Deleted cached content for %s.', url)
+                except KeyError:
+                    pass
         log.debug('Resiliently retrieved content of size %s for %s.', humanize_len(content), url)
 
         # Note: Entry parsing is not done in this method in order to permit mutability of individual entries.
