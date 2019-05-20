@@ -196,7 +196,7 @@ class Feed:
         # Get and cache content
         if response.status_code == 304:
             content = etag_cache.content
-            log.info('Reused cached content for %s.', url)
+            log.debug('Reused cached content for %s.', url)
         else:  # 200
             content = response.content
             etag = response.headers.get('ETag')
@@ -204,7 +204,7 @@ class Feed:
                 updating = url in cls.etag_cache
                 cls.etag_cache[url] = URLContent(etag, content)
                 if updating:
-                    log.info('Updated cached content for %s having etag %s.', url, etag)
+                    log.debug('Updated cached content for %s having etag %s.', url, etag)
                 else:
                     log.debug('Cached content for %s having etag %s.', url, etag)
             else:
