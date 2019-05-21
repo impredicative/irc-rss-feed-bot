@@ -59,7 +59,6 @@ class Feed:
     url: str = dataclasses.field(repr=False)
     db: Database = dataclasses.field(repr=False)
     url_shortener: bitlyshortener.Shortener = dataclasses.field(repr=False)
-    etag_cache: ClassVar[Dict[str, URLContent]] = {}
 
     def __post_init__(self):
         log.debug('Initializing instance of %s.', self)
@@ -84,10 +83,10 @@ class Feed:
         feed_config = self._feed_config
 
         # Retrieve URL content
-        log.debug('URL content cache usage is %s', self._url_content.cache_info())
-        content = self._url_content(self.url)
+        log.debug('URL content cache usage is %s', URLReader.url_content.cache_info())
+        content = URLReader.url_content(self.url)
         # Note: A cache is useful if the same URL is to be read for multiple feeds, sometimes for multiple channels.
-        log.debug('URL content cache usage is %s', self._url_content.cache_info())
+        log.debug('URL content cache usage is %s', URLReader.url_content.cache_info())
 
         # Parse entries
         log.debug('Retrieving entries for %s.', self.url)
@@ -165,9 +164,54 @@ class Feed:
         log.debug('Returning %s entries for %s.', len(entries), self)
         return entries
 
+    @cachedproperty
+    def postable_entries(self) -> List[Union[FeedEntry, ShortenedFeedEntry]]:
+        log.debug('Retrieving postable entries for %s.', self)
+        entries = self.unposted_entries
+
+        # Filter entries if new feed
+        if self.db.is_new_feed(self.channel, self.name):
+            log.debug('Filtering new feed %s having %s postable entries.', self, len(entries))
+            max_posts = self._feed_config.get('new', config.NEW_FEED_POSTS_DEFAULT)
+            max_posts = config.NEW_FEED_POSTS_MAX[max_posts]
+            entries = entries[:max_posts]
+            log.debug('Filtered new feed %s to %s postable entries given a max limit of %s entries.',
+                      self, len(entries), max_posts)
+
+        # Shorten URLs
+        if entries and self._feed_config.get('shorten', True):
+            log.debug('Shortening %s postable long URLs for %s.', len(entries), self)
+            long_urls = [entry.long_url for entry in entries]
+            short_urls = self.url_shortener.shorten_urls(long_urls)
+            entries = [ShortenedFeedEntry(e.title, e.long_url, short_urls[i]) for i, e in enumerate(entries)]
+            log.debug('Shortened %s postable long URLs for %s.', len(entries), self)
+
+        log.debug('Returning %s postable entries for %s.', len(entries), self)
+        return entries
+
+    @cachedproperty
+    def unposted_entries(self) -> List[FeedEntry]:
+        log.debug('Retrieving unposted entries for %s.', self)
+        entries = self.entries
+        long_urls = [entry.long_url for entry in entries]
+        dedup_strategy = self._feed_config.get('dedup', config.DEDUP_STRATEGY_DEFAULT)
+        if dedup_strategy == 'channel':
+            long_urls = self.db.select_unposted_for_channel(self.channel, self.name, long_urls)
+        else:
+            assert dedup_strategy == 'feed'
+            long_urls = self.db.select_unposted_for_channel_feed(self.channel, self.name, long_urls)
+        long_urls = set(long_urls)
+        entries = [entry for entry in entries if entry.long_url in long_urls]
+        log.debug('Returning %s unposted entries for %s.', len(entries), self)
+        return entries
+
+
+class URLReader:
+    etag_cache: ClassVar[Dict[str, URLContent]] = {}
+
     @classmethod
     @cachetools.func.ttl_cache(maxsize=sys.maxsize, ttl=config.URL_CACHE_TTL)
-    def _url_content(cls, url: str) -> bytes:
+    def url_content(cls, url: str) -> bytes:
         # Note: This method is feed agnostic. To prevent bugs, the return value of this method must be immutable.
 
         # Define headers
@@ -217,44 +261,3 @@ class Feed:
 
         # Note: Entry parsing is not done in this method in order to permit mutability of individual entries.
         return content
-
-    @cachedproperty
-    def postable_entries(self) -> List[Union[FeedEntry, ShortenedFeedEntry]]:
-        log.debug('Retrieving postable entries for %s.', self)
-        entries = self.unposted_entries
-
-        # Filter entries if new feed
-        if self.db.is_new_feed(self.channel, self.name):
-            log.debug('Filtering new feed %s having %s postable entries.', self, len(entries))
-            max_posts = self._feed_config.get('new', config.NEW_FEED_POSTS_DEFAULT)
-            max_posts = config.NEW_FEED_POSTS_MAX[max_posts]
-            entries = entries[:max_posts]
-            log.debug('Filtered new feed %s to %s postable entries given a max limit of %s entries.',
-                      self, len(entries), max_posts)
-
-        # Shorten URLs
-        if entries and self._feed_config.get('shorten', True):
-            log.debug('Shortening %s postable long URLs for %s.', len(entries), self)
-            long_urls = [entry.long_url for entry in entries]
-            short_urls = self.url_shortener.shorten_urls(long_urls)
-            entries = [ShortenedFeedEntry(e.title, e.long_url, short_urls[i]) for i, e in enumerate(entries)]
-            log.debug('Shortened %s postable long URLs for %s.', len(entries), self)
-
-        log.debug('Returning %s postable entries for %s.', len(entries), self)
-        return entries
-
-    @cachedproperty
-    def unposted_entries(self) -> List[FeedEntry]:
-        log.debug('Retrieving unposted entries for %s.', self)
-        entries = self.entries
-        long_urls = [entry.long_url for entry in entries]
-        dedup_strategy = self._feed_config.get('dedup', config.DEDUP_STRATEGY_DEFAULT)
-        if dedup_strategy == 'channel':
-            long_urls = self.db.select_unposted_for_channel(self.channel, self.name, long_urls)
-        else:
-            assert dedup_strategy == 'feed'
-            long_urls = self.db.select_unposted_for_channel_feed(self.channel, self.name, long_urls)
-        long_urls = set(long_urls)
-        entries = [entry for entry in entries if entry.long_url in long_urls]
-        log.debug('Returning %s unposted entries for %s.', len(entries), self)
-        return entries
