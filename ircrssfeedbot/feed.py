@@ -202,7 +202,7 @@ class Feed:
         return entries
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class URLContent:
     etag: str
     content: bytes
@@ -221,9 +221,10 @@ class URLReader:
     def _del_etag_cache(cls, url: str) -> None:
         try:
             del cls._etag_cache[url]
-            log.warning('Deleted cached content for %s from etag cache.', url)
         except KeyError:
             pass
+        else:
+            log.warning('Deleted cached content for %s from etag cache.', url)
 
     @staticmethod
     def _netloc(url: str) -> str:
@@ -280,13 +281,13 @@ class URLReader:
                 if test_etag and (etag_cache.etag == etag) and (etag_cache.links != url_content.links):
                     # Disable and delete cache
                     cls._etag_cache_prohibited_netlocs.add(netloc)
-                    for cached_url in cls._etag_cache:
+                    for cached_url in list(cls._etag_cache):  # Thread-safety is not important in this block.
                         if cls._netloc(cached_url) in cls._etag_cache_prohibited_netlocs:
                             cls._del_etag_cache(url)
                     log.warning('A semantic content mismatch is detected for %s with etag %s. '
                                 'The cached content has %s unique links and the dissimilar current content has %s.'
                                 'The etag cache has been disabled for the corresponding netloc %s.'
-                                'The etag cache has been deleted for all cached URLs having the same netloc.',
+                                'The etag cache has been deleted for all previously cached URLs having the netloc.',
                                 url, etag, len(etag_cache.links), len(url_content.links), netloc)
                 else:
                     # Update cache
