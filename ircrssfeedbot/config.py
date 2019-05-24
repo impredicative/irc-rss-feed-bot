@@ -33,7 +33,7 @@ USER_AGENT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:66.0) Gecko/20100101 Fi
 
 _DEV = False
 if _DEV:
-    MIN_CHANNEL_IDLE_TIME = 1 * 60
+    MIN_CHANNEL_IDLE_TIME = 1
     PERIOD_HOURS_MIN = 1 / 60
     PERIOD_RANDOM_PERCENT = 20
 

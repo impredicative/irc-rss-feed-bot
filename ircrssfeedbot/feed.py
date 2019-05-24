@@ -1,21 +1,15 @@
 import dataclasses
 import logging
-import random
 import re
-import sys
-import time
-import urllib.parse
-from typing import Callable, ClassVar, Dict, List, Optional, Set, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import bitlyshortener
-import cachetools.func
 from descriptors import cachedproperty
 import feedparser
-import requests
 
 from . import config
 from .db import Database
-from .util.humanize import humanize_len
+from .url import URLReader
 
 log = logging.getLogger(__name__)
 
@@ -200,109 +194,3 @@ class Feed:
         entries = [entry for entry in entries if entry.long_url in long_urls]
         log.debug('Returning %s unposted entries for %s.', len(entries), self)
         return entries
-
-
-@dataclasses.dataclass
-class URLContent:
-    etag: str
-    content: bytes
-
-    @cachedproperty
-    def links(self) -> Set[str]:
-        # Note: This is useful for approximately comparing semantic equivalence of two instances.
-        return {e['link'] for e in feedparser.parse(self.content)['entries']}
-
-
-class URLReader:
-    _etag_cache: ClassVar[Dict[str, URLContent]] = {}
-    _etag_cache_prohibited_netlocs: ClassVar[Set[str]] = set()
-
-    @classmethod
-    def _del_etag_cache(cls, url: str) -> None:
-        try:
-            del cls._etag_cache[url]
-        except KeyError:
-            pass
-        else:
-            log.info('Deleted cached content for %s from etag cache.', url)
-
-    @staticmethod
-    def _netloc(url: str) -> str:
-        netloc = urllib.parse.urlparse(url).netloc.casefold()
-        if netloc.startswith('www.'):
-            netloc = netloc[4:]
-        return netloc
-
-    @classmethod
-    @cachetools.func.ttl_cache(maxsize=sys.maxsize, ttl=config.URL_CACHE_TTL)
-    def url_content(cls, url: str) -> bytes:
-        # Note: This method is feed agnostic. To prevent bugs, the return value of this method must be immutable.
-        netloc = cls._netloc(url)
-
-        # Define headers
-        headers = {'User-Agent': config.USER_AGENT}
-        test_etag = False
-        if netloc not in cls._etag_cache_prohibited_netlocs:
-            try:
-                etag_cache = cls._etag_cache[url]
-            except KeyError:
-                pass
-            else:
-                test_etag = random.random() <= config.ETAG_TEST_PROBABILITY
-                if not test_etag:
-                    headers['If-None-Match'] = etag_cache.etag
-
-        # Read URL
-        log.debug('Resiliently retrieving content for %s.', url)
-        for num_attempt in range(1, config.READ_ATTEMPTS_MAX + 1):
-            try:
-                response = requests.get(url, timeout=config.REQUEST_TIMEOUT, headers=headers)
-                response.raise_for_status()
-            except requests.RequestException as exc:
-                log.warning('Error reading %s in attempt %s of %s: %s', url, num_attempt, config.READ_ATTEMPTS_MAX, exc)
-                if num_attempt == config.READ_ATTEMPTS_MAX:
-                    raise exc from None
-                time.sleep(2 ** num_attempt)
-            else:
-                break
-
-        # Get and cache content
-        if response.status_code == 304:
-            content = etag_cache.content
-            log.debug('Reused cached content for %s from etag cache.', url)
-        else:  # 200
-            content = response.content
-            etag = response.headers.get('ETag')
-
-            if etag:
-                url_content = URLContent(etag, content)
-
-                # Conditionally test, disable, delete, and update cache
-                if test_etag and (etag_cache.etag == etag):
-                    if etag_cache.links == url_content.links:
-                        log.debug('Etag test passed for %s with etag %s.', url, etag)
-                    else:
-                        # Disable and delete cache
-                        cls._etag_cache_prohibited_netlocs.add(netloc)
-                        for cached_url in list(cls._etag_cache):  # Thread-safety is not important in this block.
-                            if cls._netloc(cached_url) in cls._etag_cache_prohibited_netlocs:
-                                cls._del_etag_cache(url)
-                        log.warning(
-                            'Etag test failed for %s with etag %s as a semantic content mismatch was found. '
-                            'The cached content has %s unique links and the dissimilar current content has %s. '
-                            'For this reason, the etag cache has been disabled for the corresponding netloc %s. '
-                            'The etag cache has been deleted for all previously cached URLs having the netloc.'
-                            'The mismatch should be reported to the site administrator.',
-                            url, etag, len(etag_cache.links), len(url_content.links), netloc)
-                else:
-                    # Update cache
-                    action = 'Updated cached content' if (url in cls._etag_cache) else 'Cached content'
-                    cls._etag_cache[url] = url_content
-                    log.debug('%s for %s having etag %s.', action, url, etag)
-            else:
-                # Delete cache
-                cls._del_etag_cache(url)
-        log.debug('Resiliently retrieved content of size %s for %s.', humanize_len(content), url)
-
-        # Note: Entry parsing is not done in this method in order to permit mutability of individual entries.
-        return content
