@@ -280,7 +280,7 @@ class URLReader:
                 # Conditionally test, disable, delete, and update cache
                 if test_etag and (etag_cache.etag == etag):
                     if etag_cache.links == url_content.links:
-                        log.info('Etag test passed for %s with etag %s.', url, etag)
+                        log.debug('Etag test passed for %s with etag %s.', url, etag)
                     else:
                         # Disable and delete cache
                         cls._etag_cache_prohibited_netlocs.add(netloc)
