@@ -202,7 +202,7 @@ class Feed:
         return entries
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass
 class URLContent:
     etag: str
     content: bytes
