@@ -1,4 +1,5 @@
 import logging.config
+import os
 from pathlib import Path
 import tempfile
 from typing import Dict
@@ -10,33 +11,31 @@ def configure_logging() -> None:
     log.debug('Logging is configured.')
 
 
+# Meta
 INSTANCE: Dict = {}  # Set from YAML config file.
 PACKAGE_NAME = Path(__file__).parent.stem
+ENV = os.getenv(f'{PACKAGE_NAME.upper()}_ENV', 'prod')  # Externally set as needed: IRCRSSFEEDBOT_ENV='dev'
 
+# Main
 ALERTS_CHANNEL_FORMAT_DEFAULT = '##{nick}-alerts'
 BITLY_SHORTENER_MAX_CACHE_SIZE = 2048
 DB_FILENAME = 'posts.v2.db'
 DEDUP_STRATEGY_DEFAULT = 'channel'
 ETAG_TEST_PROBABILITY = .4  # TODO: Eventually lower to .2
 MESSAGE_FORMAT = '[{feed}] {title} → {url}'
-MIN_CHANNEL_IDLE_TIME = 15 * 60
+MIN_CHANNEL_IDLE_TIME = {'dev': 1}.get(ENV, 15 * 60)
 NEW_FEED_POSTS_DEFAULT = 'some'
 NEW_FEED_POSTS_MAX = {'none': 0, 'some': 3, 'all': None}
 PERIOD_HOURS_DEFAULT = 1
-PERIOD_HOURS_MIN = .5
-PERIOD_RANDOM_PERCENT = 5
+PERIOD_HOURS_MIN = {'dev': .0001}.get(ENV, .5)
+PERIOD_RANDOM_PERCENT = {'dev': 20}.get(ENV, 5)
 READ_ATTEMPTS_MAX = 3
 REQUEST_TIMEOUT = 90
 SECONDS_PER_MESSAGE = 2
 TEMPDIR = Path(tempfile.gettempdir())
 USER_AGENT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:66.0) Gecko/20100101 Firefox/66.0'
 
-_DEV = False
-if _DEV:
-    MIN_CHANNEL_IDLE_TIME = 1
-    PERIOD_HOURS_MIN = .1 / 60
-    PERIOD_RANDOM_PERCENT = 20
-
+# Calculated
 URL_CACHE_TTL = PERIOD_HOURS_MIN * 3600 * ((100 - PERIOD_RANDOM_PERCENT) / 100) * .99
 
 LOGGING = {  # Ref: https://docs.python.org/3/howto/logging.html#configuring-logging
