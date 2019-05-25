@@ -41,7 +41,7 @@ class Database:
 
         # Vacuum db
         pre_vacuum_size = db_path.stat().st_size
-        log.info('Vacuuming database having pre-vacuum size %s.', humanize_bytes(pre_vacuum_size))
+        log.debug('Vacuuming database having pre-vacuum size %s.', humanize_bytes(pre_vacuum_size))
         self._db.execute_sql('VACUUM;')
         post_vacuum_size = db_path.stat().st_size
         vacuum_size_diff = pre_vacuum_size - post_vacuum_size
@@ -49,7 +49,7 @@ class Database:
                  humanize_bytes(post_vacuum_size), humanize_bytes(vacuum_size_diff))
 
         # Analyze db
-        log.info('Analyzing database.')
+        log.debug('Analyzing database.')
         self._db.execute_sql('ANALYZE;')
         log.info('Analyzed database.')
 
