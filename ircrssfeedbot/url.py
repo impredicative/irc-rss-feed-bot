@@ -111,13 +111,16 @@ class URLReader:
                         for cached_url in list(cls._etag_cache):  # Thread-safety is not important in this block.
                             if cls._netloc(cached_url) in cls._etag_cache_prohibited_netlocs:
                                 cls._del_etag_cache(url)
-                        log.warning(
-                            'Etag test failed for %s with etag %s as a semantic content mismatch was found. '
-                            'The cached content has %s unique links and the dissimilar current content has %s. '
-                            'For this reason, the etag cache has been disabled for the corresponding netloc %s. '
-                            'The etag cache has been deleted for all previously cached URLs having the netloc.'
-                            'The mismatch should be reported to the site administrator.',
-                            url, etag, len(etag_cache.links), len(url_content.links), netloc)
+                        config.alert(  # type: ignore
+                            f'Etag test failed for {url} with etag {repr(etag)}. '
+                            f'The semantic content was unexpectedly found to be changed whereas the etag stayed '
+                            f'unchanged. '
+                            f'The previously cached content has {len(etag_cache.links)} unique links and the '
+                            f'dissimilar current content has {len(url_content.links)}. ', log.warning)
+                        config.alert(  # type: ignore
+                            f'The etag cache has been disabled for the duration of the bot process for all {netloc} '
+                            f'feed URLs. '
+                            'The semantic content mismatch should be reported to the site administrator.', log.warning)
                 else:
                     # Update cache
                     action = 'Updated cached content' if (url in cls._etag_cache) else 'Cached content'

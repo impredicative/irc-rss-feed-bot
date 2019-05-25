@@ -52,6 +52,7 @@ class Bot:
             quit_message='',
             ping_interval=30,
             )
+        config.alert = lambda *args: _alert(self._irc, *args)  # type: ignore
         log.info('Initialized IRC client.')
 
         self._setup_channels()
