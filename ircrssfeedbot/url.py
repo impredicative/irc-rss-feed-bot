@@ -39,7 +39,6 @@ class URLContent:
 
 class URLReader:
     _etag_cache: ClassVar[Dict[str, URLContent]] = {}
-    _etag_cache_prohibited_netlocs: ClassVar[Set[str]] = set()
 
     @classmethod
     def _del_etag_cache(cls, url: str) -> None:
@@ -66,7 +65,7 @@ class URLReader:
         # Define headers
         headers = {'User-Agent': config.USER_AGENT}
         test_etag = False
-        if netloc not in cls._etag_cache_prohibited_netlocs:
+        if netloc not in config.ETAG_CACHE_PROHIBITED_NETLOCS:
             try:
                 etag_cache = cls._etag_cache[url]
             except KeyError:
@@ -107,9 +106,9 @@ class URLReader:
                         log.debug('Etag test passed for %s with etag %s.', url, etag)
                     else:
                         # Disable and delete cache
-                        cls._etag_cache_prohibited_netlocs.add(netloc)
+                        config.ETAG_CACHE_PROHIBITED_NETLOCS.add(netloc)
                         for cached_url in list(cls._etag_cache):  # Thread-safety is not important in this block.
-                            if cls._netloc(cached_url) in cls._etag_cache_prohibited_netlocs:
+                            if cls._netloc(cached_url) == netloc:
                                 cls._del_etag_cache(url)
                         config.alert(  # type: ignore
                             f'Etag test failed for {url} with etag {repr(etag)}. '
