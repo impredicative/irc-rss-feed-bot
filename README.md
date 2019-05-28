@@ -11,6 +11,8 @@ interruption of any preexisting conversations.
 * A SQLite database file records hashes of the entries that have been posted, thereby preventing them from being
 reposted.
 * ETag and TTL based in-memory caches of URL content are used for preventing unnecessary URL reads.
+Any websites with a mismatched ETag are probabilistically detected, and this caching is then disabled for them for the
+duration of the process.
 
 For more features, see the customizable [global settings](#global-settings) and
 [feed-specific settings](#feed-specific-settings).
