@@ -11,6 +11,7 @@ import feedparser
 from . import config
 from .db import Database
 from .url import URLReader
+from .util.textwrap import shorten_to_bytes_width
 
 log = logging.getLogger(__name__)
 
@@ -150,19 +151,12 @@ class Feed:
             log.debug('Formatted entries for %s.', self)
 
         # Truncate titles
-        textwrap_placeholder_len = 5
         for entry in entries:
-            while True:
-                # Note: A loop is used to sanely handle possible non-ASCII characters in the title.
-                if len(entry.title) <= textwrap_placeholder_len:
-                    break
-                msg_len = len(config.PRIVMSG_FORMAT.format(identity=config.runtime.identity, channel=self.channel,
-                                                           feed=self.name, title=entry.title, url=entry.post_url
-                                                           ).encode())
-                if msg_len <= config.QUOTE_LEN_MAX:
-                    break
-                title_len_max = max(textwrap_placeholder_len, len(entry.title) - 1)
-                entry.title = textwrap.shorten(entry.title, title_len_max)
+            base_bytes_use = len(config.PRIVMSG_FORMAT.format(identity=config.runtime.identity, channel=self.channel,
+                                                              feed=self.name, title='', url=entry.post_url
+                                                              ).encode())
+            title_bytes_width = max(0, config.QUOTE_LEN_MAX - base_bytes_use)
+            entry.title = shorten_to_bytes_width(entry.title, title_bytes_width)
 
         # Deduplicate entries again
         entries = self._dedupe_entries(entries, after_what='processing feed')
