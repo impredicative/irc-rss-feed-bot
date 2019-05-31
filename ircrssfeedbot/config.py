@@ -2,6 +2,7 @@ import logging.config
 import os
 from pathlib import Path
 import tempfile
+import types
 from typing import Dict
 
 
@@ -13,6 +14,7 @@ def configure_logging() -> None:
 
 # Meta
 INSTANCE: Dict = {}  # Set from YAML config file.
+runtime = types.SimpleNamespace()  # Set at runtime.
 PACKAGE_NAME = Path(__file__).parent.stem
 ENV = os.getenv(f'{PACKAGE_NAME.upper()}_ENV', 'prod')  # Externally set as needed: IRCRSSFEEDBOT_ENV='dev'
 
@@ -30,6 +32,7 @@ NEW_FEED_POSTS_MAX = {'none': 0, 'some': 3, 'all': None}
 PERIOD_HOURS_DEFAULT = 1
 PERIOD_HOURS_MIN = {'dev': .0001}.get(ENV, .5)
 PERIOD_RANDOM_PERCENT = {'dev': 20}.get(ENV, 5)
+QUOTE_LEN_MAX = 510  # Leaving 2 for "\r\n".
 READ_ATTEMPTS_MAX = 3
 REQUEST_TIMEOUT = 90
 SECONDS_PER_MESSAGE = 2
@@ -37,6 +40,7 @@ TEMPDIR = Path(tempfile.gettempdir())
 USER_AGENT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:66.0) Gecko/20100101 Firefox/66.0'
 
 # Calculated
+PRIVMSG_FORMAT = f':{{identity}} PRIVMSG {{channel}} :{MESSAGE_FORMAT}'  # Assumed.
 URL_CACHE_TTL = PERIOD_HOURS_MIN * 3600 * ((100 - PERIOD_RANDOM_PERCENT) / 100) * .99
 
 LOGGING = {  # Ref: https://docs.python.org/3/howto/logging.html#configuring-logging

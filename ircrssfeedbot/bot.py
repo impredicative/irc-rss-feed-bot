@@ -52,7 +52,7 @@ class Bot:
             quit_message='',
             ping_interval=30,
             )
-        config.alert = lambda *args: _alert(self._irc, *args)  # type: ignore
+        config.runtime.alert = lambda *args: _alert(self._irc, *args)
         log.info('Initialized IRC client.')
 
         self._setup_channels()
@@ -210,7 +210,15 @@ class Bot:
         log.info('Finished setting up %s channels (%s) and their %s feeds with %s currently active threads.',
                  len(channels), channels_str, num_feeds_setup, threading.active_count())
 
-# Ref: https://tools.ietf.org/html/rfc1459
+# Refs: https://tools.ietf.org/html/rfc1459 https://modern.ircdocs.horse
+
+
+@miniirc.Handler(900)
+def _handle_loggedin(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
+    # Parse message
+    log.debug('Handling RPL_LOGGEDIN (900): hostmask=%s, args=%s', hostmask, args)
+    config.runtime.identity = args[1]
+    log.info('Client identity as <nick>!<user>@<host> is %s.', config.runtime.identity)
 
 
 @miniirc.Handler('JOIN')

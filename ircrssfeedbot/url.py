@@ -110,13 +110,13 @@ class URLReader:
                         for cached_url in list(cls._etag_cache):  # Thread-safety is not important in this block.
                             if cls._netloc(cached_url) == netloc:
                                 cls._del_etag_cache(url)
-                        config.alert(  # type: ignore
+                        config.runtime.alert(
                             f'Etag test failed for {url} with etag {repr(etag)}. '
                             f'The semantic content was unexpectedly found to be changed whereas the etag stayed '
                             f'unchanged. '
                             f'The previously cached content has {len(etag_cache.links)} unique links and the '
                             f'dissimilar current content has {len(url_content.links)}. ', log.warning)
-                        config.alert(  # type: ignore
+                        config.runtime.alert(
                             f'The etag cache has been disabled for the duration of the bot process for all {netloc} '
                             f'feed URLs. '
                             'The semantic content mismatch should be reported to the site administrator.', log.warning)
