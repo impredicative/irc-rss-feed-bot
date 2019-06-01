@@ -56,7 +56,12 @@ class Bot:
         log.info('Initialized IRC client.')
 
         self._setup_channels()
-        log.info('Alerts will be sent to %s.', instance['alerts_channel'])
+        self._log_config()
+
+    @staticmethod
+    def _log_config() -> None:
+        log.info('Duration of TTL cache of URL content is %s.', timedelta_desc(config.URL_CACHE_TTL))
+        log.info('Alerts will be sent to %s.', config.INSTANCE['alerts_channel'])
 
     def _msg_channel(self, channel: str) -> None:
         log.debug('Channel messenger for %s is starting and is waiting to be notified of channel join.', channel)

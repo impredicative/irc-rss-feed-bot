@@ -58,8 +58,9 @@ class URLReader:
 
     @classmethod
     @cachetools.func.ttl_cache(maxsize=sys.maxsize, ttl=config.URL_CACHE_TTL)
-    def url_content(cls, url: str) -> bytes:
+    def _url_content(cls, url: str) -> bytes:
         # Note: This method is feed agnostic. To prevent bugs, the return value of this method must be immutable.
+        # Note: TTL cache is useful if the same URL is to be read for multiple feeds, sometimes for multiple channels.
         netloc = cls._netloc(url)
 
         # Define headers
@@ -131,4 +132,8 @@ class URLReader:
         log.debug('Resiliently retrieved content of size %s for %s.', humanize_len(content), url)
 
         # Note: Entry parsing is not done in this method in order to permit mutability of individual entries.
-        return content
+        return zlib.compress(content)
+
+    @classmethod
+    def url_content(cls, url: str) -> bytes:
+        return zlib.decompress(cls._url_content(url))

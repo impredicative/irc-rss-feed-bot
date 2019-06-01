@@ -75,10 +75,7 @@ class Feed:
         feed_config = self._feed_config
 
         # Retrieve URL content
-        log.debug('URL content cache usage is %s', URLReader.url_content.cache_info())
         content = URLReader.url_content(self.url)
-        # Note: TTL cache is useful if the same URL is to be read for multiple feeds, sometimes for multiple channels.
-        log.debug('URL content cache usage is %s', URLReader.url_content.cache_info())
 
         # Parse entries
         log.debug('Retrieving entries for %s.', self.url)
