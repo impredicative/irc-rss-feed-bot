@@ -1,4 +1,5 @@
 import argparse
+import collections
 import logging
 import json
 from pathlib import Path
@@ -44,6 +45,11 @@ def main() -> None:
     instance_config['dir'] = instance_config_path.parent
     instance_config['nick:casefold'] = instance_config['nick'].casefold()
     instance_config['channels:casefold'] = [channel.casefold() for channel in instance_config['feeds']]
+    instance_config['repeated_urls'] = {url for url, count in collections.Counter(feed_cfg['url'] for channel_cfg in
+                                                                                  instance_config['feeds'].values() for
+                                                                                  feed_cfg in
+                                                                                  channel_cfg.values()).items()
+                                        if count > 1}
     config.INSTANCE = instance_config
 
     # Start bot

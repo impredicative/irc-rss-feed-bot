@@ -58,6 +58,11 @@ class URLReader:
 
     @classmethod
     @cachetools.func.ttl_cache(maxsize=sys.maxsize, ttl=config.URL_CACHE_TTL)
+    def _ttl_cached_compressed_url_content(cls, url: str) -> bytes:
+        log.debug('Compressed content of %s will be stored in the TTL cache.', url)
+        return zlib.compress(cls._url_content(url))
+
+    @classmethod
     def _url_content(cls, url: str) -> bytes:
         # Note: This method is feed agnostic. To prevent bugs, the return value of this method must be immutable.
         # Note: TTL cache is useful if the same URL is to be read for multiple feeds, sometimes for multiple channels.
@@ -132,8 +137,9 @@ class URLReader:
         log.debug('Resiliently retrieved content of size %s for %s.', humanize_len(content), url)
 
         # Note: Entry parsing is not done in this method in order to permit mutability of individual entries.
-        return zlib.compress(content)
+        return content
 
     @classmethod
     def url_content(cls, url: str) -> bytes:
-        return zlib.decompress(cls._url_content(url))
+        return zlib.decompress(cls._ttl_cached_compressed_url_content(url)) \
+            if (url in config.INSTANCE['repeated_urls']) else cls._url_content(url)
