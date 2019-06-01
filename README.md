@@ -10,9 +10,11 @@ For use with multiple servers, a separate instance of the bot process can be run
 interruption of any preexisting conversations.
 * A SQLite database file records hashes of the entries that have been posted, thereby preventing them from being
 reposted.
-* ETag and TTL based compressed in-memory caches of URL content are used for preventing unnecessary URL reads.
+* ETag and TTL based compressed in-memory caches of URL content are conditionally used for preventing unnecessary URL
+reads.
 Any websites with a mismatched ETag are probabilistically detected, and this caching is then disabled for them for the
 duration of the process.
+The TTL cache is used only for URLs that are used by more than one feed each.
 
 For more features, see the customizable [global settings](#global-settings) and
 [feed-specific settings](#feed-specific-settings).
