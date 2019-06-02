@@ -3,7 +3,7 @@
 -- v0 (normalized)
 Table topics {
   id int [not null, unique]
-  name varchar [pk, not null, unique]
+  name varchar [pk]
 }
 
 Table feeds {
@@ -12,14 +12,9 @@ Table feeds {
   name varchar [pk]
 }
 
-Table urls {
-  id int [not null, unique]
-  url varchar [pk]
-}
-
 Table posts {
-  feed_id int: [pk, ref: > feeds.id]
-  url_id int: [pk, ref: > urls.id]
+  feed_id int [pk, ref: > feeds.id]
+  url varchar [pk]
 }
 
 -- v1 (denormalized)
