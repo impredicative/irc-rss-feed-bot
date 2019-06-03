@@ -24,7 +24,7 @@ Table posts {
   url varchar [pk]
 }
 
--- v2 (denormalized hashes)
+-- v2 (hashes)
 Table posts {
   topic_hash int [pk]
   feed_hash int [pk]
