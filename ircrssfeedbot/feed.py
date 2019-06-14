@@ -147,6 +147,11 @@ class Feed:
                                            long_url=format_str.get('url', '{url}').format_map(params))
             log.debug('Formatted entries for %s.', self)
 
+        # Replace all-caps titles
+        for entry in entries:
+            if entry.title.isupper():  # e.g. https://www.biorxiv.org/content/10.1101/667436v1
+                entry.title = entry.title.capitalize()
+
         # Truncate titles
         for entry in entries:
             base_bytes_use = len(config.PRIVMSG_FORMAT.format(identity=config.runtime.identity, channel=self.channel,
