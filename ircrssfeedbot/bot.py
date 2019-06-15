@@ -179,7 +179,11 @@ class Bot:
                 else:
                     log.debug('Queued %s.', feed)
             except Exception as exc:
-                _alert(irc, f'Error reading feed {feed_name} of {channel}: {exc}')
+                msg = f'Error reading feed {feed_name} of {channel}: {exc}'
+                if feed_config.get('alert', True):
+                    _alert(irc, msg)
+                else:
+                    log.warning(msg)  # Not logging as exception or error.
             else:
                 if instance.get('once'):
                     log.warning('Discontinuing reader for %s.', feed)
