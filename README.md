@@ -166,8 +166,8 @@ Examples of this are in the sample.
 ##### Optional
 These are optional and are independent of each other:
 * **`alert`**: If `false`, an alert is not sent if an error occurs when reading or processing the feed.
-Its default value is `true`.
-Note that an exception is logged if the alert is not suppressed, and a warning is logged if the alert is suppressed. 
+Its default value is `true`. This can be useful for feeds that are known to fail intermittently.
+Note that an exception is logged if the alert is sent, and a warning is logged if the alert is not sent. 
 * **`blacklist/title`**: This is a list of regular expression patterns that result in a title being skipped if a
 [search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in the title.
 * **`blacklist/url`**: Similar to `blacklist/title`.
