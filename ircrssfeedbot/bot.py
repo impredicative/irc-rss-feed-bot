@@ -183,7 +183,7 @@ class Bot:
                 if feed_config.get('alert', True):
                     _alert(irc, msg)
                 else:
-                    log.warning(msg)  # Not logging as exception or error.
+                    log.error(msg)  # Not logging as exception.
             else:
                 if instance.get('once'):
                     log.warning('Discontinuing reader for %s.', feed)
