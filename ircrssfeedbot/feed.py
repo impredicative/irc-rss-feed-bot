@@ -1,7 +1,6 @@
 import dataclasses
 import logging
 import re
-import textwrap
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import bitlyshortener
