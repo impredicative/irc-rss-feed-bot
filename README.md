@@ -84,6 +84,7 @@ feeds:
     ArXiv:cs.AI: &ArXiv
       url: https://export.arxiv.org/rss/cs.AI
       period: 1.5
+      https: true
       shorten: false
       group: ArXiv:cs
       format:
@@ -99,6 +100,10 @@ feeds:
       <<: *ArXiv
       url: https://export.arxiv.org/rss/stat.ML
       group: null
+    BioRxiv:
+      url: https://connect.biorxiv.org/biorxiv_xml.php?subject=all
+      alert: false
+      https: true
     InfoWorld:
       url: https://www.infoworld.com/index.rss
     KDnuggets:
@@ -111,6 +116,7 @@ feeds:
       shorten: false
     PwC:Trending:
       url: https://us-east1-ml-feeds.cloudfunctions.net/pwc/trending
+      period: 0.5
       dedup: feed
     YT:3Blue1Brown: &YT
       url: https://www.youtube.com/feeds/videos.xml?channel_id=UCYO_jab_esuFRV4b17AJtAw
