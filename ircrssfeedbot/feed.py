@@ -32,7 +32,6 @@ class FeedEntry:
                 if match:
                     log.debug('Feed entry %s matches %s pattern %s.', self, searchlist_key, searchlisted_pattern)
                     return searchlist_key, match
-        return None  # This is redundant but it prevents the mypy message " Missing return statement".
 
 
 @dataclasses.dataclass
