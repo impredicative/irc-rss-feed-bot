@@ -19,6 +19,7 @@ log = logging.getLogger(__name__)
 class FeedEntry:
     title: str = dataclasses.field(compare=False)
     long_url: str = dataclasses.field(compare=True)
+    categories: List[str] = dataclasses.field(compare=False)
 
     @property
     def post_url(self) -> str:
@@ -78,7 +79,8 @@ class Feed:
 
         # Parse entries
         log.debug('Retrieving entries for %s.', self.url)
-        entries = [FeedEntry(title=e['title'], long_url=e['link']) for e in feedparser.parse(content)['entries']]
+        entries = [FeedEntry(title=e['title'], long_url=e['link'], categories=[t['term'] for t in e.tags]) for e in
+                   feedparser.parse(content)['entries']]
         logger = log.debug if entries else log.warning
         logger('Retrieved %s entries for %s.', len(entries), self.url)
 
@@ -123,10 +125,15 @@ class Feed:
         sub = feed_config.get('sub')
         if sub:
             log.debug('Substituting entries for %s.', self)
-            re_sub: Callable[[str, Optional[Dict[str, str]]], str] = \
-                lambda v, r: re.sub(r['pattern'], r['repl'], v) if r else v
-            entries = [FeedEntry(title=re_sub(e.title, sub.get('title')), long_url=re_sub(e.long_url, sub.get('url')))
-                       for e in entries]
+            re_sub: Callable[[Dict[str, str], str], str] = lambda r, v: re.sub(r['pattern'], r['repl'], v)
+            title_sub = sub.get('title')
+            if title_sub:
+                for entry in entries:
+                    entry.title = re_sub(title_sub, entry.title)
+            url_sub = sub.get('url')
+            if url_sub:
+                for entry in entries:
+                    entry.long_url = re_sub(url_sub, entry.long_url)
             log.debug('Substituted entries for %s.', self)
 
         # Format entries
@@ -135,20 +142,20 @@ class Feed:
             log.debug('Formatting entries for %s.', self)
             format_re = format_config.get('re', {})
             format_str = format_config['str']
-            for index, entry in enumerate(entries.copy()):  # May not strictly need `copy()`.
+            for entry in entries:
                 params = {'title': entry.title, 'url': entry.long_url}
                 for key, val in params.copy().items():
                     if key in format_re:
                         match = re.search(format_re[key], val)
                         if match:
                             params.update(match.groupdict())
-                entries[index] = FeedEntry(title=format_str.get('title', '{title}').format_map(params),
-                                           long_url=format_str.get('url', '{url}').format_map(params))
+                entry.title = format_str.get('title', '{title}').format_map(params)
+                entry.long_url = format_str.get('url', '{url}').format_map(params)
             log.debug('Formatted entries for %s.', self)
 
         # Replace all-caps titles
         for entry in entries:
-            if entry.title.isupper():  # e.g. https://www.biorxiv.org/content/10.1101/667436v1
+            if entry.title.isupper():  # e.g. for https://www.biorxiv.org/content/10.1101/667436v1
                 entry.title = entry.title.capitalize()
 
         # Truncate titles
@@ -184,7 +191,8 @@ class Feed:
             log.debug('Shortening %s postable long URLs for %s.', len(entries), self)
             long_urls = [entry.long_url for entry in entries]
             short_urls = self.url_shortener.shorten_urls(long_urls)
-            entries = [ShortenedFeedEntry(e.title, e.long_url, short_urls[i]) for i, e in enumerate(entries)]
+            entries = [ShortenedFeedEntry(e.title, e.long_url, e.categories, short_urls[i]) for i, e in
+                       enumerate(entries)]
             log.debug('Shortened %s postable long URLs for %s.', len(entries), self)
 
         log.debug('Returning %s postable entries for %s.', len(entries), self)
