@@ -23,7 +23,7 @@ class URLContent:
         self._etag = etag
         self._content = zlib.compress(content)
 
-    @property  # Effectively read-only. Don't use cachedproperty here.
+    @property  # Effectively read-only. For memory efficiency, don't use cachedproperty here.
     def content(self) -> bytes:
         return zlib.decompress(self._content)
 
