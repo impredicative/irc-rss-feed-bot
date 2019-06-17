@@ -167,7 +167,10 @@ Examples of this are in the sample.
 These are optional and are independent of each other:
 * **`alert`**: If `false`, an alert is not sent if an error occurs when reading or processing the feed.
 Its default value is `true`. This can be useful for feeds that are known to fail intermittently.
-* **`blacklist/title`**: This is a list of regular expression patterns that result in a title being skipped if a
+* **`blacklist/category`**: This is a list of regular expression patterns that result in an entry being skipped if a
+[search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in any of the categories of the
+entry.
+* **`blacklist/title`**: This is a list of regular expression patterns that result in an entry being skipped if a
 [search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in the title.
 * **`blacklist/url`**: Similar to `blacklist/title`.
 * **`dedup`**: This indicates how to deduplicate posts for the feed, thereby preventing them from being reposted.
@@ -199,11 +202,14 @@ each read.
 The default value is `true`.
 The alternative value `false` is recommended if the URL is naturally small, or if `sub` or `format` can be used to make
 it small.
-* **`whitelist/explain`**: This applies to `whitelist/title` but not `whitelist/url`.
+* **`whitelist/category`**: This is a list of regular expression patterns that result in an entry being skipped unless a
+[search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in any of the categories of the
+entry.
+* **`whitelist/explain`**: This applies only to `whitelist/title`.
 It can be useful for understanding which portion of a post's title matched the whitelist.
 If `true`, the matching text of each title is enclosed by asterisks. For example, "This is a \*matching sample\* title".
 The default value is `false`.
-* **`whitelist/title`**: This is a list of regular expression patterns that result in a title being skipped unless a
+* **`whitelist/title`**: This is a list of regular expression patterns that result in an entry being skipped unless a
 [search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in the title.
 * **`whitelist/url`**: Similar to `whitelist/title`.
 
