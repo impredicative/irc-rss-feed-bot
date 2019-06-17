@@ -207,8 +207,8 @@ it small.
 entry.
 * **`whitelist/explain`**: This applies only to `whitelist/title`.
 It can be useful for understanding which portion of a post's title matched the whitelist.
-If `true`, the matching text of each title is enclosed by asterisks. For example, "This is a \*matching sample\* title".
-The default value is `false`.
+If `true`, the matching text of each posted title is enclosed by asterisks.
+For example, "This is a \*matching sample\* title". The default value is `false`.
 * **`whitelist/title`**: This is a list of regular expression patterns that result in an entry being skipped unless a
 [search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in the title.
 * **`whitelist/url`**: Similar to `whitelist/title`.
