@@ -88,7 +88,7 @@ class Feed:
         log.debug('Retrieving entries for %s.', self.url)
         entries = [FeedEntry(title=e['title'], long_url=e['link'],
                              categories=[t['term'] for t in getattr(e, 'tags', [])])
-                   for e in feedparser.parse(content)['entries']]
+                   for e in feedparser.parse(content.lstrip())['entries']]
         logger = log.debug if entries else log.warning
         logger('Retrieved %s entries for %s.', len(entries), self.url)
 
