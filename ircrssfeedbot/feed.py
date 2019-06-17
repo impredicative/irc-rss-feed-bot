@@ -31,14 +31,14 @@ class FeedEntry:
             for pattern in searchlist.get(searchlist_key, []):
                 match = re.search(pattern, val)
                 if match:
-                    log.debug('Feed entry %s matches %s pattern %s.', self, searchlist_key, pattern)
+                    log.info('%s matches %s pattern %s.', self, searchlist_key, repr(pattern))
                     return searchlist_key, match
         # Check categories
         for pattern in searchlist.get('category', []):
             for category in self.categories:
                 match = re.search(pattern, category)
                 if match:
-                    log.info('Feed entry %s having category %s matches pattern %s.', self, category, pattern)
+                    log.info('%s having category %s matches pattern %s.', self, repr(category), repr(pattern))
                     return 'category', match
 
 
@@ -107,7 +107,6 @@ class Feed:
         if whitelist:
             log.debug('Filtering %s entries using whitelist for %s.', len(entries), self)
             explain = whitelist.get('explain')
-            entries = [entry for entry in entries if entry.listing(whitelist)]
             whitelisted_entries: List[FeedEntry] = []
             for entry in entries:
                 listing = entry.listing(whitelist)
