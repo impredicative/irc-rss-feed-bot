@@ -25,7 +25,7 @@ class FeedEntry:
     def post_url(self) -> str:
         return self.long_url
 
-    def is_listed(self, searchlist: Dict[str, List]) -> Optional[Tuple[str, re.Match]]:  # type: ignore
+    def listing(self, searchlist: Dict[str, List]) -> Optional[Tuple[str, re.Match]]:  # type: ignore
         # Check title and long URL
         for searchlist_key, val in {'title': self.title, 'url': self.long_url}.items():
             for pattern in searchlist.get(searchlist_key, []):
@@ -39,7 +39,7 @@ class FeedEntry:
                 match = re.search(pattern, category)
                 if match:
                     log.info('Feed entry %s having category %s matches pattern %s.', self, category, pattern)
-                    return searchlist_key, match
+                    return 'category', match
 
 
 @dataclasses.dataclass
@@ -98,7 +98,7 @@ class Feed:
         blacklist = feed_config.get('blacklist', {})
         if blacklist:
             log.debug('Filtering %s entries using blacklist for %s.', len(entries), self)
-            entries = [entry for entry in entries if not entry.is_listed(blacklist)]
+            entries = [entry for entry in entries if not entry.listing(blacklist)]
             log.debug('Filtered to %s entries using blacklist for %s.', len(entries), self)
 
         # Keep only whitelisted entries
@@ -106,12 +106,12 @@ class Feed:
         if whitelist:
             log.debug('Filtering %s entries using whitelist for %s.', len(entries), self)
             explain = whitelist.get('explain')
-            entries = [entry for entry in entries if entry.is_listed(whitelist)]
+            entries = [entry for entry in entries if entry.listing(whitelist)]
             whitelisted_entries: List[FeedEntry] = []
             for entry in entries:
-                is_listed = entry.is_listed(whitelist)
-                if is_listed:
-                    key, match = is_listed
+                listing = entry.listing(whitelist)
+                if listing:
+                    key, match = listing
                     if explain and (key == 'title'):
                         span0, span1 = match.span()
                         title = entry.title
