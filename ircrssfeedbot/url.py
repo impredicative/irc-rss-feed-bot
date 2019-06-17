@@ -2,13 +2,11 @@ import logging
 import random
 import sys
 import time
-from typing import ClassVar, Dict, Set
+from typing import ClassVar, Dict
 import urllib.parse
 import zlib
 
 import cachetools.func
-from descriptors import cachedproperty
-import feedparser
 import requests
 
 from . import config
@@ -31,10 +29,13 @@ class URLContent:
     def etag(self) -> str:
         return self._etag
 
-    @cachedproperty
-    def links(self) -> Set[str]:
-        # Note: This is useful for approximately comparing semantic equivalence of two instances.
-        return {e['link'] for e in feedparser.parse(self.content)['entries']}
+    @property
+    def is_etag_strong(self) -> bool:
+        return not self.is_etag_weak
+
+    @property
+    def is_etag_weak(self) -> bool:
+        return self._etag.startswith(('W/', 'w/'))  # Only uppercase "W/" has been observed.
 
 
 class URLReader:
@@ -77,7 +78,8 @@ class URLReader:
             except KeyError:
                 pass
             else:
-                test_etag = random.random() <= config.ETAG_TEST_PROBABILITY
+                test_etag = etag_cache.is_etag_strong and (random.random() <= config.ETAG_TEST_PROBABILITY)
+                # Note: A weak etag can also be tested but not as easily. It may be unlikely to have a mismatch anyway.
                 if not test_etag:
                     headers['If-None-Match'] = etag_cache.etag
 
@@ -108,7 +110,7 @@ class URLReader:
 
                 # Conditionally test, disable, delete, and update cache
                 if test_etag and (etag_cache.etag == etag):
-                    if etag_cache.links == url_content.links:
+                    if etag_cache.content == content:
                         log.debug('Etag test passed for %s with etag %s.', url, etag)
                     else:
                         # Disable and delete cache
@@ -117,15 +119,14 @@ class URLReader:
                             if cls._netloc(cached_url) == netloc:
                                 cls._del_etag_cache(url)
                         config.runtime.alert(
-                            f'Etag test failed for {url} with etag {repr(etag)}. '
-                            f'The semantic content was unexpectedly found to be changed whereas the etag stayed '
-                            f'unchanged. '
-                            f'The previously cached content has {len(etag_cache.links)} unique links and the '
-                            f'dissimilar current content has {len(url_content.links)}. ', log.warning)
+                            f'Etag test failed for {url} with strong etag {repr(etag)}. '
+                            f'The content was unexpectedly found to be changed whereas the etag stayed unchanged. '
+                            f'The previously cached content has length {len(etag_cache.content)} and the '
+                            f'dissimilar current content has length {len(content)}. ', log.warning)
                         config.runtime.alert(
                             f'The etag cache has been disabled for the duration of the bot process for all {netloc} '
                             f'feed URLs. '
-                            'The semantic content mismatch should be reported to the site administrator.', log.warning)
+                            'The content mismatch should be reported to the site administrator.', log.warning)
                 else:
                     # Update cache
                     action = 'Updated cached content' if (url in cls._etag_cache) else 'Cached content'

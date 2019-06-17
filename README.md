@@ -12,8 +12,8 @@ interruption of any preexisting conversations.
 reposted.
 * ETag and TTL based compressed in-memory caches of URL content are conditionally used for preventing unnecessary URL
 reads.
-Any websites with a mismatched ETag are probabilistically detected, and this caching is then disabled for them for the
-duration of the process.
+Any websites with a mismatched _strong_ ETag are probabilistically detected, and this caching is then disabled for them
+for the duration of the process. Note that this detection is skipped for a _weak_ ETag.
 The TTL cache is used only for URLs that are used by more than one feed each.
 
 For more features, see the customizable [global settings](#global-settings) and
