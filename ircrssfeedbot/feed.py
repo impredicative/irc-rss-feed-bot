@@ -31,14 +31,14 @@ class FeedEntry:
             for pattern in searchlist.get(searchlist_key, []):
                 match = re.search(pattern, val)
                 if match:
-                    log.info('%s matches %s pattern %s.', self, searchlist_key, repr(pattern))
+                    log.debug('%s matches %s pattern %s.', self, searchlist_key, repr(pattern))
                     return searchlist_key, match
         # Check categories
         for pattern in searchlist.get('category', []):
             for category in self.categories:
                 match = re.search(pattern, category)
                 if match:
-                    log.info('%s having category %s matches pattern %s.', self, repr(category), repr(pattern))
+                    log.debug('%s having category %s matches category pattern %s.', self, repr(category), repr(pattern))
                     return 'category', match
 
 
