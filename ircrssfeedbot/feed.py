@@ -19,18 +19,26 @@ log = logging.getLogger(__name__)
 class FeedEntry:
     title: str = dataclasses.field(compare=False)
     long_url: str = dataclasses.field(compare=True)
-    categories: List[str] = dataclasses.field(compare=False)
+    categories: List[str] = dataclasses.field(compare=False, repr=False)
 
     @property
     def post_url(self) -> str:
         return self.long_url
 
     def is_listed(self, searchlist: Dict[str, List]) -> Optional[Tuple[str, re.Match]]:  # type: ignore
+        # Check title and long URL
         for searchlist_key, val in {'title': self.title, 'url': self.long_url}.items():
-            for searchlisted_pattern in searchlist.get(searchlist_key, []):
-                match = re.search(searchlisted_pattern, val)
+            for pattern in searchlist.get(searchlist_key, []):
+                match = re.search(pattern, val)
                 if match:
-                    log.debug('Feed entry %s matches %s pattern %s.', self, searchlist_key, searchlisted_pattern)
+                    log.debug('Feed entry %s matches %s pattern %s.', self, searchlist_key, pattern)
+                    return searchlist_key, match
+        # Check categories
+        for pattern in searchlist.get('category', []):
+            for category in self.categories:
+                match = re.search(pattern, category)
+                if match:
+                    log.info('Feed entry %s having category %s matches pattern %s.', self, category, pattern)
                     return searchlist_key, match
 
 
