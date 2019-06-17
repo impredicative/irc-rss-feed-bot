@@ -37,7 +37,7 @@ READ_ATTEMPTS_MAX = 3
 REQUEST_TIMEOUT = 90
 SECONDS_PER_MESSAGE = 2
 TEMPDIR = Path(tempfile.gettempdir())
-USER_AGENT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:66.0) Gecko/20100101 Firefox/66.0'
+USER_AGENT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:67.0) Gecko/20100101 Firefox/67.0'
 
 # Calculated
 PRIVMSG_FORMAT = f':{{identity}} PRIVMSG {{channel}} :{MESSAGE_FORMAT}'  # Assumed.
