@@ -126,7 +126,8 @@ class URLReader:
                         config.runtime.alert(
                             f'The etag cache has been disabled for the duration of the bot process for all {netloc} '
                             f'feed URLs. '
-                            'The content mismatch should be reported to the site administrator.', log.warning)
+                            "The content mismatch should be reported to the site administrator and also to the bot's "
+                            "maintainer.", log.warning)
                 else:
                     # Update cache
                     action = 'Updated cached content' if (url in cls._etag_cache) else 'Cached content'
