@@ -87,7 +87,8 @@ class URLReader:
         log.debug('Resiliently retrieving content for %s.', url)
         for num_attempt in range(1, config.READ_ATTEMPTS_MAX + 1):
             try:
-                response = requests.get(url, timeout=config.REQUEST_TIMEOUT, headers=headers)
+                response = requests.Session().get(url, timeout=config.REQUEST_TIMEOUT, headers=headers)
+                # Note: requests.Session may be relevant for scraping a page which requires cookies to be accepted.
                 response.raise_for_status()
             except requests.RequestException as exc:
                 log.warning('Error reading %s in attempt %s of %s: %s', url, num_attempt, config.READ_ATTEMPTS_MAX, exc)

@@ -1,11 +1,13 @@
 import dataclasses
+import html
 import logging
 import re
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Set, Tuple, Union
 
 import bitlyshortener
 from descriptors import cachedproperty
 import feedparser
+import hext
 
 from . import config
 from .db import Database
@@ -13,6 +15,11 @@ from .url import URLReader
 from .util.textwrap import shorten_to_bytes_width
 
 log = logging.getLogger(__name__)
+
+
+def ensure_list(s: Union[str, List[str], Tuple[str], Set[str]]) -> List[str]:
+    # Ref: https://stackoverflow.com/a/56641168/
+    return s if isinstance(s, list) else list(s) if isinstance(s, (tuple, set)) else [s]
 
 
 @dataclasses.dataclass(unsafe_hash=True)
@@ -85,12 +92,17 @@ class Feed:
         content = URLReader.url_content(self.url)
 
         # Parse entries
-        log.debug('Retrieving entries for %s.', self.url)
-        entries = [FeedEntry(title=e['title'], long_url=e['link'],
-                             categories=[t['term'] for t in getattr(e, 'tags', [])])
-                   for e in feedparser.parse(content.lstrip())['entries']]
+        log.debug('Parsing entries for %s.', self.url)
+        if 'hext' in feed_config:
+            entries = [FeedEntry(title=html.unescape(e['title']), long_url=e['link'],
+                                 categories=[html.unescape(c) for c in ensure_list(e.get('category', []))])
+                       for e in hext.Rule(feed_config['hext']).extract(hext.Html(content.decode()))]
+        else:
+            entries = [FeedEntry(title=e['title'], long_url=e['link'],
+                                 categories=[t['term'] for t in getattr(e, 'tags', [])])
+                       for e in feedparser.parse(content.lstrip())['entries']]
         logger = log.debug if entries else log.warning
-        logger('Retrieved %s entries for %s.', len(entries), self.url)
+        logger('Parsed %s entries for %s.', len(entries), self.url)
 
         # Deduplicate entries
         entries = self._dedupe_entries(entries, after_what='reading feed')

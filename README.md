@@ -126,6 +126,14 @@ feeds:
         url:
           pattern: ^https://www\.youtube\.com/watch\?v=(?P<id>.+?)$
           repl: https://youtu.be/\g<id>
+    YT:AGI:
+      url: https://www.youtube.com/results?search_query=%22artificial+general+intelligence%22&sp=CAISBBABGAI%253D
+      hext: <a href:filter("/watch\?v=(.+)"):prepend("https://youtu.be/"):link href^="/watch?v=" title:title/>
+      period: 12
+      shorten: false
+      blacklist:
+        title:
+          - \bWikipedia\ audio\ article\b
     YT:LexFridman:
       <<: *YT
       url: https://www.youtube.com/feeds/videos.xml?channel_id=UCSHZKyawb77ixDdsGog4iWA
@@ -183,6 +191,10 @@ conversation.
 It is however possible that unrelated feeds of any channel gets posted between ones having the same group.
 To explicitly specify the absence of a group when using a YAML reference, the value can be specified as `null`.
 It is recommended that feeds in the same group have the same `period`.
+* **`hext`**: This is a string representing the [hext](https://hext.thomastrapp.com/documentation) DSL for extracting a
+list of entries from a web page that is not a feed.
+Before using, it can be tested in the form [here](https://hext.thomastrapp.com/).
+Each extracted entry must at minimum include a `title`, a valid `link`, and zero or more values for `category`.
 * **`https`**: If `true`, links that start with `http://` are changed to start with `https://` instead.
 Its default value is `false`.
 * **`new`**: This indicates up to how many entries of a new feed to post.
