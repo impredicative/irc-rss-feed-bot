@@ -93,7 +93,7 @@ class Feed:
 
         # Parse entries
         log.debug('Parsing entries for %s.', self.url)
-        if 'hext' in feed_config:
+        if feed_config.get('hext'):
             entries = [FeedEntry(title=html.unescape(e['title']), long_url=e['link'],
                                  categories=[html.unescape(c) for c in ensure_list(e.get('category', []))])
                        for e in hext.Rule(feed_config['hext']).extract(hext.Html(content.decode()))]
