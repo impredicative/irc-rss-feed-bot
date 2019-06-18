@@ -1,11 +1,14 @@
-import feedparser, requests
+import feedparser
+import requests
 
 from ircrssfeedbot import config
+from ircrssfeedbot.util.urllib import url_to_netloc
 
 # Customize:
 URL = 'https://www.reddit.com/r/AGI/hot/.rss'
 
-content = requests.get(URL, timeout=config.REQUEST_TIMEOUT, headers={'User-Agent': config.USER_AGENT}).content
+user_agent = config.USER_AGENT_OVERRIDES.get(url_to_netloc(URL), config.USER_AGENT_DEFAULT)
+content = requests.Session().get(URL, timeout=config.REQUEST_TIMEOUT, headers={'User-Agent': user_agent}).content
 entries = feedparser.parse(content.lstrip())['entries']
 
 for index, entry in enumerate(entries):
