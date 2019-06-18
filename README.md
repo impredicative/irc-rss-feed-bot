@@ -62,12 +62,12 @@ feeds:
   "##mybot-alerts":
     irc-rss-feed-bot:
       url: https://github.com/impredicative/irc-rss-feed-bot/releases.atom
-      period: 24
+      period: 12
       shorten: false
   "#some_chan1":
     j:AJCN:
       url: https://academic.oup.com/rss/site_6122/3981.xml
-      period: 24
+      period: 12
       blacklist:
         title:
           - ^Calendar\ of\ Events$
@@ -120,7 +120,7 @@ feeds:
       dedup: feed
     YT:3Blue1Brown: &YT
       url: https://www.youtube.com/feeds/videos.xml?channel_id=UCYO_jab_esuFRV4b17AJtAw
-      period: 24
+      period: 12
       shorten: false
       sub:
         url:
