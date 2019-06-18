@@ -37,7 +37,14 @@ READ_ATTEMPTS_MAX = 3
 REQUEST_TIMEOUT = 90
 SECONDS_PER_MESSAGE = 2
 TEMPDIR = Path(tempfile.gettempdir())
-USER_AGENT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:67.0) Gecko/20100101 Firefox/67.0'
+USER_AGENT_DEFAULT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:67.0) Gecko/20100101 Firefox/67.0'
+USER_AGENT_OVERRIDES = {  # Site-specific overrides (without www prefix). Sites must be in lowercase.
+    'medscape.com': 'Googlebot-News',
+    'm.youtube.com': 'Mozilla/5.0',
+    'swansonvitamins.com': 'FeedFetcher-Google; (+http://www.google.com/feedfetcher.html)',
+    'youtu.be': 'Mozilla/5.0',
+    'youtube.com': 'Mozilla/5.0',
+    }
 
 # Calculated
 PRIVMSG_FORMAT = f':{{identity}} PRIVMSG {{channel}} :{MESSAGE_FORMAT}'  # Assumed.

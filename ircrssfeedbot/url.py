@@ -3,7 +3,6 @@ import random
 import sys
 import time
 from typing import ClassVar, Dict
-import urllib.parse
 import zlib
 
 import cachetools.func
@@ -11,6 +10,7 @@ import requests
 
 from . import config
 from .util.humanize import humanize_len
+from .util.urllib import url_to_netloc
 
 log = logging.getLogger(__name__)
 
@@ -50,13 +50,6 @@ class URLReader:
         else:
             log.info('Deleted cached content for %s from etag cache.', url)
 
-    @staticmethod
-    def _netloc(url: str) -> str:
-        netloc = urllib.parse.urlparse(url).netloc.casefold()
-        if netloc.startswith('www.'):
-            netloc = netloc[4:]
-        return netloc
-
     @classmethod
     @cachetools.func.ttl_cache(maxsize=sys.maxsize, ttl=config.URL_CACHE_TTL)
     def _ttl_cached_compressed_url_content(cls, url: str) -> bytes:
@@ -67,10 +60,10 @@ class URLReader:
     def _url_content(cls, url: str) -> bytes:
         # Note: This method is feed agnostic. To prevent bugs, the return value of this method must be immutable.
         # Note: TTL cache is useful if the same URL is to be read for multiple feeds, sometimes for multiple channels.
-        netloc = cls._netloc(url)
+        netloc = url_to_netloc(url)
 
         # Define headers
-        headers = {'User-Agent': config.USER_AGENT}
+        headers = {'User-Agent': config.USER_AGENT_OVERRIDES.get(netloc, config.USER_AGENT_DEFAULT)}
         test_etag = False
         if netloc not in config.ETAG_CACHE_PROHIBITED_NETLOCS:
             try:
@@ -117,7 +110,7 @@ class URLReader:
                         # Disable and delete cache
                         config.ETAG_CACHE_PROHIBITED_NETLOCS.add(netloc)
                         for cached_url in list(cls._etag_cache):  # Thread-safety is not important in this block.
-                            if cls._netloc(cached_url) == netloc:
+                            if url_to_netloc(cached_url) == netloc:
                                 cls._del_etag_cache(url)
                         config.runtime.alert(
                             f'Etag test failed for {url} with strong etag {repr(etag)}. '

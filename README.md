@@ -195,6 +195,8 @@ It is recommended that feeds in the same group have the same `period`.
 list of entries from a web page that is not a feed.
 Before using, it can be tested in the form [here](https://hext.thomastrapp.com/).
 Each extracted entry must at minimum include a `title`, a valid `link`, and zero or more values for `category`.
+Some sites require a custom user agent for successful scraping; such a customization can be requested by creating an
+issue.
 * **`https`**: If `true`, links that start with `http://` are changed to start with `https://` instead.
 Its default value is `false`.
 * **`new`**: This indicates up to how many entries of a new feed to post.
