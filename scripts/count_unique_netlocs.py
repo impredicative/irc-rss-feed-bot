@@ -2,11 +2,11 @@ import argparse
 import logging
 import json
 from pathlib import Path
-from urllib.parse import urlparse
 
 from ruamel.yaml import YAML
 
 from ircrssfeedbot import config
+from ircrssfeedbot.util.urllib import url_to_netloc
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ def main() -> None:
 
 def investigate_etags() -> None:
     instance = config.INSTANCE
-    netlocs = sorted({urlparse(feed_config['url']).netloc for channel_config in instance['feeds'].values() for feed_config in channel_config.values()})
+    netlocs = sorted({url_to_netloc(feed_config['url']) for channel_config in instance['feeds'].values() for feed_config in channel_config.values()})
     log.info('The unique netlocs are: %s', ', '.join(netlocs))
     log.info('Number of unique netlocs is %s.', len(netlocs))
 
