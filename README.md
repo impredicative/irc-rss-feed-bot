@@ -104,6 +104,18 @@ feeds:
       url: https://connect.biorxiv.org/biorxiv_xml.php?subject=all
       alert: false
       https: true
+    Fb:Research:
+      url: https://research.fb.com/publications/
+      hext: |-
+        <div>
+            <a href:link><h3 @text:title/></a>
+            <p/><p @text:description/>
+            <div class="areas-wrapper"><a href @text:category/></div>
+        </div>
+        <div><form class="download-form" action:link_pdf/></div>
+      whitelist:
+        category:
+          - ^(?:Facebook\ AI\ Research|Machine\ Learning|Natural\ Language\ Processing\ \&\ Speech)$
     InfoWorld:
       url: https://www.infoworld.com/index.rss
     KDnuggets:
