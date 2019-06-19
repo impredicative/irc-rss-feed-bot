@@ -109,10 +109,9 @@ feeds:
       hext: |-
         <div>
             <a href:link><h3 @text:title/></a>
-            <p/><p @text:description/>
             <div class="areas-wrapper"><a href @text:category/></div>
         </div>
-        <div><form class="download-form" action:link_pdf/></div>
+        <div><form class="download-form" action/></div>
       whitelist:
         category:
           - ^(?:Facebook\ AI\ Research|Machine\ Learning|Natural\ Language\ Processing\ \&\ Speech)$
