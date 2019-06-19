@@ -16,9 +16,9 @@ content = requests.Session().get(URL, timeout=config.REQUEST_TIMEOUT, headers={'
 entries = hext.Rule(HEXT).extract(hext.Html(content.decode()))
 
 for index, entry in enumerate(entries):
-    title, link = html.unescape(entry['title']), entry['link']
+    title, link = html.unescape(entry['title'].strip()), entry['link'].strip()
     post = f'#{index+1}: {title}\n{link}\n'
-    categories = ', '.join(html.unescape(c) for c in ensure_list(entry.get('category', [])))
+    categories = ', '.join(html.unescape(c.strip()) for c in ensure_list(entry.get('category', [])))
     if categories:
         post += f'{categories}\n'
     print(post)
