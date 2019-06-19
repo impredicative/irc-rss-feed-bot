@@ -1,6 +1,6 @@
 # irc-rss-feed-bot
-**irc-rss-feed-bot** is a Python 3.7 based IRC RSS and Atom feed posting bot.
-It essentially posts the entries of RSS and Atom feeds in IRC channels, one entry per message.
+**irc-rss-feed-bot** is a Python 3.7 based IRC RSS, Atom, and scraped feed posting bot.
+It essentially posts the entries of feeds in IRC channels, one entry per message.
 More specifically, it posts the titles and shortened URLs of entries.
 
 ## Features
