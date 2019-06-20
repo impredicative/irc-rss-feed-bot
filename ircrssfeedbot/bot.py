@@ -222,7 +222,7 @@ class Bot:
 # Refs: https://tools.ietf.org/html/rfc1459 https://modern.ircdocs.horse
 
 
-@miniirc.Handler(900)
+@miniirc.Handler(900, colon=True)
 def _handle_loggedin(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     # Parse message
     log.debug('Handling RPL_LOGGEDIN (900): hostmask=%s, args=%s', hostmask, args)
@@ -230,7 +230,7 @@ def _handle_loggedin(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: Li
     log.info('Client identity as <nick>!<user>@<host> is %s.', config.runtime.identity)
 
 
-@miniirc.Handler('JOIN')
+@miniirc.Handler('JOIN', colon=True)
 def _handle_join(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     # Parse message
     log.debug('Handling channel join: hostmask=%s, args=%s', hostmask, args)
@@ -248,7 +248,7 @@ def _handle_join(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[s
               channel, Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel])
 
 
-@miniirc.Handler('PRIVMSG')
+@miniirc.Handler('PRIVMSG', colon=True)
 def _handle_privmsg(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     # Parse message
     log.debug('Handling incoming message: hostmask=%s, args=%s', hostmask, args)
