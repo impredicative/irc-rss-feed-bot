@@ -232,7 +232,7 @@ def _handle_loggedin(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: Li
     log.info('Client identity as <nick>!<user>@<host> is %s.', config.runtime.identity)
 
 
-@miniirc.Handler('JOIN', colon=True)
+@miniirc.Handler('JOIN', colon=False)
 def _handle_join(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     # Parse message
     log.debug('Handling channel join: hostmask=%s, args=%s', hostmask, args)
@@ -250,7 +250,7 @@ def _handle_join(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[s
               channel, Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel])
 
 
-@miniirc.Handler('PRIVMSG', colon=True)
+@miniirc.Handler('PRIVMSG', colon=False)
 def _handle_privmsg(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     # Parse message
     log.debug('Handling incoming message: hostmask=%s, args=%s', hostmask, args)
@@ -261,8 +261,6 @@ def _handle_privmsg(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List
         assert channel.casefold() == config.INSTANCE['nick:casefold']
         user, ident, hostname = hostmask
         msg = args[-1]
-        assert msg.startswith(':')
-        msg = msg[1:]
         if msg != '\x01VERSION\x01':
             # Ignoring private message from freenode-connect having ident frigg
             # and hostname freenode/utility-bot/frigg: VERSION
