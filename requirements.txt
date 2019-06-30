@@ -5,7 +5,7 @@
 #    pip-compile
 #
 bitlyshortener==0.3.1
-cachetools==3.1.0
+cachetools==3.1.1
 certifi==2019.6.16        # via miniirc, requests
 chardet==3.0.4            # via requests
 dickens==1.0.1
@@ -15,8 +15,8 @@ humanize==0.5.1
 idna==2.8                 # via requests
 ircmessage==0.1.1
 miniirc==1.4.0
-peewee==3.9.5
+peewee==3.9.6
 requests==2.22.0
-ruamel.yaml==0.15.96
+ruamel.yaml==0.15.97
 six==1.10.0               # via ircmessage
 urllib3==1.25.3           # via requests
