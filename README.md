@@ -133,6 +133,11 @@ feeds:
       url: https://www.youtube.com/feeds/videos.xml?channel_id=UCYO_jab_esuFRV4b17AJtAw
       period: 12
       shorten: false
+      style:
+        name:
+          bg: red
+          fg: white
+          bold: true
       sub:
         url:
           pattern: ^https://www\.youtube\.com/watch\?v=(?P<id>.+?)$
