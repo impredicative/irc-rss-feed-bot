@@ -107,7 +107,7 @@ class Bot:
                                      timedelta_desc(disconnection_time))
 
                         log.info('Posting %s entries for %s.', len(feed.postable_entries), feed)
-                        feed_styled = style(feed.name, feed.config.get('style', {}).get('name'))
+                        feed_styled = style(feed.name, **feed.config.get('style', {}).get('name', {}))
                         for entry in feed.postable_entries:
                             msg = message_format.format(feed=feed_styled, title=entry.title, url=entry.post_url)
                             outgoing_msg_time = time.monotonic()

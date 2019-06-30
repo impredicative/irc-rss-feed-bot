@@ -180,7 +180,7 @@ class Feed:
                 entry.title = entry.title.capitalize()
 
         # Truncate titles
-        feed_styled = style(self.name, feed_config.get('style', {}).get('name'))
+        feed_styled = style(self.name, **feed_config.get('style', {}).get('name', {}))
         for entry in entries:
             base_bytes_use = len(config.PRIVMSG_FORMAT.format(identity=config.runtime.identity, channel=self.channel,
                                                               feed=feed_styled, title='', url=entry.post_url
