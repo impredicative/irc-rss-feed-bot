@@ -234,8 +234,9 @@ The alternative value `false` is recommended if the URL is naturally small, or i
 it small.
 * **`style/name/bg`**: This is a string representing the name of a background color applied to the feed's name.
 It can be one of: white, black, blue, green, red, brown, purple, orange, yellow, lime, teal, aqua, royal, pink, grey,
-silver.
+silver. The channel modes must allow formatting for this option to be effective.
 * **`style/name/bold`**: If `true`, bold formatting is applied to the feed's name. Its default value is `false`.
+The channel modes must allow formatting for this option to be effective.
 * **`style/name/fg`**: Foreground color similar to `style/name/bg`.
 * **`whitelist/category`**: This is a list of regular expression patterns that result in an entry being skipped unless a
 [search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in any of the categories of the
