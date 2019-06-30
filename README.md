@@ -227,6 +227,9 @@ each read.
 The default value is `true`.
 The alternative value `false` is recommended if the URL is naturally small, or if `sub` or `format` can be used to make
 it small.
+* **`style/name/fg`**: This is a string representing the name of a foreground color applied to the feed's name.
+It can be one of: white, black, blue, green, red, brown, purple, orange, yellow, lime, teal, aqua, royal, pink, grey,
+silver.
 * **`whitelist/category`**: This is a list of regular expression patterns that result in an entry being skipped unless a
 [search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in any of the categories of the
 entry.

@@ -4,6 +4,7 @@ dickens==1.0.1
 feedparser==5.2.1
 hext==0.2.3
 humanize==0.5.1
+ircmessage==0.1.1
 miniirc==1.4.0
 peewee==3.9.5
 requests==2.22.0

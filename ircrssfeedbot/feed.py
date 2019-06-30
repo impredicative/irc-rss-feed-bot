@@ -12,7 +12,9 @@ import hext
 from . import config
 from .db import Database
 from .url import URLReader
+from .util.ircmessage import style
 from .util.textwrap import shorten_to_bytes_width
+
 
 log = logging.getLogger(__name__)
 
@@ -68,7 +70,7 @@ class Feed:
 
     def __post_init__(self):
         log.debug('Initializing instance of %s.', self)
-        self._feed_config = config.INSTANCE['feeds'][self.channel][self.name]
+        self.config = config.INSTANCE['feeds'][self.channel][self.name]
         self.entries = self._entries()  # Entries are effectively cached here at this point in time.
         log.debug('Initialized instance of %s.', self)
 
@@ -86,7 +88,7 @@ class Feed:
         return entries
 
     def _entries(self) -> List[FeedEntry]:
-        feed_config = self._feed_config
+        feed_config = self.config
 
         # Retrieve URL content
         content = URLReader.url_content(self.url)
@@ -178,9 +180,10 @@ class Feed:
                 entry.title = entry.title.capitalize()
 
         # Truncate titles
+        feed_styled = style(self.name, feed_config.get('style', {}).get('name'))
         for entry in entries:
             base_bytes_use = len(config.PRIVMSG_FORMAT.format(identity=config.runtime.identity, channel=self.channel,
-                                                              feed=self.name, title='', url=entry.post_url
+                                                              feed=feed_styled, title='', url=entry.post_url
                                                               ).encode())
             title_bytes_width = max(0, config.QUOTE_LEN_MAX - base_bytes_use)
             entry.title = shorten_to_bytes_width(entry.title, title_bytes_width)
@@ -199,14 +202,14 @@ class Feed:
         # Filter entries if new feed
         if self.db.is_new_feed(self.channel, self.name):
             log.debug('Filtering new feed %s having %s postable entries.', self, len(entries))
-            max_posts = self._feed_config.get('new', config.NEW_FEED_POSTS_DEFAULT)
+            max_posts = self.config.get('new', config.NEW_FEED_POSTS_DEFAULT)
             max_posts = config.NEW_FEED_POSTS_MAX[max_posts]
             entries = entries[:max_posts]
             log.debug('Filtered new feed %s to %s postable entries given a max limit of %s entries.',
                       self, len(entries), max_posts)
 
         # Shorten URLs
-        if entries and self._feed_config.get('shorten', True):
+        if entries and self.config.get('shorten', True):
             log.debug('Shortening %s postable long URLs for %s.', len(entries), self)
             long_urls = [entry.long_url for entry in entries]
             short_urls = self.url_shortener.shorten_urls(long_urls)
@@ -222,7 +225,7 @@ class Feed:
         log.debug('Retrieving unposted entries for %s.', self)
         entries = self.entries
         long_urls = [entry.long_url for entry in entries]
-        dedup_strategy = self._feed_config.get('dedup', config.DEDUP_STRATEGY_DEFAULT)
+        dedup_strategy = self.config.get('dedup', config.DEDUP_STRATEGY_DEFAULT)
         if dedup_strategy == 'channel':
             long_urls = self.db.select_unposted_for_channel(self.channel, self.name, long_urls)
         else:
