@@ -224,7 +224,7 @@ class Bot:
 # Refs: https://tools.ietf.org/html/rfc1459 https://modern.ircdocs.horse
 
 
-@miniirc.Handler(900, colon=True)
+@miniirc.Handler(900, colon=False)
 def _handle_loggedin(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     # Parse message
     log.debug('Handling RPL_LOGGEDIN (900): hostmask=%s, args=%s', hostmask, args)
