@@ -5,6 +5,8 @@ import tempfile
 import types
 from typing import Dict
 
+import ircmessage
+
 
 def configure_logging() -> None:
     logging.config.dictConfig(LOGGING)
@@ -25,7 +27,7 @@ DB_FILENAME = 'posts.v2.db'
 DEDUP_STRATEGY_DEFAULT = 'channel'
 ETAG_CACHE_PROHIBITED_NETLOCS = {'export.arxiv.org'}
 ETAG_TEST_PROBABILITY = .1
-MESSAGE_FORMAT = '[{feed}] {title} → \x0314{url}'  # URL is colored grey.
+MESSAGE_FORMAT = '[{feed}] {title} → ' + ircmessage.style('{url}', fg='grey', reset=False)
 MIN_CHANNEL_IDLE_TIME = {'dev': 1}.get(ENV, 15 * 60)
 NEW_FEED_POSTS_DEFAULT = 'some'
 NEW_FEED_POSTS_MAX = {'none': 0, 'some': 3, 'all': None}
