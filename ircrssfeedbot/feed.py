@@ -180,6 +180,16 @@ class Feed:
             # e.g. for http://rss.sciencedirect.com/publication/science/08999007  (Elsevier Nutrition journal)
             entry.title = html_to_text(entry.title)
 
+        # Strip unicode quotes around titles
+        quote_begin, quote_end = '“”'
+        # e.g. for https://www.sciencedirect.com/science/article/abs/pii/S0899900718307883
+        for entry in entries:
+            title = entry.title
+            if (len(title) > 2) and (title[0] == quote_begin) and (title[-1] == quote_end):
+                title = title[1:-1]
+                if (quote_begin not in title) and (quote_end not in title):
+                    entry.title = title
+
         # Replace all-caps titles
         for entry in entries:
             if entry.title.isupper():  # e.g. for https://www.biorxiv.org/content/10.1101/667436v1
