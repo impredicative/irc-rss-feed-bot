@@ -10,7 +10,9 @@ For use with multiple servers, a separate instance of the bot process can be run
 interruption of any preexisting conversations.
 * A SQLite database file records hashes of the entries that have been posted, thereby preventing them from being
 reposted.
-* URLs are colored gray to visually deemphasize them.
+* Entry titles are formatted for neatness.
+Any HTML tags and excessive whitespace are stripped, all-caps are replaced, and long titles are sanely truncated. 
+* Entry URLs are colored gray to visually deemphasize them.
 This is effective only if the channel's modes and the end-user's client both use the formatting.
 * ETag and TTL based compressed in-memory caches of URL content are conditionally used for preventing unnecessary URL
 reads.

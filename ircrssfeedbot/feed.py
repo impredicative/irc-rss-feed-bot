@@ -12,6 +12,7 @@ import hext
 from . import config
 from .db import Database
 from .url import URLReader
+from .util.hext import html_to_text
 from .util.ircmessage import style
 from .util.textwrap import shorten_to_bytes_width
 
@@ -173,6 +174,11 @@ class Feed:
                 entry.title = format_str.get('title', '{title}').format_map(params)
                 entry.long_url = format_str.get('url', '{url}').format_map(params)
             log.debug('Formatted entries for %s.', self)
+
+        # Strip HTML tags from titles
+        for entry in entries:
+            # e.g. for http://rss.sciencedirect.com/publication/science/08999007  (Elsevier Nutrition journal)
+            entry.title = html_to_text(entry.title)
 
         # Replace all-caps titles
         for entry in entries:
