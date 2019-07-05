@@ -38,6 +38,7 @@ For more features, see the customizable [global settings](#global-settings) and
 <Feed[bot]> [InfoWorld] What is a devops engineer? And how do you become one? → https://j.mp/2NOgQ3g
 <Feed[bot]> [InfoWorld] What is Jupyter Notebook? Data analysis made easier → https://j.mp/2NMailP
 ```
+![Sample posts](images/sample_posts.png)
 
 ## Usage
 ### Configuration: secret
