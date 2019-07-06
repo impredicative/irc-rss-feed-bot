@@ -1,6 +1,13 @@
 import functools
 import hashlib
-from typing import Dict, List
+from typing import Dict, List, Union
+
+
+def hash4(content: Union[bytes, str]) -> str:
+    """Return a small 4 byte hash encoded as a hex string."""
+    if isinstance(content, str):
+        content = content.encode()
+    return hashlib.shake_128(content).hexdigest(4)
 
 
 class Int8Hash:
