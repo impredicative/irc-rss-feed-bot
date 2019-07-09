@@ -18,7 +18,7 @@ data = json.loads(content)
 entries = jmespath.search(JMES, data)
 
 for index, entry in enumerate(entries):
-    title, link = entry['title'], entry['link']
+    title, link = entry['title'].strip(), entry['link'].strip()
     post = f'#{index+1}: {title}\n{link}\n'
     categories = ', '.join(html.unescape(c.strip()) for c in ensure_list(entry.get('category', [])))
     if categories:
