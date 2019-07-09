@@ -1,7 +1,10 @@
 # irc-rss-feed-bot
-**irc-rss-feed-bot** is a Python 3.7 based IRC RSS, Atom, and scraped feed posting bot.
+**irc-rss-feed-bot** is an IRC based RSS, Atom, JSON, and HTML feed posting bot implemented in Python 3.7.
 It essentially posts the entries of feeds in IRC channels, one entry per message.
 More specifically, it posts the titles and shortened URLs of entries.
+
+The [`jmespath`](https://pypi.org/project/jmespath/) and [`hext`](https://pypi.org/project/hext/) DSLs are used for
+parsing arbitrary JSON and HTML content respectively.
 
 If viewing this readme on Docker Hub, note that it may be misformatted and truncated.
 In this case, it can be viewed correctly on [GitHub](https://github.com/impredicative/irc-rss-feed-bot).
@@ -38,7 +41,7 @@ For more features, see the customizable [global settings](#global-settings) and
 <Feed[bot]> [InfoWorld] What is a devops engineer? And how do you become one? → https://j.mp/2NOgQ3g
 <Feed[bot]> [InfoWorld] What is Jupyter Notebook? Data analysis made easier → https://j.mp/2NMailP
 ```
-![Sample posts](images/sample_posts.png)
+![](images/sample_posts.png)
 
 ## Usage
 ### Configuration: secret
@@ -134,6 +137,10 @@ feeds:
       new: none
       period: 8
       shorten: false
+    r/MachineLearning:100+:
+      url: https://www.reddit.com/r/MachineLearning/hot/.json?limit=50
+      jmes: 'data.children[*].data | [?score >= `100`].{title: title, link: join(``, [`https://redd.it/`, id])}'
+      shorten: false
     PwC:Trending:
       url: https://us-east1-ml-feeds.cloudfunctions.net/pwc/trending
       period: 0.5
@@ -216,12 +223,6 @@ conversation.
 It is however possible that unrelated feeds of any channel gets posted between ones having the same group.
 To explicitly specify the absence of a group when using a YAML reference, the value can be specified as `null`.
 It is recommended that feeds in the same group have the same `period`.
-* **`hext`**: This is a string representing the [hext](https://hext.thomastrapp.com/documentation) DSL for extracting a
-list of entries from a web page that is not a feed.
-Before using, it can be tested in the form [here](https://hext.thomastrapp.com/).
-Each extracted entry must at minimum include a `title`, a valid `link`, and zero or more values for `category`.
-Some sites require a custom user agent for successful scraping; such a customization can be requested by creating an
-issue.
 * **`https`**: If `true`, links that start with `http://` are changed to start with `https://` instead.
 Its default value is `false`.
 * **`new`**: This indicates up to how many entries of a new feed to post.
@@ -258,6 +259,19 @@ For example, "This is a \*matching sample\* title". The default value is `false`
 [search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in the title.
 * **`whitelist/url`**: Similar to `whitelist/title`.
 
+##### Extractor
+For non-XML feeds, one of the following extractors can be used.
+Its value must be such that a list of entry
+[_dictionaries_](https://en.wikipedia.org/wiki/Associative_array#Example) is extracted.
+Each extracted entry _dictionary_ must at a minimum include a `title`, a valid `link`, and zero or more values for
+`category`.
+Some sites require a custom user agent or other custom headers for successful scraping; such a customization can be
+requested by creating an issue.
+* **`hext`**: This is a string representing the [hext](https://hext.thomastrapp.com/documentation) DSL for extracting a
+list of entries from a HTML web page. Before using, it can be tested in the form [here](https://hext.thomastrapp.com/).
+* **`jmes`**: This is a string representing the [jmespath](http://jmespath.org/examples.html) DSL for extracting a list
+of entries from JSON. Before using, it can be tested in the form [here](http://jmespath.org/).
+
 ##### Conditional
 The sample configuration above contains examples of these:
 * **`format/re/title`**: This is a single regular expression pattern that is
@@ -272,7 +286,6 @@ quoted title string.
 The default value is `{title}`.
 * **`format/str/url`**: Similar to `format/str/title`. The default value is `{url}`.
 If this is specified, it is advisable to set `shorten` to `false` for the feed.
-
 * **`sub/title/pattern`**: This is a single regular expression pattern that if found results in the entry
 title being [substituted](https://docs.python.org/3/library/re.html#re.sub).
 * **`sub/title/repl`**: If `sub/title/pattern` is found, the entry title is replaced with this replacement, otherwise it
