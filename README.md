@@ -3,9 +3,6 @@
 It essentially posts the entries of feeds in IRC channels, one entry per message.
 More specifically, it posts the titles and shortened URLs of entries.
 
-The [`jmespath`](https://pypi.org/project/jmespath/) and [`hext`](https://pypi.org/project/hext/) DSLs are used for
-parsing arbitrary JSON and HTML content respectively.
-
 If viewing this readme on Docker Hub, note that it may be misformatted and truncated.
 In this case, it can be viewed correctly on [GitHub](https://github.com/impredicative/irc-rss-feed-bot).
 
@@ -16,6 +13,8 @@ For use with multiple servers, a separate instance of the bot process can be run
 interruption of any preexisting conversations.
 * A SQLite database file records hashes of the entries that have been posted, thereby preventing them from being
 reposted.
+* The [`jmespath`](https://pypi.org/project/jmespath/) and [`hext`](https://pypi.org/project/hext/) DSLs are used for
+parsing arbitrary JSON and HTML content respectively.
 * Entry titles are formatted for neatness.
 Any HTML tags and excessive whitespace are stripped, all-caps are replaced,
 and excessively long titles are sanely truncated. 
