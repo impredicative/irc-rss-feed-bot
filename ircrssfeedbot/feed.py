@@ -1,11 +1,13 @@
 import dataclasses
 import html
+import json
 import logging
 import re
 from typing import Callable, Dict, List, Optional, Set, Tuple, Union
 
 import bitlyshortener
 from descriptors import cachedproperty
+import jmespath
 import feedparser
 import hext
 
@@ -20,9 +22,9 @@ from .util.textwrap import shorten_to_bytes_width
 log = logging.getLogger(__name__)
 
 
-def ensure_list(s: Union[str, List[str], Tuple[str], Set[str]]) -> List[str]:
+def ensure_list(s: Optional[Union[str, List[str], Tuple[str], Set[str]]]) -> List[str]:
     # Ref: https://stackoverflow.com/a/56641168/
-    return s if isinstance(s, list) else list(s) if isinstance(s, (tuple, set)) else [s]
+    return s if isinstance(s, list) else list(s) if isinstance(s, (tuple, set)) else [] if s is None else [s]
 
 
 @dataclasses.dataclass(unsafe_hash=True)
@@ -96,14 +98,21 @@ class Feed:
 
         # Parse entries
         log.debug('Parsing entries for %s.', self.url)
-        if feed_config.get('hext'):
+        if feed_config.get('jmes'):
+            raw_entries = jmespath.search(feed_config['jmes'], json.loads(content)) or []  # search can return None
+            entries = [FeedEntry(title=e['title'].strip(), long_url=e['link'].strip(),
+                                 categories=[c.strip() for c in ensure_list(e.get('category', []))])
+                       for e in raw_entries]
+        elif feed_config.get('hext'):
+            raw_entries = hext.Rule(feed_config['hext']).extract(hext.Html(content.decode()))
             entries = [FeedEntry(title=html.unescape(e['title'].strip()), long_url=e['link'].strip(),
                                  categories=[html.unescape(c.strip()) for c in ensure_list(e.get('category', []))])
-                       for e in hext.Rule(feed_config['hext']).extract(hext.Html(content.decode()))]
+                       for e in raw_entries]
         else:
+            raw_entries = feedparser.parse(content.lstrip())['entries']
             entries = [FeedEntry(title=e['title'], long_url=e['link'],
                                  categories=[t['term'] for t in getattr(e, 'tags', [])])
-                       for e in feedparser.parse(content.lstrip())['entries']]
+                       for e in raw_entries]
         logger = log.debug if entries else log.warning
         logger('Parsed %s entries for %s.', len(entries), self.url)
 
