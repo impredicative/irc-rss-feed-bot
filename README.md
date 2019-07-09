@@ -259,7 +259,7 @@ For example, "This is a \*matching sample\* title". The default value is `false`
 * **`whitelist/url`**: Similar to `whitelist/title`.
 
 ##### Extractor
-For non-XML feeds, one of the following extractors can be used.
+For a non-XML feed, one of the following extractors can be used.
 Its value must be such that a list of entry
 [_dictionaries_](https://en.wikipedia.org/wiki/Associative_array#Example) is extracted.
 Each extracted entry _dictionary_ must at a minimum include a `title`, a valid `link`, and zero or more values for
