@@ -14,6 +14,7 @@ hext==0.2.3
 humanize==0.5.1
 idna==2.8                 # via requests
 ircmessage==0.1.1
+jmespath==0.9.4
 miniirc==1.4.0
 peewee==3.9.6
 requests==2.22.0
