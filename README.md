@@ -264,6 +264,7 @@ Its value must be such that a list of entry
 [_dictionaries_](https://en.wikipedia.org/wiki/Associative_array#Example) is extracted.
 Each extracted entry _dictionary_ must at a minimum include a `title`, a valid `link`, and zero or more values for
 `category`.
+
 Some sites require a custom user agent or other custom headers for successful scraping; such a customization can be
 requested by creating an issue.
 * **`hext`**: This is a string representing the [hext](https://hext.thomastrapp.com/documentation) DSL for extracting a
