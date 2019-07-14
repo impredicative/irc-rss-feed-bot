@@ -1,3 +1,4 @@
+import datetime
 import logging
 import os
 import queue
@@ -223,7 +224,8 @@ class Bot:
             self.FEED_GROUP_BARRIERS[barrier] = threading.Barrier(parties)
         log.info('Finished setting up %s channels (%s) and their %s feeds with %s currently active threads.',
                  len(channels), channels_str, num_feeds_setup, threading.active_count())
-        log.info('Ignoring any caches, %s URL reads are expected daily.', f'{round(num_reads_daily):n}')
+        log.info('Ignoring any caches, %s URL reads are expected daily, i.e. once every %s on an average.',
+                 f'{round(num_reads_daily):n}', timedelta_desc(datetime.timedelta(days=1) / num_reads_daily))
 
 # Refs: https://tools.ietf.org/html/rfc1459 https://modern.ircdocs.horse
 
