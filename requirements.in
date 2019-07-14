@@ -9,4 +9,4 @@ jmespath==0.9.4
 miniirc==1.4.0
 peewee==3.9.6
 requests==2.22.0
-ruamel.yaml==0.15.97
+ruamel.yaml==0.15.99
