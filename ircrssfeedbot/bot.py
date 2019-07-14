@@ -199,6 +199,7 @@ class Bot:
         log.debug('Setting up threads and queues for %s channels (%s) and their feeds with %s currently active '
                   'threads.', len(channels), channels_str, threading.active_count())
         num_feeds_setup = 0
+        num_reads_daily = 0
         barriers_parties: Dict[str, int] = {}
         for channel, channel_config in channels.items():
             log.debug('Setting up threads and queue for %s.', channel)
@@ -211,6 +212,8 @@ class Bot:
                 threading.Thread(target=self._read_feed, name=f'FeedReader-{channel}-{feed}',
                                  args=(channel, feed)).start()
                 num_feeds_setup += 1
+                num_reads_daily += \
+                    (24 / max(config.PERIOD_HOURS_MIN, feed_config.get('period', config.PERIOD_HOURS_DEFAULT)))
                 if feed_config.get('group'):
                     group = feed_config['group']
                     barriers_parties[group] = barriers_parties.get(group, 0) + 1
@@ -220,6 +223,7 @@ class Bot:
             self.FEED_GROUP_BARRIERS[barrier] = threading.Barrier(parties)
         log.info('Finished setting up %s channels (%s) and their %s feeds with %s currently active threads.',
                  len(channels), channels_str, num_feeds_setup, threading.active_count())
+        log.info('Ignoring any caches, %s URL reads are expected daily.', f'{round(num_reads_daily):n}')
 
 # Refs: https://tools.ietf.org/html/rfc1459 https://modern.ircdocs.horse
 
