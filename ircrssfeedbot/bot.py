@@ -182,7 +182,7 @@ class Bot:
                 else:
                     log.debug('Queued %s.', feed)
             except Exception as exc:
-                msg = f'Error reading or parsing feed {feed_name} of {channel}: {exc}'
+                msg = f'Error reading or processing feed {feed_name} of {channel}: {exc}'
                 if feed_config.get('alerts', {}).get('read', True):
                     _alert(irc, msg)
                     _alert(irc, 'Either check the feed configuration, or wait for its next read, '
