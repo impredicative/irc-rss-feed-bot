@@ -207,10 +207,10 @@ Examples of this are in the sample.
 
 ##### Optional
 These are optional and are independent of each other:
-* **`alerts/read`**: If `false`, an alert is not sent if an error occurs when reading or processing the feed.
-Its default value is `true`. This can be useful for feeds that are known to fail intermittently.
 * **`alerts/empty`**: If `false`, an alert is not sent if the feed has no entries.
 Its default value is `true`. This can be useful for feeds that are known to intermittently have no entries.
+* **`alerts/read`**: If `false`, an alert is not sent if an error occurs when reading or processing the feed.
+Its default value is `true`. This can be useful for feeds that are known to fail intermittently.
 * **`blacklist/category`**: This is a list of regular expression patterns that result in an entry being skipped if a
 [search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in any of the categories of the
 entry.
