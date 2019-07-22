@@ -113,8 +113,16 @@ class Feed:
             entries = [FeedEntry(title=e['title'], long_url=e['link'],
                                  categories=[t['term'] for t in getattr(e, 'tags', [])])
                        for e in raw_entries]
-        logger = log.debug if entries else log.warning
-        logger('Parsed %s entries for %s.', len(entries), self.url)
+        log_msg = f'Parsed {len(entries)} entries for {self}.'
+        if entries:
+            log.debug(log_msg)
+        else:
+            log_msg += ' Either check the feed configuration, or wait for its next read, ' \
+                       'or set `alerts/empty` to `false` for it.'
+            if feed_config.get('alerts', {}).get('empty', True):
+                config.runtime.alert(log_msg)
+            else:
+                log.warning(log_msg)
 
         # Deduplicate entries
         entries = self._dedupe_entries(entries, after_what='reading feed')

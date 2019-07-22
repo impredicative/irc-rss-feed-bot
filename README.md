@@ -98,6 +98,8 @@ feeds:
       https: true
       shorten: false
       group: ArXiv:cs
+      alerts:
+        empty: false
       format:
         re:
           title: '^(?P<name>.+?)\.?\ \(arXiv:.+(?P<ver>v\d+)\ '
@@ -113,7 +115,8 @@ feeds:
       group: null
     BioRxiv:
       url: https://connect.biorxiv.org/biorxiv_xml.php?subject=all
-      alert: false
+      alerts:
+        read: false
       https: true
     Fb:Research:
       url: https://research.fb.com/publications/
@@ -204,8 +207,10 @@ Examples of this are in the sample.
 
 ##### Optional
 These are optional and are independent of each other:
-* **`alert`**: If `false`, an alert is not sent if an error occurs when reading or processing the feed.
+* **`alerts/read`**: If `false`, an alert is not sent if an error occurs when reading or processing the feed.
 Its default value is `true`. This can be useful for feeds that are known to fail intermittently.
+* **`alerts/empty`**: If `false`, an alert is not sent if the feed has no entries.
+Its default value is `true`. This can be useful for feeds that are known to intermittently have no entries.
 * **`blacklist/category`**: This is a list of regular expression patterns that result in an entry being skipped if a
 [search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in any of the categories of the
 entry.
