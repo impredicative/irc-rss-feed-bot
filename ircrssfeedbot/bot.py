@@ -233,13 +233,20 @@ class Bot:
 
 
 @miniirc.Handler(900, colon=False)
-def _handle_loggedin(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
+def _handle_loggedin(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     # Parse message
     log.debug('Handling RPL_LOGGEDIN (900): hostmask=%s, args=%s', hostmask, args)
     config.runtime.identity = identity = args[1]
-    config.runtime.nick_casefold = identity.split('!', 1)[0].casefold()
+    nick = identity.split('!', 1)[0]
+    config.runtime.nick_casefold = nick_casefold = nick.casefold()
     log.info('Client identity as <nick>!<user>@<host> is %s.', identity)
-    # TODO: If nick is unexpected, ghost expected nick, maybe sleep for 2s or await an update, and use expected nick.
+    if nick_casefold != config.INSTANCE['nick:casefold']:
+        log.warning('Client nick was expected to be %s but it is %s. '
+                    'The expected nick will be ghosted. The client will then be made to reconnect.',
+                    config.INSTANCE['nick'], nick)
+        irc.msg('nickserv', 'GHOST', config.INSTANCE['nick'], os.environ['IRC_PASSWORD'])
+        irc.disconnect('Unexpected nick.', auto_reconnect=True)
+        # Note: REGAIN or GHOST+NICK are not used because they don't resend 900. GHOST+QUIT is simpler to process.
 
 
 @miniirc.Handler('JOIN', colon=False)
