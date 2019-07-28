@@ -1,4 +1,4 @@
-bitlyshortener==0.3.1
+bitlyshortener==0.3.2
 cachetools==3.1.1
 dickens==1.0.1
 feedparser==5.2.1
@@ -6,7 +6,7 @@ hext==0.2.3
 humanize==0.5.1
 ircmessage==0.1.1
 jmespath==0.9.4
-miniirc==1.4.0
+miniirc==1.4.1
 peewee==3.9.6
 requests==2.22.0
-ruamel.yaml==0.15.99
+ruamel.yaml==0.16.0
