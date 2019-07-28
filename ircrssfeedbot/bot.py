@@ -236,8 +236,10 @@ class Bot:
 def _handle_loggedin(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     # Parse message
     log.debug('Handling RPL_LOGGEDIN (900): hostmask=%s, args=%s', hostmask, args)
-    config.runtime.identity = args[1]
-    log.info('Client identity as <nick>!<user>@<host> is %s.', config.runtime.identity)
+    config.runtime.identity = identity = args[1]
+    config.runtime.nick_casefold = identity.split('!', 1)[0].casefold()
+    log.info('Client identity as <nick>!<user>@<host> is %s.', identity)
+    # TODO: If nick is unexpected, ghost expected nick, maybe sleep for 2s or await an update, and use expected nick.
 
 
 @miniirc.Handler('JOIN', colon=False)
@@ -248,7 +250,8 @@ def _handle_join(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[s
     channel = args[0]
 
     # Ignore if not actionable
-    if (user != config.INSTANCE['nick']) or (channel.casefold() not in config.INSTANCE['channels:casefold']):
+    if (user.casefold() != config.runtime.nick_casefold) or \
+            (channel.casefold() not in config.INSTANCE['channels:casefold']):
         return
 
     # Update channel last message time
@@ -266,7 +269,7 @@ def _handle_privmsg(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List
 
     # Ignore if not actionable
     if channel.casefold() not in config.INSTANCE['channels:casefold']:
-        assert channel.casefold() == config.INSTANCE['nick:casefold']
+        assert channel.casefold() == config.runtime.nick_casefold
         user, ident, hostname = hostmask
         msg = args[-1]
         if msg != '\x01VERSION\x01':
