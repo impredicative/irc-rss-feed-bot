@@ -181,7 +181,7 @@ feeds:
 ##### Mandatory
 * **`host`**: IRC server address.
 * **`ssl_port`**: IRC server SSL port.
-* **`nick`**: This is the registered IRC nick with which to connect and authenticate.
+* **`nick`**: This is a registered IRC nick with which to connect and authenticate.
 If the nick is in use, it will be regained.
 
 ##### Optional
