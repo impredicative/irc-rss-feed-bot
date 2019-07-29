@@ -239,14 +239,27 @@ def _handle_loggedin(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: Lis
     config.runtime.identity = identity = args[1]
     nick = identity.split('!', 1)[0]
     config.runtime.nick_casefold = nick_casefold = nick.casefold()
-    log.info('Client identity as <nick>!<user>@<host> is %s.', identity)
+    log.info('The client identity as <nick>!<user>@<host> is %s.', identity)
     if nick_casefold != config.INSTANCE['nick:casefold']:
-        log.warning('Client nick was expected to be %s but it is %s. '
-                    'The expected nick will be ghosted. The client will then be made to reconnect.',
+        log.warning('The client nick was configured to be %s but it is %s. The configured nick will be regained.',
                     config.INSTANCE['nick'], nick)
-        irc.msg('nickserv', 'GHOST', config.INSTANCE['nick'], os.environ['IRC_PASSWORD'])
-        irc.disconnect('Unexpected nick.', auto_reconnect=True)
-        # Note: REGAIN or GHOST+NICK are not used because they don't resend 900. GHOST+QUIT is simpler to process.
+        irc.msg('nickserv', 'REGAIN', config.INSTANCE['nick'], os.environ['IRC_PASSWORD'])
+
+
+@miniirc.Handler('NICK', colon=False)
+def _handle_nick(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
+    log.debug('Handling nick change: hostmask=%s, args=%s', hostmask, args)
+    old_nick, ident, hostname = hostmask
+
+    # Ignore if not actionable
+    if old_nick.casefold() != config.runtime.nick_casefold:
+        return
+
+    # Update identity, possibly after a nick regain
+    new_nick = args[0]
+    config.runtime.identity = identity = config.runtime.identity.replace(old_nick, new_nick, 1)
+    config.runtime.nick_casefold = new_nick.casefold()
+    log.info('The updated client identity as <nick>!<user>@<host> is inferred to be %s.', identity)
 
 
 @miniirc.Handler('JOIN', colon=False)
