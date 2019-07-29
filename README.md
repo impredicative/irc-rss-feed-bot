@@ -179,9 +179,9 @@ feeds:
 #### Global settings
 
 ##### Mandatory
-* **`host`**
-* **`ssl_port`**
-* **`nick`**
+* **`host`**: IRC server address.
+* **`ssl_port`**: IRC server SSL port.
+* **`nick`**: IRC nick with which to connect and authenticate. If the nick is in use, it will be regained.
 
 ##### Optional
 * **`alerts_channel`**: Some but not all warning and error alerts are sent to the this channel.
