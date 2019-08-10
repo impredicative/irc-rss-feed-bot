@@ -16,6 +16,7 @@ from .db import Database
 from .url import URLReader
 from .util.hext import html_to_text
 from .util.ircmessage import style
+from .util.lxml import sanitize_xml
 from .util.textwrap import shorten_to_bytes_width
 
 
@@ -109,6 +110,7 @@ class Feed:
                                  categories=[html.unescape(c.strip()) for c in ensure_list(e.get('category', []))])
                        for e in raw_entries]
         else:
+            content = sanitize_xml(content)  # e.g. for unescaped & char in https://deepmind.com/blog/feed/basic/
             raw_entries = feedparser.parse(content.lstrip())['entries']
             entries = [FeedEntry(title=e['title'], long_url=e['link'],
                                  categories=[t['term'] for t in getattr(e, 'tags', [])])
