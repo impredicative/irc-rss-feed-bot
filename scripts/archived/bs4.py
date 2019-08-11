@@ -4,6 +4,7 @@ import bs4
 
 
 def sanitize_xml(content: bytes) -> bytes:
+    # Ref: https://stackoverflow.com/a/57450722/
     try:
         xml.etree.ElementTree.fromstring(content)
     except xml.etree.ElementTree.ParseError:

@@ -2,7 +2,7 @@ import lxml.etree
 
 
 def sanitize_xml(content: bytes) -> bytes:
-    # Ref: https://stackoverflow.com/a/4997458/
+    # Ref: https://stackoverflow.com/a/57450722/
     try:
         lxml.etree.fromstring(content)
     except lxml.etree.XMLSyntaxError:
