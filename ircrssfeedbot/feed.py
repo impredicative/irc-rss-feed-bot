@@ -119,9 +119,9 @@ class Feed:
         if entries:
             log.debug(log_msg)
         else:
-            log_msg += ' Either check the feed configuration, or wait for its next read, ' \
-                       'or set `alerts/empty` to `false` for it.'
             if feed_config.get('alerts', {}).get('empty', True):
+                log_msg += ' Either check the feed configuration, or wait for its next read, ' \
+                           'or set `alerts/empty` to `false` for it.'
                 config.runtime.alert(log_msg)
             else:
                 log.warning(log_msg)
