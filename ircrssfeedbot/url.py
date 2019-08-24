@@ -85,7 +85,7 @@ class URLReader:
                 # Note: requests.Session may be relevant for scraping a page which requires cookies to be accepted.
                 response.raise_for_status()
             except requests.RequestException as exc:
-                log.warning('Error reading %s in attempt %s of %s: %s', url, num_attempt, config.READ_ATTEMPTS_MAX, exc)
+                log.info('Error reading %s in attempt %s of %s: %s', url, num_attempt, config.READ_ATTEMPTS_MAX, exc)
                 if num_attempt == config.READ_ATTEMPTS_MAX:
                     raise exc from None
                 time.sleep(2 ** num_attempt)
