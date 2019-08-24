@@ -15,11 +15,11 @@ humanize==0.5.1
 idna==2.8                 # via requests
 ircmessage==0.1.1
 jmespath==0.9.4
-lxml==4.4.0
-miniirc==1.4.1
+lxml==4.4.1
+miniirc==1.4.2
 peewee==3.10.0
 requests==2.22.0
 ruamel.yaml.clib==0.1.2   # via ruamel.yaml
-ruamel.yaml==0.16.1
+ruamel.yaml==0.16.5
 six==1.10.0               # via ircmessage
 urllib3==1.25.3           # via requests
