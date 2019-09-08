@@ -22,7 +22,7 @@ ENV = os.getenv(f'{PACKAGE_NAME.upper()}_ENV', 'prod')  # Externally set as need
 
 # Main
 ALERTS_CHANNEL_FORMAT_DEFAULT = '##{nick}-alerts'
-BITLY_SHORTENER_MAX_CACHE_SIZE = 4096
+BITLY_SHORTENER_MAX_CACHE_SIZE = 2048
 DB_FILENAME = 'posts.v2.db'
 DEDUP_STRATEGY_DEFAULT = 'channel'
 ETAG_CACHE_PROHIBITED_NETLOCS = {'export.arxiv.org', 'rise.cs.berkeley.edu', 'siliconangle.com'}
@@ -46,7 +46,7 @@ USER_AGENT_OVERRIDES = {  # Site-specific overrides (without www prefix). Sites 
     'swansonvitamins.com': 'FeedFetcher-Google; (+http://www.google.com/feedfetcher.html)',
     'youtu.be': 'Mozilla/5.0',
     'youtube.com': 'Mozilla/5.0',
-    }
+}
 
 # Calculated
 PRIVMSG_FORMAT = f':{{identity}} PRIVMSG {{channel}} :{MESSAGE_FORMAT}'  # Assumed.
