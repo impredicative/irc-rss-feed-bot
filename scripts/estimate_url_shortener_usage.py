@@ -12,7 +12,11 @@ num_links_created_monthly = num_links_created_thus_far * (days_in_month / day)
 num_links_created_daily = num_links_created_monthly / days_in_month
 num_links_created_hourly = num_links_created_daily / 24
 
-print('Number of links created: '
+print('Number of links created using all accounts: '
       f'{num_links_created_monthly:.0f}/month, '
       f'{num_links_created_daily:.0f}/day, '
       f'{num_links_created_hourly:.1f}/hour')
+print('Number of links created using each account: '
+      f'{num_links_created_monthly/NUM_ACCOUNTS_USED:.0f}/month, '
+      f'{num_links_created_daily/NUM_ACCOUNTS_USED:.0f}/day, '
+      f'{num_links_created_hourly/NUM_ACCOUNTS_USED:.1f}/hour')
