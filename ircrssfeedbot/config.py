@@ -31,7 +31,7 @@ ETAG_CACHE_PROHIBITED_NETLOCS = {'bodyrecomposition.com',
                                  'siliconangle.com',
                                  }
 ETAG_TEST_PROBABILITY = .1
-MESSAGE_FORMAT = '[{feed}] {title} → ' + ircmessage.style('{url}', fg='grey', reset=False)
+MESSAGE_FORMAT = '[{feed}] {title} → {url}'
 MIN_CHANNEL_IDLE_TIME = {'dev': 1}.get(ENV, 15 * 60)
 NEW_FEED_POSTS_DEFAULT = 'some'
 NEW_FEED_POSTS_MAX = {'none': 0, 'some': 3, 'all': None}
