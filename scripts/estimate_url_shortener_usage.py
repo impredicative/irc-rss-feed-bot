@@ -1,7 +1,7 @@
 import datetime
 
 # Customize:
-NUM_LINKS_CREATED_THUS_FAR_FOR_ONE_ACCOUNT = 80  # "Total Bitlinks" from https://app.bitly.com/organization/Oj25iZx0iy0/detail
+NUM_LINKS_CREATED_THUS_FAR_FOR_ONE_ACCOUNT = 80  # "Total Bitlinks" from https://app.bitly.com/organization/1/detail
 NUM_ACCOUNTS_USED = 20
 
 assert NUM_LINKS_CREATED_THUS_FAR_FOR_ONE_ACCOUNT <= 1000
