@@ -18,8 +18,6 @@ parsing arbitrary HTML and JSON content respectively.
 * Entry titles are formatted for neatness.
 Any HTML tags and excessive whitespace are stripped, all-caps are replaced,
 and excessively long titles are sanely truncated. 
-* Entry URLs are colored gray to visually deemphasize them.
-This is effective only if the channel's modes and the end-user's client both use the formatting.
 * ETag and TTL based compressed in-memory caches of URL content are conditionally used for preventing unnecessary URL
 reads.
 Any websites with a mismatched _strong_ ETag are probabilistically detected, and this caching is then disabled for them
