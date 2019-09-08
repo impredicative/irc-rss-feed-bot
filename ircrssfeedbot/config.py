@@ -25,7 +25,11 @@ ALERTS_CHANNEL_FORMAT_DEFAULT = '##{nick}-alerts'
 BITLY_SHORTENER_MAX_CACHE_SIZE = 2048
 DB_FILENAME = 'posts.v2.db'
 DEDUP_STRATEGY_DEFAULT = 'channel'
-ETAG_CACHE_PROHIBITED_NETLOCS = {'export.arxiv.org', 'rise.cs.berkeley.edu', 'siliconangle.com'}
+ETAG_CACHE_PROHIBITED_NETLOCS = {'bodyrecomposition.com',
+                                 'export.arxiv.org',
+                                 'rise.cs.berkeley.edu',
+                                 'siliconangle.com',
+                                 }
 ETAG_TEST_PROBABILITY = .1
 MESSAGE_FORMAT = '[{feed}] {title} → ' + ircmessage.style('{url}', fg='grey', reset=False)
 MIN_CHANNEL_IDLE_TIME = {'dev': 1}.get(ENV, 15 * 60)
