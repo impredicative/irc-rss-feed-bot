@@ -1,10 +1,10 @@
 import datetime
 
 # Customize:
-NUM_LINKS_CREATED_THUS_FAR_FOR_ONE_ACCOUNT = 80
+NUM_LINKS_CREATED_THUS_FAR_FOR_ONE_ACCOUNT = 80  # "Total Bitlinks" from https://app.bitly.com/organization/Oj25iZx0iy0/detail
 NUM_ACCOUNTS_USED = 20
 
-
+assert NUM_LINKS_CREATED_THUS_FAR_FOR_ONE_ACCOUNT <= 1000
 num_links_created_thus_far = NUM_LINKS_CREATED_THUS_FAR_FOR_ONE_ACCOUNT * NUM_ACCOUNTS_USED
 day = datetime.date.today().day
 days_in_month = 31
