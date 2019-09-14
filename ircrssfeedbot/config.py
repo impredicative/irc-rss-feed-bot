@@ -5,8 +5,6 @@ import tempfile
 import types
 from typing import Dict
 
-import ircmessage
-
 
 def configure_logging() -> None:
     logging.config.dictConfig(LOGGING)
