@@ -23,7 +23,8 @@ ALERTS_CHANNEL_FORMAT_DEFAULT = '##{nick}-alerts'
 BITLY_SHORTENER_MAX_CACHE_SIZE = 2048
 DB_FILENAME = 'posts.v2.db'
 DEDUP_STRATEGY_DEFAULT = 'channel'
-ETAG_CACHE_PROHIBITED_NETLOCS = {'bodyrecomposition.com',
+ETAG_CACHE_PROHIBITED_NETLOCS = {'blogs.cornell.edu',
+                                 'bodyrecomposition.com',
                                  'deeplearning.ai',
                                  'export.arxiv.org',
                                  'rise.cs.berkeley.edu',
