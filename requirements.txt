@@ -6,7 +6,7 @@
 #
 bitlyshortener==0.3.2
 cachetools==3.1.1
-certifi==2019.6.16        # via miniirc, requests
+certifi==2019.9.11        # via miniirc, requests
 chardet==3.0.4            # via requests
 dickens==1.0.1
 feedparser==5.2.1
@@ -16,10 +16,10 @@ idna==2.8                 # via requests
 ircmessage==0.1.1
 jmespath==0.9.4
 lxml==4.4.1
-miniirc==1.4.2
-peewee==3.10.0
+miniirc==1.4.3
+peewee==3.11.2
 requests==2.22.0
-ruamel.yaml.clib==0.1.2   # via ruamel.yaml
+ruamel.yaml.clib==0.2.0   # via ruamel.yaml
 ruamel.yaml==0.16.5
 six==1.10.0               # via ircmessage
-urllib3==1.25.3           # via requests
+urllib3==1.25.6           # via requests
