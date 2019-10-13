@@ -308,6 +308,8 @@ It facilitates not having to set the same value individually for many feeds.
 Refer to "Feed-specific settings" for the possible values and internal defaults of these settings.
 Refer to the embedded sample configuration for a usage example.
 
+Note that even if a default of `shorten: false` is set, the `BITLY_TOKENS` environment variable is still required.
+
 ### Deployment
 * As a reminder, it is recommended that the alerts channel be registered and monitored.
 
