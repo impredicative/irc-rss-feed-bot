@@ -17,12 +17,12 @@ def main() -> None:
     parser.add_argument('--config-path', required=True, help='Configuration file path, e.g. /some/dir/config.yaml')
     instance_config_path = Path(parser.parse_args().config_path)
 
-    # Read user config
+    # Read instance config
     log.debug('Reading instance configuration file %s', instance_config_path)
     instance_config = YAML().load(instance_config_path)
     instance_config = json.loads(json.dumps(instance_config))  # Recursively use a dict as the data structure.
 
-    # Log user config
+    # Log instance config
     logged_instance_config = instance_config.copy()
     del logged_instance_config['feeds']
     log.info('Read user configuration file %s having excerpted configuration %s for %s channels %s with %s feeds.',
@@ -41,7 +41,7 @@ def main() -> None:
     if instance_config['alerts_channel'] not in instance_config['feeds']:
         instance_config['feeds'][instance_config['alerts_channel']] = {}
 
-    # Process user config
+    # Process instance config
     instance_config['dir'] = instance_config_path.parent
     instance_config['nick:casefold'] = instance_config['nick'].casefold()
     instance_config['channels:casefold'] = [channel.casefold() for channel in instance_config['feeds']]
