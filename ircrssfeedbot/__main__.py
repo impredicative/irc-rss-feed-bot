@@ -35,11 +35,10 @@ def main() -> None:
             log.info('%s has feed %s having config: %s', channel, feed, feed_config)
 
     # Set alerts channel
-    if 'alerts_channel' not in instance_config:
-        instance_config['alerts_channel'] = config.ALERTS_CHANNEL_FORMAT_DEFAULT
-    instance_config['alerts_channel'] = instance_config['alerts_channel'].format(nick=instance_config['nick'])
+    alerts_channel_format = instance_config.get('alerts_channel') or config.ALERTS_CHANNEL_FORMAT_DEFAULT
+    instance_config['alerts_channel'] = alerts_channel_format.format(nick=instance_config['nick'])
     if instance_config['alerts_channel'] not in instance_config['feeds']:
-        instance_config['feeds'][instance_config['alerts_channel']] = {}
+        instance_config['feeds'][instance_config['alerts_channel']] = {}  # Set as a feeds channel.
 
     # Process instance config
     instance_config['dir'] = instance_config_path.parent
@@ -50,9 +49,9 @@ def main() -> None:
                                                                                   feed_cfg in
                                                                                   channel_cfg.values()).items()
                                         if count > 1}
+    instance_config['defaults'] = {k: instance_config.get('defaults', {}).get(k, v) for k, v in
+                                   config.FEED_DEFAULTS.items()}
     config.INSTANCE = instance_config
-    config.INSTANCE_DEFAULTS.update((k, v) for k, v in instance_config.get('defaults', {}).items() if k in
-                                    config.INSTANCE_DEFAULTS)
 
     # Start bot
     Bot()
