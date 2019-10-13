@@ -218,8 +218,7 @@ entry.
 [search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in the title.
 * **`blacklist/url`**: Similar to `blacklist/title`.
 * **`dedup`**: This indicates how to deduplicate posts for the feed, thereby preventing them from being reposted.
-The default value is `channel` (per-channel), and an alternate possible value is `feed` (per-feed).
-Note that per-feed deduplication is implicitly specific to its channel.
+The default value is `channel` (per-channel), and an alternate possible value is `feed` (per-feed per-channel).
 * **`group`**: If a string, this delays the processing of a feed that has just been read until all other feeds having
 the same group are also read.
 This encourages multiple feeds having the same group to be be posted in succession, except if interrupted by
