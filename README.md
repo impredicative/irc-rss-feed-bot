@@ -67,6 +67,8 @@ ssl_port: 6697
 nick: MyFeed[bot]
 alerts_channel: '##mybot-alerts'
 mode:
+defaults:
+  new: all
 feeds:
   "##mybot-alerts":
     irc-rss-feed-bot:
@@ -131,7 +133,7 @@ feeds:
       url: https://www.infoworld.com/index.rss
     KDnuggets:
       url: https://us-east1-ml-feeds.cloudfunctions.net/kdnuggets
-      new: all
+      new: some
     libraries.io/pypi/scikit-learn:
       url: https://libraries.io/pypi/scikit-learn/versions.atom
       new: none
@@ -201,7 +203,7 @@ YAML [anchors and references](https://en.wikipedia.org/wiki/YAML#Advanced_compon
 Examples of this are in the sample.
 
 ##### Mandatory
-* **`url`**: This is the URL of the feed. 
+* **`url`**: This is the URL of the feed.
 
 ##### Optional
 These are optional and are independent of each other:
@@ -296,6 +298,15 @@ is forwarded unchanged.
 * **`sub/url/pattern`**: Similar to `sub/title/pattern`.
 If a pattern is specified, it is advisable to set `shorten` to `false` for the feed.
 * **`sub/url/repl`**: Similar to `sub/title/repl`.
+
+#### Feed default settings
+A global default value can optionally be set under `defaults` for some feed-specific settings, 
+namely `new` and `shorten`.
+This value overrides its internal default.
+It facilitates not having to set the same value individually for many feeds.
+
+Refer to "Feed-specific settings" for the possible values and internal defaults of these settings.
+Refer to the embedded sample configuration for a usage example.
 
 ### Deployment
 * As a reminder, it is recommended that the alerts channel be registered and monitored.

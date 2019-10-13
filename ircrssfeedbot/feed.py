@@ -74,7 +74,7 @@ class Feed:
 
     def __post_init__(self):
         log.debug('Initializing instance of %s.', self)
-        self.config = config.INSTANCE['feeds'][self.channel][self.name]
+        self.config: Dict = {**config.INSTANCE_DEFAULTS, **config.INSTANCE['feeds'][self.channel][self.name]}
         self.entries = self._entries()  # Entries are effectively cached here at this point in time.
         log.debug('Initialized instance of %s.', self)
 
@@ -237,14 +237,13 @@ class Feed:
         # Filter entries if new feed
         if self.db.is_new_feed(self.channel, self.name):
             log.debug('Filtering new feed %s having %s postable entries.', self, len(entries))
-            max_posts = self.config.get('new', config.NEW_FEED_POSTS_DEFAULT)
-            max_posts = config.NEW_FEED_POSTS_MAX[max_posts]
+            max_posts = config.NEW_FEED_POSTS_MAX[self.config['new']]
             entries = entries[:max_posts]
             log.debug('Filtered new feed %s to %s postable entries given a max limit of %s entries.',
                       self, len(entries), max_posts)
 
         # Shorten URLs
-        if entries and self.config.get('shorten', True):
+        if entries and self.config['shorten']:
             log.debug('Shortening %s postable long URLs for %s.', len(entries), self)
             long_urls = [entry.long_url for entry in entries]
             short_urls = self.url_shortener.shorten_urls(long_urls)

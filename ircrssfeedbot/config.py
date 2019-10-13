@@ -13,7 +13,8 @@ def configure_logging() -> None:
 
 
 # Meta
-INSTANCE: Dict = {}  # Set from YAML config file.
+INSTANCE: Dict = {}  # Gets set from YAML config file.
+INSTANCE_DEFAULTS = {'new': 'some', 'shorten': True}  # Gets updated from YAML config file.
 runtime = types.SimpleNamespace()  # Set at runtime.
 PACKAGE_NAME = Path(__file__).parent.stem
 ENV = os.getenv(f'{PACKAGE_NAME.upper()}_ENV', 'prod')  # Externally set as needed: IRCRSSFEEDBOT_ENV='dev'
@@ -33,7 +34,6 @@ ETAG_CACHE_PROHIBITED_NETLOCS = {'blogs.cornell.edu',
 ETAG_TEST_PROBABILITY = .1
 MESSAGE_FORMAT = '[{feed}] {title} → {url}'
 MIN_CHANNEL_IDLE_TIME = {'dev': 1}.get(ENV, 15 * 60)
-NEW_FEED_POSTS_DEFAULT = 'some'
 NEW_FEED_POSTS_MAX = {'none': 0, 'some': 3, 'all': None}
 PERIOD_HOURS_DEFAULT = 1
 PERIOD_HOURS_MIN = {'dev': .0001}.get(ENV, .5)

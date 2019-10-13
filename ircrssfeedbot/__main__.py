@@ -51,6 +51,7 @@ def main() -> None:
                                                                                   channel_cfg.values()).items()
                                         if count > 1}
     config.INSTANCE = instance_config
+    config.INSTANCE_DEFAULTS.update(instance_config.get('defaults', {}))
 
     # Start bot
     Bot()
