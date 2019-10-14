@@ -110,7 +110,7 @@ class Feed:
                                  categories=[html.unescape(c.strip()) for c in ensure_list(e.get('category', []))])
                        for e in raw_entries]
         else:
-            content = sanitize_xml(content)  # e.g. for unescaped & char in https://deepmind.com/blog/feed/basic/
+            content = sanitize_xml(content)  # e.g. for unescaped "&" char in https://deepmind.com/blog/feed/basic/
             raw_entries = feedparser.parse(content.lstrip())['entries']
             entries = [FeedEntry(title=e['title'], long_url=e['link'],
                                  categories=[t['term'] for t in getattr(e, 'tags', [])])
