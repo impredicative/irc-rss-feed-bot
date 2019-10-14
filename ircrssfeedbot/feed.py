@@ -7,9 +7,9 @@ from typing import Callable, Dict, List, Optional, Set, Tuple, Union
 
 import bitlyshortener
 from descriptors import cachedproperty
-import jmespath
 import feedparser
 import hext
+import jmespath
 
 from . import config
 from .db import Database
