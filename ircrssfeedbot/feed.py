@@ -14,6 +14,7 @@ import jmespath
 from . import config
 from .db import Database
 from .entry import FeedEntry, ShortenedFeedEntry
+from .gnews import decode_google_news_url
 from .url import URLReader
 from .util.hext import html_to_text
 from .util.ircmessage import style
@@ -64,16 +65,19 @@ class Feed:
         # Parse entries
         log.debug('Parsing entries for %s.', self.url)
         if feed_config.get('jmes'):
+            parser = 'jmes'
             raw_entries = jmespath.search(feed_config['jmes'], json.loads(content)) or []  # search can return None
             entries = [FeedEntry(title=e['title'].strip(), long_url=e['link'].strip(),
                                  categories=[c.strip() for c in ensure_list(e.get('category', []))])
                        for e in raw_entries]
         elif feed_config.get('hext'):
+            parser = 'hext'
             raw_entries = hext.Rule(feed_config['hext']).extract(hext.Html(content.decode()))
             entries = [FeedEntry(title=html.unescape(e['title'].strip()), long_url=e['link'].strip(),
                                  categories=[html.unescape(c.strip()) for c in ensure_list(e.get('category', []))])
                        for e in raw_entries]
         else:
+            parser = 'default'
             content = sanitize_xml(content)  # e.g. for unescaped "&" char in https://deepmind.com/blog/feed/basic/
             raw_entries = feedparser.parse(content.lstrip())['entries']
             entries = [FeedEntry(title=e['title'], long_url=e['link'],
@@ -89,6 +93,11 @@ class Feed:
                 config.runtime.alert(log_msg)
             else:
                 log.warning(log_msg)
+
+        # Decode Google News URLs
+        if self.url.startswith('https://news.google.com/rss/') and (parser == 'default'):
+            for entry in entries:
+                entry.long_url = decode_google_news_url(entry.long_url)
 
         # Deduplicate entries
         entries = self._dedupe_entries(entries, after_what='reading feed')
