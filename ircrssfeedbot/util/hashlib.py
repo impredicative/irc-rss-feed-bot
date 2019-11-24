@@ -23,7 +23,7 @@ class Int8Hash:
         return {cls.as_int(text): text for text in texts}  # Intentionally reversed.
 
     @classmethod
-    @functools.lru_cache(1024)
+    @functools.lru_cache(2048)
     def as_int(cls, text: str) -> int:
         seed = text.encode()
         hash_digest = hashlib.shake_128(seed).digest(cls.BYTES)
