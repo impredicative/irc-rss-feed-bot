@@ -13,12 +13,12 @@ import jmespath
 
 from . import config
 from .db import Database
+from .entry import FeedEntry, ShortenedFeedEntry
 from .url import URLReader
 from .util.hext import html_to_text
 from .util.ircmessage import style
 from .util.lxml import sanitize_xml
 from .util.textwrap import shorten_to_bytes_width
-
 
 log = logging.getLogger(__name__)
 
@@ -26,42 +26,6 @@ log = logging.getLogger(__name__)
 def ensure_list(s: Optional[Union[str, List[str], Tuple[str], Set[str]]]) -> List[str]:
     # Ref: https://stackoverflow.com/a/56641168/
     return s if isinstance(s, list) else list(s) if isinstance(s, (tuple, set)) else [] if s is None else [s]
-
-
-@dataclasses.dataclass(unsafe_hash=True)
-class FeedEntry:
-    title: str = dataclasses.field(compare=False)
-    long_url: str = dataclasses.field(compare=True)
-    categories: List[str] = dataclasses.field(compare=False, repr=False)
-
-    @property
-    def post_url(self) -> str:
-        return self.long_url
-
-    def listing(self, searchlist: Dict[str, List]) -> Optional[Tuple[str, re.Match]]:  # type: ignore
-        # Check title and long URL
-        for searchlist_key, val in {'title': self.title, 'url': self.long_url}.items():
-            for pattern in searchlist.get(searchlist_key, []):
-                match = re.search(pattern, val)
-                if match:
-                    log.debug('%s matches %s pattern %s.', self, searchlist_key, repr(pattern))
-                    return searchlist_key, match
-        # Check categories
-        for pattern in searchlist.get('category', []):
-            for category in self.categories:
-                match = re.search(pattern, category)
-                if match:
-                    log.debug('%s having category %s matches category pattern %s.', self, repr(category), repr(pattern))
-                    return 'category', match
-
-
-@dataclasses.dataclass
-class ShortenedFeedEntry(FeedEntry):
-    short_url: str = dataclasses.field(compare=False)
-
-    @property
-    def post_url(self) -> str:
-        return self.short_url
 
 
 @dataclasses.dataclass
