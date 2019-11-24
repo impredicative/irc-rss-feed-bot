@@ -178,15 +178,6 @@ class Feed:
             if entry.title.isupper():  # e.g. for https://www.biorxiv.org/content/10.1101/667436v1
                 entry.title = entry.title.capitalize()
 
-        # Truncate titles
-        feed_styled = style(self.name, **feed_config.get('style', {}).get('name', {}))
-        for entry in entries:
-            base_bytes_use = len(config.PRIVMSG_FORMAT.format(identity=config.runtime.identity, channel=self.channel,
-                                                              feed=feed_styled, title='', url=entry.post_url
-                                                              ).encode())
-            title_bytes_width = max(0, config.QUOTE_LEN_MAX - base_bytes_use)
-            entry.title = shorten_to_bytes_width(entry.title, title_bytes_width)
-
         # Deduplicate entries again
         entries = self._dedupe_entries(entries, after_what='processing feed')
 
@@ -214,6 +205,15 @@ class Feed:
             entries = [ShortenedFeedEntry(e.title, e.long_url, e.categories, short_urls[i]) for i, e in
                        enumerate(entries)]
             log.debug('Shortened %s postable long URLs for %s.', len(entries), self)
+
+        # Shorten titles, also relative to URLs
+        feed_styled = style(self.name, **self.config.get('style', {}).get('name', {}))
+        for entry in entries:
+            base_bytes_use = len(config.PRIVMSG_FORMAT.format(identity=config.runtime.identity, channel=self.channel,
+                                                              feed=feed_styled, title='', url=entry.post_url
+                                                              ).encode())
+            title_bytes_width = max(0, config.QUOTE_LEN_MAX - base_bytes_use)
+            entry.title = shorten_to_bytes_width(entry.title, title_bytes_width)
 
         log.debug('Returning %s postable entries for %s.', len(entries), self)
         return entries
