@@ -58,7 +58,7 @@ Bitly tokens are required for shortening URLs.
 URL shortening is enabled for all feeds by default but can be disabled selectively per feed.
 The sample tokens above are for illustration only and are invalid.
 To obtain tokens, refer to [these instructions](https://github.com/impredicative/bitlyshortener#usage).
-Providing multiple comma-separated tokens, perhaps as many as 20 free ones or sufficient commercial ones, is required.
+Providing multiple comma-separated tokens, perhaps as many as 30 free ones or sufficient commercial ones, is required.
 Failing this, Bitly imposed rate limits for shortening URLs will lead to errors.
 If there are errors, the batched new entries in a feed may get reprocessed the next time the feed is read.
 It is safer to provide more tokens than are necessary.
