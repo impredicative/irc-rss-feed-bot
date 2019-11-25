@@ -5,7 +5,7 @@ import re
 # Ref: https://stackoverflow.com/a/59023463/
 
 _ENCODED_URL_RE = re.compile(r'^https://news\.google\.com/__i/rss/rd/articles/(?P<encoded_url>[^?]+)')
-_DECODED_URL_RE = re.compile(rb'^\x08\x13"[^h]+(?P<primary_url>[^\xd2]+)\xd2\x01')
+_DECODED_URL_RE = re.compile(rb'^\x08\x13".+?(?P<primary_url>http[^\xd2]+)\xd2\x01')
 
 
 @functools.lru_cache(2048)
