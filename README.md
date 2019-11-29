@@ -94,7 +94,7 @@ feeds:
           repl: https://redd.it/\g<id>
   "##some_chan2":
     ArXiv:cs.AI: &ArXiv
-      url: https://export.arxiv.org/rss/cs.AI
+      url: http://export.arxiv.org/rss/cs.AI
       period: 1.5
       https: true
       shorten: false
@@ -109,10 +109,10 @@ feeds:
           url: '{url}{ver}'
     ArXiv:cs.NE:
       <<: *ArXiv
-      url: https://export.arxiv.org/rss/cs.NE
+      url: http://export.arxiv.org/rss/cs.NE
     ArXiv:stat.ML:
       <<: *ArXiv
-      url: https://export.arxiv.org/rss/stat.ML
+      url: http://export.arxiv.org/rss/stat.ML
       group: null
     BioRxiv:
       url: https://connect.biorxiv.org/biorxiv_xml.php?subject=all
@@ -227,7 +227,7 @@ conversation.
 It is however possible that unrelated feeds of any channel gets posted between ones having the same group.
 To explicitly specify the absence of a group when using a YAML reference, the value can be specified as `null`.
 It is recommended that feeds in the same group have the same `period`.
-* **`https`**: If `true`, links that start with `http://` are changed to start with `https://` instead.
+* **`https`**: If `true`, entry links that start with `http://` are changed to start with `https://` instead.
 Its default value is `false`.
 * **`new`**: This indicates up to how many entries of a new feed to post.
 A new feed is defined as one with no prior posts in its channel.
