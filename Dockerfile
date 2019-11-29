@@ -1,4 +1,4 @@
-FROM python:3.7-slim
+FROM python:3.8-slim-buster
 WORKDIR /app
 RUN pip install --no-cache-dir -U pip
 COPY requirements.txt .
