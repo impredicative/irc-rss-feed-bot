@@ -132,14 +132,18 @@ class Bot:
                   feed_name, channel)
         instance = config.INSTANCE
         feed_config = instance['feeds'][channel][feed_name]
+
         channel_queue = Bot.CHANNEL_QUEUES[channel]
         feed_url = feed_config['url']
         feed_period_avg = max(config.PERIOD_HOURS_MIN, feed_config.get('period', config.PERIOD_HOURS_DEFAULT)) * 3600
         feed_period_min = feed_period_avg * (1 - config.PERIOD_RANDOM_PERCENT / 100)
         feed_period_max = feed_period_avg * (1 + config.PERIOD_RANDOM_PERCENT / 100)
+        num_consecutive_failures = 0
+
         irc = self._irc
         db = self._db
         url_shortener = self._url_shortener
+
         query_time = time.monotonic() - (feed_period_avg / 2)  # Delays first read by half of feed period.
         Bot.CHANNEL_JOIN_EVENTS[channel].wait()  # Optional.
         Bot.CHANNEL_JOIN_EVENTS[instance['alerts_channel']].wait()
@@ -182,10 +186,15 @@ class Bot:
                 else:
                     log.debug('Queued %s.', feed)
             except Exception as exc:
-                msg = f'Error reading or processing feed {feed_name} of {channel}: {exc}'
-                if feed_config.get('alerts', {}).get('read', True):
+                num_consecutive_failures += 1
+                msg = 'Failed'
+                if num_consecutive_failures > 1:
+                    msg += f' {num_consecutive_failures} consecutive times'
+                msg += f' while reading or processing feed {feed_name} of {channel}: {exc}'
+                if feed_config.get('alerts', {}).get('read', True) and \
+                        (num_consecutive_failures >= config.MIN_CONSECUTIVE_FEED_FAILURES_FOR_ALERT):
                     _alert(irc, msg)
-                    _alert(irc, 'Either check the feed configuration, or wait for its next read, '
+                    _alert(irc, 'Either check the feed configuration, or wait for its next successful read, '
                                 'or set `alerts/read` to `false` for it.')
                 else:
                     log.error(msg)  # Not logging as exception.
@@ -194,6 +203,7 @@ class Bot:
                     log.warning('Discontinuing reader for %s.', feed)
                     return
                 del feed
+                num_consecutive_failures = 0
 
     def _setup_channels(self) -> None:
         instance = config.INSTANCE

@@ -103,22 +103,19 @@ class Feed:
         entries = self._dedupe_entries(entries, after_what='reading feed')
 
         # Remove blacklisted entries
-        blacklist = feed_config.get('blacklist', {})
-        if blacklist:
+        if blacklist := feed_config.get('blacklist', {}):
             log.debug('Filtering %s entries using blacklist for %s.', len(entries), self)
             entries = [entry for entry in entries if not entry.listing(blacklist)]
             log.debug('Filtered to %s entries using blacklist for %s.', len(entries), self)
 
         # Keep only whitelisted entries
-        whitelist = feed_config.get('whitelist', {})
-        if whitelist:
+        if whitelist := feed_config.get('whitelist', {}):
             log.debug('Filtering %s entries using whitelist for %s.', len(entries), self)
             explain = whitelist.get('explain')
             whitelisted_entries: List[FeedEntry] = []
             for entry in entries:
-                listing = entry.listing(whitelist)
-                if listing:
-                    key, match = listing
+                if listing := entry.listing(whitelist):
+                    key, match = listing  # type: ignore
                     if explain and (key == 'title'):
                         span0, span1 = match.span()
                         title = entry.title
@@ -136,33 +133,28 @@ class Feed:
             log.debug('Enforced HTTPS for URLs in %s.', self)
 
         # Substitute entries
-        sub = feed_config.get('sub')
-        if sub:
+        if sub := feed_config.get('sub'):
             log.debug('Substituting entries for %s.', self)
             re_sub: Callable[[Dict[str, str], str], str] = lambda r, v: re.sub(r['pattern'], r['repl'], v)
-            title_sub = sub.get('title')
-            if title_sub:
+            if title_sub := sub.get('title'):   # type: ignore
                 for entry in entries:
                     entry.title = re_sub(title_sub, entry.title)
-            url_sub = sub.get('url')
-            if url_sub:
+            if url_sub := sub.get('url'):   # type: ignore
                 for entry in entries:
                     entry.long_url = re_sub(url_sub, entry.long_url)
             log.debug('Substituted entries for %s.', self)
 
         # Format entries
-        format_config = feed_config.get('format')
-        if format_config:
+        if format_config := feed_config.get('format'):
             log.debug('Formatting entries for %s.', self)
-            format_re = format_config.get('re', {})
-            format_str = format_config['str']
+            format_re = format_config.get('re', {})   # type: ignore
+            format_str = format_config['str']   # type: ignore
             for entry in entries:
                 params = {'title': entry.title, 'url': entry.long_url}
                 for key, val in params.copy().items():
                     if key in format_re:
-                        match = re.search(format_re[key], val)
-                        if match:
-                            params.update(match.groupdict())
+                        if match := re.search(format_re[key], val):
+                            params.update(match.groupdict())   # type: ignore
                 entry.title = format_str.get('title', '{title}').format_map(params)
                 entry.long_url = format_str.get('url', '{url}').format_map(params)
             log.debug('Formatted entries for %s.', self)

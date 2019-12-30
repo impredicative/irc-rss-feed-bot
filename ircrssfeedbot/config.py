@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 import tempfile
 import types
-from typing import Dict
+from typing import Dict, Final
 
 
 def configure_logging() -> None:
@@ -15,36 +15,38 @@ def configure_logging() -> None:
 # Meta
 INSTANCE: Dict = {}  # Gets set from YAML config file.
 runtime = types.SimpleNamespace()  # Set at runtime.
-PACKAGE_NAME = Path(__file__).parent.stem
-ENV = os.getenv(f'{PACKAGE_NAME.upper()}_ENV', 'prod')  # Externally set as needed: IRCRSSFEEDBOT_ENV='dev'
+PACKAGE_NAME: Final = Path(__file__).parent.stem
+ENV: Final = os.getenv(f'{PACKAGE_NAME.upper()}_ENV', 'prod')  # Externally set as needed: IRCRSSFEEDBOT_ENV='dev'
 
 # Main
-ALERTS_CHANNEL_FORMAT_DEFAULT = '##{nick}-alerts'
-BITLY_SHORTENER_MAX_CACHE_SIZE = 2048
-DB_FILENAME = 'posts.v2.db'
-DEDUP_STRATEGY_DEFAULT = 'channel'
-ETAG_CACHE_PROHIBITED_NETLOCS = {'blogs.cornell.edu',
-                                 'bodyrecomposition.com',
-                                 'deeplearning.ai',
-                                 'export.arxiv.org',
-                                 'rise.cs.berkeley.edu',
-                                 'siliconangle.com',
-                                 }
-ETAG_TEST_PROBABILITY = .1
-FEED_DEFAULTS = {'new': 'some', 'shorten': True}
-MESSAGE_FORMAT = '[{feed}] {title} → {url}'
-MIN_CHANNEL_IDLE_TIME = {'dev': 1}.get(ENV, 15 * 60)
-NEW_FEED_POSTS_MAX = {'none': 0, 'some': 3, 'all': None}
-PERIOD_HOURS_DEFAULT = 1
-PERIOD_HOURS_MIN = {'dev': .0001}.get(ENV, .5)
-PERIOD_RANDOM_PERCENT = {'dev': 20}.get(ENV, 5)
-QUOTE_LEN_MAX = 510  # Leaving 2 for "\r\n".
-READ_ATTEMPTS_MAX = 3
-REQUEST_TIMEOUT = 90
-SECONDS_PER_MESSAGE = 2
-TEMPDIR = Path(tempfile.gettempdir())
-USER_AGENT_DEFAULT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:67.0) Gecko/20100101 Firefox/67.0'
-USER_AGENT_OVERRIDES = {  # Site-specific overrides (without www prefix). Sites must be in lowercase.
+ALERTS_CHANNEL_FORMAT_DEFAULT: Final = '##{nick}-alerts'
+BITLY_SHORTENER_MAX_CACHE_SIZE: Final = 2048
+DB_FILENAME: Final = 'posts.v2.db'
+DEDUP_STRATEGY_DEFAULT: Final = 'channel'
+ETAG_CACHE_PROHIBITED_NETLOCS: Final = {
+    'blogs.cornell.edu',
+    'bodyrecomposition.com',
+    'deeplearning.ai',
+    'export.arxiv.org',
+    'rise.cs.berkeley.edu',
+    'siliconangle.com',
+}
+ETAG_TEST_PROBABILITY: Final = .1
+FEED_DEFAULTS: Final = {'new': 'some', 'shorten': True}
+MESSAGE_FORMAT: Final = '[{feed}] {title} → {url}'
+MIN_CHANNEL_IDLE_TIME: Final = {'dev': 1}.get(ENV, 15 * 60)
+MIN_CONSECUTIVE_FEED_FAILURES_FOR_ALERT: Final = 3
+NEW_FEED_POSTS_MAX: Final = {'none': 0, 'some': 3, 'all': None}
+PERIOD_HOURS_DEFAULT: Final = 1
+PERIOD_HOURS_MIN: Final = {'dev': .0001}.get(ENV, .5)
+PERIOD_RANDOM_PERCENT: Final = {'dev': 20}.get(ENV, 5)
+QUOTE_LEN_MAX: Final = 510  # Leaving 2 for "\r\n".
+READ_ATTEMPTS_MAX: Final = 3
+REQUEST_TIMEOUT: Final = 90
+SECONDS_PER_MESSAGE: Final = 2
+TEMPDIR: Final = Path(tempfile.gettempdir())
+USER_AGENT_DEFAULT: Final = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:67.0) Gecko/20100101 Firefox/67.0'
+USER_AGENT_OVERRIDES: Final = {  # Site-specific overrides (without www prefix). Sites must be in lowercase.
     'medscape.com': 'Googlebot-News',
     'm.youtube.com': 'Mozilla/5.0',
     'swansonvitamins.com': 'FeedFetcher-Google; (+http://www.google.com/feedfetcher.html)',
@@ -53,10 +55,10 @@ USER_AGENT_OVERRIDES = {  # Site-specific overrides (without www prefix). Sites 
 }
 
 # Calculated
-PRIVMSG_FORMAT = f':{{identity}} PRIVMSG {{channel}} :{MESSAGE_FORMAT}'  # Assumed.
-URL_CACHE_TTL = PERIOD_HOURS_MIN * 3600 * ((100 - PERIOD_RANDOM_PERCENT) / 100) * .99
+PRIVMSG_FORMAT: Final = f':{{identity}} PRIVMSG {{channel}} :{MESSAGE_FORMAT}'  # Assumed.
+URL_CACHE_TTL: Final = PERIOD_HOURS_MIN * 3600 * ((100 - PERIOD_RANDOM_PERCENT) / 100) * .99
 
-LOGGING = {  # Ref: https://docs.python.org/3/howto/logging.html#configuring-logging
+LOGGING: Final = {  # Ref: https://docs.python.org/3/howto/logging.html#configuring-logging
     'version': 1,
     'formatters': {
         'detailed': {
