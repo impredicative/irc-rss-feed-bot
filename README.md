@@ -24,8 +24,6 @@ Any websites with a mismatched _strong_ ETag are probabilistically detected, and
 for the duration of the process. Note that this detection is skipped for a _weak_ ETag.
 The TTL cache is used only for URLs that are used by more than one feed each.
 * Encoded Google News URLs are decoded.
-* To minimize any inconsequential alerts, a failure while reading or processing a feed is alerted only if it occurs 
-three or more consecutive times.
 
 For more features, see the customizable [global settings](#global-settings) and
 [feed-specific settings](#feed-specific-settings).
@@ -210,10 +208,11 @@ Examples of this are in the sample.
 
 ##### Optional
 These are optional and are independent of each other:
-* **`alerts/empty`**: If `false`, an alert is not sent if the feed has no entries.
-Its default value is `true`. This can be useful for feeds that are known to intermittently have no entries.
-* **`alerts/read`**: If `false`, an alert is not sent if an error occurs when reading or processing the feed.
-Its default value is `true`. This can be useful for feeds that trigger an intermittent failure alert.
+* **`alerts/empty`**: If `true`, an alert is sent if the feed has no entries. If `false`, such an alert is not sent.
+Its default value is `true`.
+* **`alerts/read`**: If `true`, an alert is sent if an error occurs three or more consecutive times when reading or processing the feed.
+If `false`, such an alert is not sent.
+Its default value is `true`.
 * **`blacklist/category`**: This is a list of regular expression patterns that result in an entry being skipped if a
 [search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in any of the categories of the
 entry.
