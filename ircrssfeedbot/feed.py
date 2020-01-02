@@ -68,20 +68,21 @@ class Feed:
             parser = 'jmes'
             raw_entries = jmespath.search(feed_config['jmes'], json.loads(content)) or []  # search can return None
             entries = [FeedEntry(title=e['title'].strip(), long_url=e['link'].strip(),
-                                 categories=[c.strip() for c in ensure_list(e.get('category', []))])
+                                 categories=[c.strip() for c in ensure_list(e.get('category', []))], data=e)
                        for e in raw_entries]
         elif feed_config.get('hext'):
             parser = 'hext'
             raw_entries = hext.Rule(feed_config['hext']).extract(hext.Html(content.decode()))
             entries = [FeedEntry(title=html.unescape(e['title'].strip()), long_url=e['link'].strip(),
-                                 categories=[html.unescape(c.strip()) for c in ensure_list(e.get('category', []))])
+                                 categories=[html.unescape(c.strip()) for c in ensure_list(e.get('category', []))],
+                                 data=e)
                        for e in raw_entries]
         else:
             parser = 'default'
             content = sanitize_xml(content)  # e.g. for unescaped "&" char in https://deepmind.com/blog/feed/basic/
             raw_entries = feedparser.parse(content.lstrip())['entries']
             entries = [FeedEntry(title=e['title'], long_url=e['link'],
-                                 categories=[t['term'] for t in getattr(e, 'tags', [])])
+                                 categories=[t['term'] for t in getattr(e, 'tags', [])], data=dict(e))
                        for e in raw_entries]
         log_msg = f'Parsed {len(entries)} entries for {self}.'
         if entries:
@@ -98,9 +99,6 @@ class Feed:
         if self.url.startswith('https://news.google.com/rss/') and (parser == 'default'):
             for entry in entries:
                 entry.long_url = decode_google_news_url(entry.long_url)
-
-        # Deduplicate entries
-        entries = self._dedupe_entries(entries, after_what='reading feed')
 
         # Remove blacklisted entries
         if blacklist := feed_config.get('blacklist', {}):
@@ -150,11 +148,13 @@ class Feed:
             format_re = format_config.get('re', {})   # type: ignore
             format_str = format_config['str']   # type: ignore
             for entry in entries:
-                params = {'title': entry.title, 'url': entry.long_url}
-                for key, val in params.copy().items():
-                    if key in format_re:
-                        if match := re.search(format_re[key], val):
-                            params.update(match.groupdict())   # type: ignore
+                # Collect:
+                re_params = {'title': entry.title, 'url': entry.long_url}
+                params = {**entry.data, **re_params}
+                for re_key, re_val in format_re.items():
+                    if match := re.search(re_val, params[re_key]):
+                        params.update(match.groupdict())   # type: ignore
+                # Format:
                 entry.title = format_str.get('title', '{title}').format_map(params)
                 entry.long_url = format_str.get('url', '{url}').format_map(params)
             log.debug('Formatted entries for %s.', self)
@@ -203,8 +203,8 @@ class Feed:
             log.debug('Shortening %s postable long URLs for %s.', len(entries), self)
             long_urls = [entry.long_url for entry in entries]
             short_urls = self.url_shortener.shorten_urls(long_urls)
-            entries = [ShortenedFeedEntry(e.title, e.long_url, e.categories, short_urls[i]) for i, e in
-                       enumerate(entries)]
+            entries = [ShortenedFeedEntry(title=e.title, long_url=e.long_url, categories=e.categories, data=e.data,
+                                          short_url=short_urls[i]) for i, e in enumerate(entries)]
             log.debug('Shortened %s postable long URLs for %s.', len(entries), self)
 
         # Shorten titles, also relative to URLs

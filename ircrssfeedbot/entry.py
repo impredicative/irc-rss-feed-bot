@@ -1,7 +1,7 @@
 import dataclasses
 import logging
 import re
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 log = logging.getLogger(__name__)
 
@@ -11,6 +11,7 @@ class FeedEntry:
     title: str = dataclasses.field(compare=False)
     long_url: str = dataclasses.field(compare=True)
     categories: List[str] = dataclasses.field(compare=False, repr=False)
+    data: Dict[str, Any] = dataclasses.field(compare=False, repr=False)
 
     @property
     def post_url(self) -> str:
