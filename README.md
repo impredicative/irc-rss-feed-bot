@@ -114,6 +114,21 @@ feeds:
       <<: *ArXiv
       url: http://export.arxiv.org/rss/stat.ML
       group: null
+    AWS:status:
+      url: https://status.aws.amazon.com/rss/all.rss
+      period: .25
+      https: true
+      new: none
+      sub:
+        title:
+          pattern: ^(?:Informational\ message|Service\ is\ operating\ normally):\ \[RESOLVED\]
+          repl: '[RESOLVED]'
+      format:
+        re:
+          id: /\#(?P<service>[^_]+)
+        str:
+          title: '[{service}] {title} | {summary}'
+          url: '{id}'
     BioRxiv:
       url: https://connect.biorxiv.org/biorxiv_xml.php?subject=all
       alerts:
