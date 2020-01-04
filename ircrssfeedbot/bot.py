@@ -72,7 +72,6 @@ class Bot:
         db = self._db
         irc = self._irc
         message_format = config.MESSAGE_FORMAT
-        min_channel_idle_time = config.MIN_CHANNEL_IDLE_TIME
         seconds_per_msg = config.SECONDS_PER_MESSAGE
         Bot.CHANNEL_JOIN_EVENTS[channel].wait()
         Bot.CHANNEL_JOIN_EVENTS[instance['alerts_channel']].wait()
@@ -80,6 +79,10 @@ class Bot:
         while True:
             feed = channel_queue.get()
             log.debug('Dequeued %s.', feed)
+            min_channel_idle_time = config.MIN_CHANNEL_IDLE_TIME_DEFAULT if \
+                (feed.period_hours > config.PERIOD_HOURS_MIN) else config.MIN_CHANNEL_IDLE_TIME_URGENT
+            log.debug('The minimum required channel idle time for %s is %s.',
+                      feed, timedelta_desc(min_channel_idle_time))
             try:
                 if feed.postable_entries:  # Result gets cached.
                     try:

@@ -9,8 +9,10 @@ In this case, it can be viewed correctly on [GitHub](https://github.com/impredic
 ## Features
 * Multiple channels on an IRC server are supported, with each channel having its own set of feeds.
 For use with multiple servers, a separate instance of the bot process can be run for each server.
-* Entries are posted only if the channel has not had any conversation for at least 15 minutes, thereby preventing the
-interruption of any preexisting conversations.
+* Entries are posted only if the channel has not had any conversation for a certain minimum amount of time, 
+thereby avoiding the interruption of any preexisting conversations.
+This amount of time is 15 minutes for any feed which has a polling period greater than 15 minutes.
+It is 1 minute for any feed which has a polling period less than or equal to 15 minutes.
 * A SQLite database file records hashes of the entries that have been posted, thereby preventing them from being
 reposted.
 * The [`hext`](https://pypi.org/project/hext/) and [`jmespath`](https://pypi.org/project/jmespath/) DSLs are used for
