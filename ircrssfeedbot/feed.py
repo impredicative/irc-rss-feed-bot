@@ -40,7 +40,9 @@ class Feed:
     def __post_init__(self):
         log.debug('Initializing instance of %s.', self)
         self.config: Dict = {**config.INSTANCE['defaults'], **config.INSTANCE['feeds'][self.channel][self.name]}
-        self.period_hours = self.config.get('period', config.PERIOD_HOURS_DEFAULT)
+        self.min_channel_idle_time = config.MIN_CHANNEL_IDLE_TIME_DEFAULT if \
+            (self.config.get('period', config.PERIOD_HOURS_DEFAULT) > config.PERIOD_HOURS_MIN) else \
+            config.MIN_CHANNEL_IDLE_TIME_URGENT
         self.entries = self._entries()  # Entries are effectively cached here at this point in time.
         log.debug('Initialized instance of %s.', self)
 

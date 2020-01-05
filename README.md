@@ -12,7 +12,8 @@ For use with multiple servers, a separate instance of the bot process can be run
 * Entries are posted only if the channel has not had any conversation for a certain minimum amount of time, 
 thereby avoiding the interruption of any preexisting conversations.
 This amount of time is 15 minutes for any feed which has a polling period greater than 15 minutes.
-It is 1 minute for any feed which has a polling period less than or equal to 15 minutes.
+There is however no delay for any feed which has a polling period less than or equal to 15 minutes as such a feed is
+considered urgent.
 * A SQLite database file records hashes of the entries that have been posted, thereby preventing them from being
 reposted.
 * The [`hext`](https://pypi.org/project/hext/) and [`jmespath`](https://pypi.org/project/jmespath/) DSLs are used for

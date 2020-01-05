@@ -79,10 +79,8 @@ class Bot:
         while True:
             feed = channel_queue.get()
             log.debug('Dequeued %s.', feed)
-            min_channel_idle_time = config.MIN_CHANNEL_IDLE_TIME_DEFAULT if \
-                (feed.period_hours > config.PERIOD_HOURS_MIN) else config.MIN_CHANNEL_IDLE_TIME_URGENT
             log.debug('The minimum required channel idle time for %s is %s.',
-                      feed, timedelta_desc(min_channel_idle_time))
+                      feed, timedelta_desc(feed.min_channel_idle_time))
             try:
                 if feed.postable_entries:  # Result gets cached.
                     try:
@@ -92,7 +90,7 @@ class Bot:
                                 self._outgoing_msg_lock.acquire()
                             last_incoming_msg_time = Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel]
                             time_elapsed_since_last_ic_msg = time.monotonic() - last_incoming_msg_time
-                            sleep_time = max(0, min_channel_idle_time - time_elapsed_since_last_ic_msg)
+                            sleep_time = max(0, feed.min_channel_idle_time - time_elapsed_since_last_ic_msg)
                             if sleep_time == 0:
                                 break  # Lock will be released later after posting messages.
                             self._outgoing_msg_lock.release()  # Releasing lock before sleeping.
