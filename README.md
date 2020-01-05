@@ -11,8 +11,8 @@ In this case, it can be viewed correctly on [GitHub](https://github.com/impredic
 For use with multiple servers, a separate instance of the bot process can be run for each server.
 * Entries are posted only if the channel has not had any conversation for a certain minimum amount of time, 
 thereby avoiding the interruption of any preexisting conversations.
-This amount of time is 15 minutes for any feed which has a polling period greater than 15 minutes.
-There is however no delay for any feed which has a polling period less than or equal to 15 minutes as such a feed is
+This amount of time is 15 minutes for any feed which has a polling period greater than 12 minutes.
+There is however no delay for any feed which has a polling period less than or equal to 12 minutes as such a feed is
 considered urgent.
 * A SQLite database file records hashes of the entries that have been posted, thereby preventing them from being
 reposted.
@@ -119,7 +119,7 @@ feeds:
       group: null
     AWS:status:
       url: https://status.aws.amazon.com/rss/all.rss
-      period: .25
+      period: .2
       https: true
       new: none
       sub:
@@ -257,7 +257,8 @@ A value of `all` will skip no entries for a new feed; it is not recommended and 
 In any case, future entries in the feed are not affected by this option on subsequent reads,
 and they are all forwarded without a limit.
 * **`period`**: This indicates how frequently to read the feed in hours on an average. Its default value is 1.
-Conservative polling is recommended. Any value below 0.25 is changed to a minimum of 0.25.
+Conservative polling is recommended. Any value below 0.2 is changed to a minimum of 0.2.
+Note that 0.2 hours is equal to 12 minutes.
 To make service restarts safer by preventing excessive reads, the first read is delayed by half the period.
 To better distribute the load of reading multiple feeds, a uniformly distributed random ±5% is applied to the period for
 each read.
