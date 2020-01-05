@@ -1,3 +1,4 @@
+"""Print entries from an RSS or Atom feed parsed using feedparser."""
 import feedparser
 import requests
 
@@ -5,7 +6,10 @@ from ircrssfeedbot import config
 from ircrssfeedbot.util.lxml import sanitize_xml
 from ircrssfeedbot.util.urllib import url_to_netloc
 
+# pylint: disable=invalid-name
+
 # Customize:
+
 URL = "https://deepmind.com/blog/feed/basic/"
 
 user_agent = config.USER_AGENT_OVERRIDES.get(url_to_netloc(URL), config.USER_AGENT_DEFAULT)

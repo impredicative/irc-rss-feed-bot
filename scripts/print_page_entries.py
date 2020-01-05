@@ -1,3 +1,4 @@
+"""Print entries from an HTML page parsed using hext."""
 import html
 
 import hext
@@ -6,6 +7,8 @@ import requests
 from ircrssfeedbot import config
 from ircrssfeedbot.feed import ensure_list
 from ircrssfeedbot.util.urllib import url_to_netloc
+
+# pylint: disable=invalid-name
 
 # Customize:
 URL = "https://ergo-log.com"

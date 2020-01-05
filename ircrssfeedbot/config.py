@@ -1,3 +1,4 @@
+"""Package configuration."""
 import logging.config
 import os
 import tempfile
@@ -7,6 +8,7 @@ from typing import Dict, Final
 
 
 def configure_logging() -> None:
+    """Configure logging."""
     logging.config.dictConfig(LOGGING)
     log = logging.getLogger(__name__)
     log.debug("Logging is configured.")
@@ -14,7 +16,7 @@ def configure_logging() -> None:
 
 # Meta
 INSTANCE: Dict = {}  # Gets set from YAML config file.
-runtime = types.SimpleNamespace()  # Set at runtime.
+runtime = types.SimpleNamespace()  # Set at runtime.  # pylint: disable=invalid-name
 PACKAGE_NAME: Final = Path(__file__).parent.stem
 ENV: Final = os.getenv(f"{PACKAGE_NAME.upper()}_ENV", "prod")  # Externally set as needed: IRCRSSFEEDBOT_ENV='dev'
 

@@ -1,3 +1,4 @@
+"""Bot."""
 import datetime
 import logging
 import os
@@ -26,13 +27,18 @@ def _alert(irc: miniirc.IRC, msg: str, logger: Callable[[str], None] = log.excep
 
 
 class Bot:
+    """Bot."""
+
     CHANNEL_JOIN_EVENTS: Dict[str, threading.Event] = {}
     CHANNEL_LAST_INCOMING_MSG_TIMES: Dict[str, float] = {}
     CHANNEL_QUEUES: Dict[str, queue.Queue] = {}
     FEED_GROUP_BARRIERS: Dict[str, threading.Barrier] = {}
 
     def __init__(self) -> None:
-        log.info("Initializing bot as: %s", subprocess.check_output("id", text=True).rstrip())
+        log.info(
+            "Initializing bot as: %s",
+            subprocess.check_output("id", text=True).rstrip(),  # pylint: disable=unexpected-keyword-arg
+        )
         instance = config.INSTANCE
         self._outgoing_msg_lock = threading.Lock()  # Used for rate limiting across multiple channels.
         self._db = Database()
@@ -66,7 +72,7 @@ class Bot:
         log.info("Duration of TTL cache of URL content is %s.", timedelta_desc(config.URL_CACHE_TTL))
         log.info("Alerts will be sent to %s.", config.INSTANCE["alerts_channel"])
 
-    def _msg_channel(self, channel: str) -> None:
+    def _msg_channel(self, channel: str) -> None:  # pylint: disable=too-many-locals,too-many-statements
         log.debug("Channel messenger for %s is starting and is waiting to be notified of channel join.", channel)
         instance = config.INSTANCE
         channel_queue = Bot.CHANNEL_QUEUES[channel]
@@ -77,7 +83,7 @@ class Bot:
         Bot.CHANNEL_JOIN_EVENTS[channel].wait()
         Bot.CHANNEL_JOIN_EVENTS[instance["alerts_channel"]].wait()
         log.info("Channel messenger for %s has started.", channel)
-        while True:
+        while True:  # pylint: disable=too-many-nested-blocks
             feed = channel_queue.get()
             log.debug("Dequeued %s.", feed)
             log.debug(
@@ -125,12 +131,12 @@ class Bot:
                 if feed.unposted_entries:  # Note: feed.postable_entries is intentionally not used here.
                     db.insert_posted(channel, feed.name, [entry.long_url for entry in feed.unposted_entries])
 
-            except Exception as exc:
+            except Exception as exc:  # pylint: disable=broad-except
                 msg = f"Error processing {feed}: {exc}"
                 _alert(irc, msg)
             channel_queue.task_done()
 
-    def _read_feed(self, channel: str, feed_name: str) -> None:
+    def _read_feed(self, channel: str, feed_name: str) -> None:  # pylint: disable=too-many-locals,too-many-statements
         log.debug(
             "Feed reader for feed %s of %s is starting and is waiting to be notified of channel join.",
             feed_name,
@@ -197,7 +203,7 @@ class Bot:
                     channel_queue.put(feed)
                 else:
                     log.debug("Queued %s.", feed)
-            except Exception as exc:
+            except Exception as exc:  # pylint: disable=broad-except
                 num_consecutive_failures += 1
                 msg = "Failed"
                 if num_consecutive_failures > 1:
@@ -296,7 +302,7 @@ def _handle_loggedin(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: Lis
 @miniirc.Handler("NICK", colon=False)
 def _handle_nick(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     log.debug("Handling nick change: hostmask=%s, args=%s", hostmask, args)
-    old_nick, ident, hostname = hostmask
+    old_nick, _ident, _hostname = hostmask
 
     # Ignore if not actionable
     if old_nick.casefold() != config.runtime.nick_casefold:
@@ -313,7 +319,7 @@ def _handle_nick(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[s
 def _handle_join(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     # Parse message
     log.debug("Handling channel join: hostmask=%s, args=%s", hostmask, args)
-    user, ident, hostname = hostmask
+    user, _ident, _hostname = hostmask
     channel = args[0]
 
     # Ignore if not actionable

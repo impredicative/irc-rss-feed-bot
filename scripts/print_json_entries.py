@@ -1,3 +1,4 @@
+"""Print entries from a JSON document parsed using jmespath."""
 import html
 import json
 
@@ -7,6 +8,8 @@ import requests
 from ircrssfeedbot import config
 from ircrssfeedbot.feed import ensure_list
 from ircrssfeedbot.util.urllib import url_to_netloc
+
+# pylint: disable=invalid-name
 
 # Customize:
 URL = "https://www.reddit.com/r/MachineLearning/hot/.json?limit=50"

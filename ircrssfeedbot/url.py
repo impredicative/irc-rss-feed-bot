@@ -1,3 +1,4 @@
+"""URL reader and content."""
 import logging
 import random
 import sys
@@ -17,28 +18,36 @@ log = logging.getLogger(__name__)
 
 
 class URLContent:
+    """URL content."""
+
     def __init__(self, etag: str, content: bytes):
         self._etag = etag
         self._content = zlib.compress(content)
 
     @property  # Effectively read-only. For memory efficiency, don't use cachedproperty here.
     def content(self) -> bytes:
+        """Return URL content."""
         return zlib.decompress(self._content)
 
     @property  # Effectively read-only.
     def etag(self) -> str:
+        """Return URL ETag."""
         return self._etag
 
     @property
     def is_etag_strong(self) -> bool:
+        """Return whether the ETag is a strong ETag."""
         return not self.is_etag_weak
 
     @property
     def is_etag_weak(self) -> bool:
+        """Return whether the ETag is a weak ETag."""
         return self._etag.startswith(("W/", "w/"))  # Only uppercase "W/" has been observed.
 
 
 class URLReader:
+    """URL reader."""
+
     _etag_cache: ClassVar[Dict[str, URLContent]] = {}
 
     @classmethod
@@ -57,7 +66,7 @@ class URLReader:
         return zlib.compress(cls._url_content(url))
 
     @classmethod
-    def _url_content(cls, url: str) -> bytes:
+    def _url_content(cls, url: str) -> bytes:  # pylint: disable=too-many-branches
         # Note: This method is feed agnostic. To prevent bugs, the return value of this method must be immutable.
         # Note: TTL cache is useful if the same URL is to be read for multiple feeds, sometimes for multiple channels.
         netloc = url_to_netloc(url)
@@ -92,7 +101,7 @@ class URLReader:
                 break
 
         # Get and cache content
-        if response.status_code == 304:
+        if response.status_code == 304:  # pylint: disable=too-many-nested-blocks
             content = etag_cache.content
             log.debug("Reused cached content for %s from etag cache.", url)
         else:  # 200
@@ -142,6 +151,7 @@ class URLReader:
 
     @classmethod
     def url_content(cls, url: str) -> bytes:
+        """Return the URL content."""
         return (
             zlib.decompress(cls._ttl_cached_compressed_url_content(url))
             if (url in config.INSTANCE["repeated_urls"])

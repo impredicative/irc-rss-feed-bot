@@ -1,3 +1,4 @@
+"""Decode encoded Google News entry URLs."""
 import base64
 import functools
 import re
@@ -22,4 +23,5 @@ def _decode_google_news_url(url: str) -> str:
 
 
 def decode_google_news_url(url: str) -> str:  # Not cached because not all Google News URLs are encoded.
+    """Return Google News entry URLs after decoding their encoding if it exists."""
     return _decode_google_news_url(url) if url.startswith("https://news.google.com/") else url

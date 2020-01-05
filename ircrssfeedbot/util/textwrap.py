@@ -1,3 +1,4 @@
+"""textwrap utilities."""
 import textwrap
 import unittest
 
@@ -5,6 +6,7 @@ _MIN_WIDTH = 5  # == len(textwrap.shorten(string.ascii_letters, len(string.ascii
 
 
 def shorten_to_bytes_width(text: str, width: int) -> str:
+    """Return shortened text for a given bytes width."""
     # Ref: https://stackoverflow.com/a/56401167/
     width = max(_MIN_WIDTH, width)  # This prevents ValueError if width < _MIN_WIDTH
     text = textwrap.shorten(text, width)  # After this line, len(text.encode()) >= width
@@ -14,6 +16,7 @@ def shorten_to_bytes_width(text: str, width: int) -> str:
     return text
 
 
+# pylint: disable=missing-class-docstring,missing-function-docstring
 class TestShortener(unittest.TestCase):
     def test_example(self):
         text = "☺ Ilsa, le méchant ☺ ☺ gardien ☺"

@@ -1,0 +1,25 @@
+[MASTER]
+jobs=0
+
+[BASIC]
+good-names=db,df,fn,KiB,log,MiB
+class-attribute-rgx=([A-Za-z_][A-Za-z0-9_]{2,60}|(__.*__))$
+function-rgx=([a-z_][a-z0-9_]{2,60}|test_[a-z0-9_]{2,90})$
+method-rgx=([a-z_][a-z0-9_]{2,60}|test_[a-z0-9_]{2,90})$
+
+[MESSAGES CONTROL]
+disable=
+    bad-continuation,
+    locally-disabled,
+    locally-enabled,
+    logging-format-interpolation,
+    no-init,
+    too-few-public-methods,
+    too-many-instance-attributes,
+    fixme
+
+[REPORTS]
+output-format=colorized
+
+[FORMAT]
+max-line-length=120

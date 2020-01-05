@@ -1,3 +1,4 @@
+"""Database interface."""
 import logging
 import threading
 from typing import List, Set
@@ -14,11 +15,13 @@ _DATABASE = peewee.SqliteDatabase(None)
 
 
 class Post(peewee.Model):
+    """Post table."""
+
     channel = peewee.BigIntegerField(null=False, verbose_name="signed hash of channel name")
     feed = peewee.BigIntegerField(null=False, verbose_name="signed hash of feed name")
     url = peewee.BigIntegerField(null=False, verbose_name="signed hash of long URL")
 
-    class Meta:
+    class Meta:  # pylint: disable=missing-class-docstring
         database = _DATABASE
         legacy_table_names = False  # This will become a default in peewee>=4
         primary_key = peewee.CompositeKey("channel", "feed", "url")
@@ -29,6 +32,8 @@ class Post(peewee.Model):
 
 
 class Database:
+    """Database interface via an ORM."""
+
     def __init__(self) -> None:
         # Initialize db
         log.debug("Initializing database.")
@@ -71,10 +76,12 @@ class Database:
 
     @staticmethod
     def is_new_feed(channel: str, feed: str) -> bool:
+        """Return whether the specified feed name is new or not by checking whether it has entries in the database."""
         conditions = (Post.channel == Int8Hash.as_int(channel)) & (Post.feed == Int8Hash.as_int(feed))
         return not Post.select(Post.url).where(conditions).limit(1)
 
     def select_unposted_for_channel(self, channel: str, feed: str, urls: List[str]) -> List[str]:
+        """Return unposted URLs for the given channel."""
         log.debug(
             "Retrieving unposted URLs from the database for channel %s having ignored feed %s out of %s URLs.",
             channel,
@@ -95,6 +102,7 @@ class Database:
         return unposted_urls
 
     def select_unposted_for_channel_feed(self, channel: str, feed: str, urls: List[str]) -> List[str]:
+        """Return unposted URLs for the given channel and feed."""
         log.debug(
             "Retrieving unposted URLs from the database for channel %s having feed %s out of %s URLs.",
             channel,
@@ -115,12 +123,13 @@ class Database:
         return unposted_urls
 
     def insert_posted(self, channel: str, feed: str, urls: List[str]) -> None:
+        """Insert the given URLs for the given channel and feed."""
         log.debug("Inserting %s URLs into the database for channel %s having feed %s.", len(urls), channel, feed)
         channel_hash, feed_hash, urls_hashes = Int8Hash.as_int(channel), Int8Hash.as_int(feed), Int8Hash.as_list(urls)
         data = ({"channel": channel_hash, "feed": feed_hash, "url": url_hash} for url_hash in urls_hashes)
         with self._write_lock, self._db.atomic():
             for batch in chunked(data, 100):  # Ref: https://www.sqlite.org/limits.html#max_variable_number
-                Post.insert_many(batch).execute()
+                Post.insert_many(batch).execute()  # pylint: disable=no-value-for-parameter
                 # Note: "sqlite3.IntegrityError: UNIQUE constraint failed" would be indicative of a bug elsewhere.
                 # As such, prepending ".on_conflict_ignore()" before ".execute()" should not be needed.
         log.info("Inserted %s URLs into the database for channel %s having feed %s.", len(urls), channel, feed)

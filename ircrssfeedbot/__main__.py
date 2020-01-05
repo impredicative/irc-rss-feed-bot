@@ -1,3 +1,4 @@
+"""Package entrypoint."""
 import argparse
 import collections
 import json
@@ -12,6 +13,7 @@ log = logging.getLogger(__name__)
 
 
 def main() -> None:
+    """Start the bot."""
     # Read args
     parser = argparse.ArgumentParser(prog=config.PACKAGE_NAME, description="IRC RSS feed posting bot")
     parser.add_argument("--config-path", required=True, help="Configuration file path, e.g. /some/dir/config.yaml")

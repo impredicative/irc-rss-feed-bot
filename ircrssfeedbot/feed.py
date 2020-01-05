@@ -1,3 +1,4 @@
+"""Feed."""
 import dataclasses
 import html
 import json
@@ -24,13 +25,16 @@ from .util.textwrap import shorten_to_bytes_width
 log = logging.getLogger(__name__)
 
 
-def ensure_list(s: Optional[Union[str, List[str], Tuple[str], Set[str]]]) -> List[str]:
+def ensure_list(s: Optional[Union[str, List[str], Tuple[str], Set[str]]]) -> List[str]:  # pylint: disable=invalid-name
+    """Return the given object as a list of strings."""
     # Ref: https://stackoverflow.com/a/56641168/
     return s if isinstance(s, list) else list(s) if isinstance(s, (tuple, set)) else [] if s is None else [s]
 
 
 @dataclasses.dataclass
 class Feed:
+    """Feed with entries."""
+
     channel: str
     name: str
     url: str = dataclasses.field(repr=False)
@@ -67,7 +71,7 @@ class Feed:
             return entries_deduped
         return entries
 
-    def _entries(self) -> List[FeedEntry]:
+    def _entries(self) -> List[FeedEntry]:  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
         feed_config = self.config
 
         # Retrieve URL content
@@ -217,6 +221,7 @@ class Feed:
 
     @cachedproperty
     def postable_entries(self) -> List[Union[FeedEntry, ShortenedFeedEntry]]:
+        """Return the subset of postable entries as a list."""
         log.debug("Retrieving postable entries for %s.", self)
         entries = self.unposted_entries
 
@@ -265,6 +270,7 @@ class Feed:
 
     @cachedproperty
     def unposted_entries(self) -> List[FeedEntry]:
+        """Return the subset of unposted entries as a list."""
         log.debug("Retrieving unposted entries for %s.", self)
         entries = self.entries
         long_urls = [entry.long_url for entry in entries]
