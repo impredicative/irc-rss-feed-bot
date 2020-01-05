@@ -1,4 +1,5 @@
 import textwrap
+import unittest
 
 _MIN_WIDTH = 5  # == len(textwrap.shorten(string.ascii_letters, len(string.ascii_letters) - 1)) == len('[...]')
 
@@ -13,15 +14,13 @@ def shorten_to_bytes_width(text: str, width: int) -> str:
     return text
 
 
-import unittest
-
-
 class TestShortener(unittest.TestCase):
     def test_example(self):
-        text = '☺ Ilsa, le méchant ☺ ☺ gardien ☺'
+        text = "☺ Ilsa, le méchant ☺ ☺ gardien ☺"
         width = 27
         shortened = shorten_to_bytes_width(text, width)
-        self.assertEqual(shortened, '☺ Ilsa, le méchant [...]')
+        self.assertEqual(shortened, "☺ Ilsa, le méchant [...]")
         self.assertLessEqual(len(shortened.encode()), width)
+
 
 # python -m unittest -v ircrssfeedbot.util.textwrap

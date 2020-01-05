@@ -2,8 +2,8 @@ import logging
 import random
 import sys
 import time
-from typing import ClassVar, Dict
 import zlib
+from typing import ClassVar, Dict
 
 import cachetools.func
 import requests
@@ -17,7 +17,6 @@ log = logging.getLogger(__name__)
 
 
 class URLContent:
-
     def __init__(self, etag: str, content: bytes):
         self._etag = etag
         self._content = zlib.compress(content)
@@ -36,7 +35,7 @@ class URLContent:
 
     @property
     def is_etag_weak(self) -> bool:
-        return self._etag.startswith(('W/', 'w/'))  # Only uppercase "W/" has been observed.
+        return self._etag.startswith(("W/", "w/"))  # Only uppercase "W/" has been observed.
 
 
 class URLReader:
@@ -49,12 +48,12 @@ class URLReader:
         except KeyError:
             pass
         else:
-            log.info('Deleted cached content for %s from etag cache.', url)
+            log.info("Deleted cached content for %s from etag cache.", url)
 
     @classmethod
     @cachetools.func.ttl_cache(maxsize=sys.maxsize, ttl=config.URL_CACHE_TTL)
     def _ttl_cached_compressed_url_content(cls, url: str) -> bytes:
-        log.debug('Compressed content of %s will be stored in the TTL cache.', url)
+        log.debug("Compressed content of %s will be stored in the TTL cache.", url)
         return zlib.compress(cls._url_content(url))
 
     @classmethod
@@ -64,7 +63,7 @@ class URLReader:
         netloc = url_to_netloc(url)
 
         # Define headers
-        headers = {'User-Agent': config.USER_AGENT_OVERRIDES.get(netloc, config.USER_AGENT_DEFAULT)}
+        headers = {"User-Agent": config.USER_AGENT_OVERRIDES.get(netloc, config.USER_AGENT_DEFAULT)}
         test_etag = False
         if netloc not in config.ETAG_CACHE_PROHIBITED_NETLOCS:
             try:
@@ -75,17 +74,17 @@ class URLReader:
                 test_etag = etag_cache.is_etag_strong and (random.random() <= config.ETAG_TEST_PROBABILITY)
                 # Note: A weak etag can also be tested but not as easily. It may be unlikely to have a mismatch anyway.
                 if not test_etag:
-                    headers['If-None-Match'] = etag_cache.etag
+                    headers["If-None-Match"] = etag_cache.etag
 
         # Read URL
-        log.debug('Resiliently retrieving content for %s.', url)
+        log.debug("Resiliently retrieving content for %s.", url)
         for num_attempt in range(1, config.READ_ATTEMPTS_MAX + 1):
             try:
                 response = requests.Session().get(url, timeout=config.REQUEST_TIMEOUT, headers=headers)
                 # Note: requests.Session may be relevant for scraping a page which requires cookies to be accepted.
                 response.raise_for_status()
             except requests.RequestException as exc:
-                log.info('Error reading %s in attempt %s of %s: %s', url, num_attempt, config.READ_ATTEMPTS_MAX, exc)
+                log.info("Error reading %s in attempt %s of %s: %s", url, num_attempt, config.READ_ATTEMPTS_MAX, exc)
                 if num_attempt == config.READ_ATTEMPTS_MAX:
                     raise exc from None
                 time.sleep(2 ** num_attempt)
@@ -95,10 +94,10 @@ class URLReader:
         # Get and cache content
         if response.status_code == 304:
             content = etag_cache.content
-            log.debug('Reused cached content for %s from etag cache.', url)
+            log.debug("Reused cached content for %s from etag cache.", url)
         else:  # 200
             content = response.content
-            etag = response.headers.get('ETag')
+            etag = response.headers.get("ETag")
 
             if etag:
                 url_content = URLContent(etag, content)
@@ -106,7 +105,7 @@ class URLReader:
                 # Conditionally test, disable, delete, and update cache
                 if test_etag and (etag_cache.etag == etag):
                     if etag_cache.content == content:
-                        log.debug('Etag test passed for %s with etag %s.', url, etag)
+                        log.debug("Etag test passed for %s with etag %s.", url, etag)
                     else:
                         # Disable and delete cache
                         config.ETAG_CACHE_PROHIBITED_NETLOCS.add(netloc)
@@ -114,30 +113,37 @@ class URLReader:
                             if url_to_netloc(cached_url) == netloc:
                                 cls._del_etag_cache(url)
                         config.runtime.alert(
-                            f'Etag test failed for {url} with strong etag {repr(etag)}. '
-                            f'The content was unexpectedly found to be changed whereas the etag stayed unchanged. '
-                            f'The previously cached content has length {len(etag_cache.content)} with '
-                            f'hash {hash4(etag_cache.content)} and the dissimilar current content has '
-                            f'length {len(content)} with hash {hash4(content)}. ', log.warning)
+                            f"Etag test failed for {url} with strong etag {repr(etag)}. "
+                            f"The content was unexpectedly found to be changed whereas the etag stayed unchanged. "
+                            f"The previously cached content has length {len(etag_cache.content)} with "
+                            f"hash {hash4(etag_cache.content)} and the dissimilar current content has "
+                            f"length {len(content)} with hash {hash4(content)}. ",
+                            log.warning,
+                        )
                         config.runtime.alert(
-                            f'The etag cache has been disabled for the duration of the bot process for all {netloc} '
-                            f'feed URLs. '
+                            f"The etag cache has been disabled for the duration of the bot process for all {netloc} "
+                            f"feed URLs. "
                             "The content mismatch should be reported to the site administrator and also to the bot's "
-                            "maintainer.", log.warning)
+                            "maintainer.",
+                            log.warning,
+                        )
                 else:
                     # Update cache
-                    action = 'Updated cached content' if (url in cls._etag_cache) else 'Cached content'
+                    action = "Updated cached content" if (url in cls._etag_cache) else "Cached content"
                     cls._etag_cache[url] = url_content
-                    log.debug('%s for %s having etag %s.', action, url, etag)
+                    log.debug("%s for %s having etag %s.", action, url, etag)
             else:
                 # Delete cache
                 cls._del_etag_cache(url)
-        log.debug('Resiliently retrieved content of size %s for %s.', humanize_len(content), url)
+        log.debug("Resiliently retrieved content of size %s for %s.", humanize_len(content), url)
 
         # Note: Entry parsing is not done in this method in order to permit mutability of individual entries.
         return content
 
     @classmethod
     def url_content(cls, url: str) -> bytes:
-        return zlib.decompress(cls._ttl_cached_compressed_url_content(url)) \
-            if (url in config.INSTANCE['repeated_urls']) else cls._url_content(url)
+        return (
+            zlib.decompress(cls._ttl_cached_compressed_url_content(url))
+            if (url in config.INSTANCE["repeated_urls"])
+            else cls._url_content(url)
+        )

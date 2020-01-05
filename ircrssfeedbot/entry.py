@@ -19,19 +19,19 @@ class FeedEntry:
 
     def listing(self, searchlist: Dict[str, List]) -> Optional[Tuple[str, re.Match]]:  # type: ignore
         # Check title and long URL
-        for searchlist_key, val in {'title': self.title, 'url': self.long_url}.items():
+        for searchlist_key, val in {"title": self.title, "url": self.long_url}.items():
             for pattern in searchlist.get(searchlist_key, []):
                 match = re.search(pattern, val)
                 if match:
-                    log.debug('%s matches %s pattern %s.', self, searchlist_key, repr(pattern))
+                    log.debug("%s matches %s pattern %s.", self, searchlist_key, repr(pattern))
                     return searchlist_key, match
         # Check categories
-        for pattern in searchlist.get('category', []):
+        for pattern in searchlist.get("category", []):
             for category in self.categories:
                 match = re.search(pattern, category)
                 if match:
-                    log.debug('%s having category %s matches category pattern %s.', self, repr(category), repr(pattern))
-                    return 'category', match
+                    log.debug("%s having category %s matches category pattern %s.", self, repr(category), repr(pattern))
+                    return "category", match
 
 
 @dataclasses.dataclass

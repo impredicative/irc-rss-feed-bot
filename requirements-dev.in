@@ -1,3 +1,17 @@
+autopep8
+black
+isort
 mypy
 pip
 pip-tools
+pycodestyle
+pydocstyle
+pylint
+pytest
+pytest-codestyle
+pytest-docstyle
+pytest-isort
+pytest-mccabe
+pytest-mypy
+pytest-pylint
+vulture
