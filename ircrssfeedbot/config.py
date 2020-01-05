@@ -77,7 +77,7 @@ LOGGING: Final = {  # Ref: https://docs.python.org/3/howto/logging.html#configur
         PACKAGE_NAME: {"level": "INFO", "handlers": ["console"], "propagate": False},
         "bitlyshortener": {"level": "INFO", "handlers": ["console"], "propagate": False},
         "peewee": {"level": "INFO", "handlers": ["console"], "propagate": False},
-        "": {"level": "INFO", "handlers": ["console"],},
+        "": {"level": "INFO", "handlers": ["console"]},
     },
 }
 
