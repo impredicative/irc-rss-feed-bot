@@ -3,7 +3,7 @@
 It essentially posts the entries of feeds in IRC channels, one entry per message.
 More specifically, it posts the titles and shortened URLs of entries.
 
-If viewing this readme on Docker Hub, note that it may be misformatted and truncated.
+If viewing this readme on Docker Hub, note that it may be misformatted.
 In this case, it can be viewed correctly on [GitHub](https://github.com/impredicative/irc-rss-feed-bot).
 
 ## Features
