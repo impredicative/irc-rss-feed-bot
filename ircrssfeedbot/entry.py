@@ -21,7 +21,7 @@ class FeedEntry:
         """Return the URL to post."""
         return self.long_url
 
-    def listing(self, searchlist: Dict[str, List]) -> Optional[Tuple[str, re.Match]]:
+    def listing(self, searchlist: Dict[str, List[str]]) -> Optional[Tuple[str, re.Match]]:
         """Return the matching key name and regular expression match against the given match lists mapping."""
         # Check title and long URL
         for searchlist_key, val in {"title": self.title, "url": self.long_url}.items():
