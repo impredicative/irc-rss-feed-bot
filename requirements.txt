@@ -16,7 +16,7 @@ idna==2.8                 # via requests
 ircmessage==0.1.1
 jmespath==0.9.4
 lxml==4.4.2
-miniirc==1.5.0
+miniirc==1.5.1
 peewee==3.13.1
 requests==2.22.0
 ruamel.yaml==0.16.5
