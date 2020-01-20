@@ -1,15 +1,24 @@
 # Vulture whitelist:
+
 _handle_loggedin  # unused function (ircrssfeedbot/bot.py:280)
 _handle_nick  # unused function (ircrssfeedbot/bot.py:297)
 _handle_join  # unused function (ircrssfeedbot/bot.py:313)
 _handle_privmsg  # unused function (ircrssfeedbot/bot.py:332)
+
 TEMPDIR  # unused variable (ircrssfeedbot/config.py:47)
+
 Meta  # unused class (ircrssfeedbot/db.py:21)
 database  # unused variable (ircrssfeedbot/db.py:22)
 legacy_table_names  # unused variable (ircrssfeedbot/db.py:23)
 primary_key  # unused variable (ircrssfeedbot/db.py:24)
 indexes  # unused variable (ircrssfeedbot/db.py:25)
+
 TestInt8Hash  # unused class (ircrssfeedbot/util/hashlib.py:42)
 test_range  # unused function (ircrssfeedbot/util/hashlib.py:43)
+
 TestShortener  # unused class (ircrssfeedbot/util/textwrap.py:17)
 test_example  # unused function (ircrssfeedbot/util/textwrap.py:18)
+
+TestLeaves  # unused class (ircrssfeedbot/util/set.py:21)
+test_dict  # unused function (ircrssfeedbot/util/set.py:22)
+test_list  # unused function (ircrssfeedbot/util/set.py:45)

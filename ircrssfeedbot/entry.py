@@ -2,9 +2,9 @@
 import dataclasses
 import logging
 import re
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-from more_itertools import collapse
+from .util.set import leaves
 
 log = logging.getLogger(__name__)
 SearchPatterns = Dict[str, Union[List[str], Dict[str, List[str]]]]
@@ -20,13 +20,11 @@ class FeedEntry:
     data: Dict[str, Any] = dataclasses.field(compare=False, repr=False)
 
     @staticmethod
-    def _applicable_patterns(patterns: SearchPatterns, key: str) -> List[str]:
+    def _applicable_patterns(patterns: SearchPatterns, key: str) -> Set[str]:
         patterns = patterns.get(key, [])
-        if isinstance(patterns, dict):
-            patterns = patterns.values()  # type: ignore
-        patterns = list(filter(None.__ne__, collapse(patterns)))
-        # Note: `None.__ne__` helps remove None values. Refer to https://stackoverflow.com/a/16097112/
-        return patterns
+        # if isinstance(patterns, dict): patterns = patterns.values()  # type: ignore
+        # patterns = list(filter(None.__ne__, collapse(patterns)))
+        return leaves(patterns)
 
     def listing(self, search_patterns: SearchPatterns) -> Optional[Tuple[str, re.Match]]:
         """Return the matching key name and regular expression match against the given search patterns."""
