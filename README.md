@@ -229,14 +229,18 @@ Examples of this are in the sample.
 These are optional and are independent of each other:
 * **`alerts/empty`**: If `true`, an alert is sent if the feed has no entries. If `false`, such an alert is not sent.
 Its default value is `true`.
-* **`alerts/read`**: If `true`, an alert is sent if an error occurs three or more consecutive times when reading or processing the feed.
+* **`alerts/read`**: If `true`, an alert is sent if an error occurs three or more consecutive times when reading or 
+processing the feed.
 If `false`, such an alert is not sent.
 Its default value is `true`.
-* **`blacklist/category`**: This is a list of regular expression patterns that result in an entry being skipped if a
-[search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in any of the categories of the
-entry.
-* **`blacklist/title`**: This is a list of regular expression patterns that result in an entry being skipped if a
-[search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in the title.
+* **`blacklist/category`**: This is an arbitrarily nested dictionary or list or their mix of regular expression patterns 
+that result in an entry being skipped if a [search](https://docs.python.org/3/library/re.html#re.search) finds any of 
+the patterns in any of the categories of the entry.
+The nesting permits lists to be creatively reused between feeds via YAML anchors and references.
+* **`blacklist/title`**: This is an arbitrarily nested dictionary or list or their mix of regular expression patterns 
+that result in an entry being skipped if a [search](https://docs.python.org/3/library/re.html#re.search) finds any of 
+the patterns in the title.
+The nesting permits lists to be creatively reused between feeds via YAML anchors and references.
 * **`blacklist/url`**: Similar to `blacklist/title`.
 * **`dedup`**: This indicates how to deduplicate posts for the feed, thereby preventing them from being reposted.
 The default value is `channel` (per-channel), and an alternate possible value is `feed` (per-feed per-channel).
@@ -273,15 +277,18 @@ silver. The channel modes must allow formatting for this option to be effective.
 * **`style/name/bold`**: If `true`, bold formatting is applied to the feed's name. Its default value is `false`.
 The channel modes must allow formatting for this option to be effective.
 * **`style/name/fg`**: Foreground color similar to `style/name/bg`.
-* **`whitelist/category`**: This is a list of regular expression patterns that result in an entry being skipped unless a
-[search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in any of the categories of the
-entry.
+* **`whitelist/category`**: This is an arbitrarily nested dictionary or list or their mix of regular expression patterns 
+that result in an entry being skipped unless a [search](https://docs.python.org/3/library/re.html#re.search) finds any 
+of the patterns in any of the categories of the entry.
+The nesting permits lists to be creatively reused between feeds via YAML anchors and references.
 * **`whitelist/explain`**: This applies only to `whitelist/title`.
 It can be useful for understanding which portion of a post's title matched the whitelist.
 If `true`, the matching text of each posted title is enclosed by asterisks.
 For example, "This is a \*matching sample\* title". The default value is `false`.
-* **`whitelist/title`**: This is a list of regular expression patterns that result in an entry being skipped unless a
-[search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in the title.
+* **`whitelist/title`**: This is an arbitrarily nested dictionary or list or their mix of regular expression patterns 
+that result in an entry being skipped unless a [search](https://docs.python.org/3/library/re.html#re.search) finds any 
+of the patterns in the title.
+The nesting permits lists to be creatively reused between feeds via YAML anchors and references.
 * **`whitelist/url`**: Similar to `whitelist/title`.
 
 ##### Extractor
@@ -341,7 +348,7 @@ This is despite the bot-enforced limit of two seconds per message across the ser
 
 * It is recommended that the bot be run as a Docker container using using Docker ≥18.09.2, possibly with
 Docker Compose ≥1.24.0.
-To run the bot using Docker Compose, create or add to a version-controlled `docker-compose.yml` file:
+To run the bot using Docker Compose, create or add to a version-controlled `docker-compose.yml` file such as:
 ```yaml
 version: '3.7'
 services:
