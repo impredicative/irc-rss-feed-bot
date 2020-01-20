@@ -5,6 +5,7 @@ from typing import Any, Dict, Set
 
 def leaves(struct: Any) -> Set[Any]:
     """Return a set of leaf values found in nested dicts and lists excluding None values."""
+    # Ref: https://stackoverflow.com/a/59832362/
     values = set()
     if isinstance(struct, dict):
         for sub_struct in struct.values():
