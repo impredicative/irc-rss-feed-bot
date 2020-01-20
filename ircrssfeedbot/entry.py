@@ -2,9 +2,10 @@
 import dataclasses
 import logging
 import re
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 log = logging.getLogger(__name__)
+SearchPatterns = Dict[str, Union[List[str], Dict[str, List[str]]]]
 
 
 @dataclasses.dataclass(unsafe_hash=True)
@@ -16,28 +17,35 @@ class FeedEntry:
     categories: List[str] = dataclasses.field(compare=False, repr=False)
     data: Dict[str, Any] = dataclasses.field(compare=False, repr=False)
 
+    @staticmethod
+    def _applicable_patterns(patterns: SearchPatterns, key: str) -> List[str]:
+        patterns = patterns.get(key, [])
+        if isinstance(patterns, dict):
+            patterns = [pattern for patterns_list in patterns.values() for pattern in patterns_list]
+        return patterns
+
+    def listing(self, search_patterns: SearchPatterns) -> Optional[Tuple[str, re.Match]]:
+        """Return the matching key name and regular expression match against the given search patterns."""
+        # Check title and long URL
+        for search_key, val in {"title": self.title, "url": self.long_url}.items():
+            for pattern in self._applicable_patterns(search_patterns, search_key):
+                if match := re.search(pattern, val):
+                    log.debug("%s matches %s pattern %s.", self, search_key, repr(pattern))
+                    return search_key, match  # type: ignore
+
+        # Check categories
+        for pattern in self._applicable_patterns(search_patterns, "category"):
+            for category in self.categories:  # This loop is only for categories.
+                if match := re.search(pattern, category):
+                    log.debug("%s having category %s matches category pattern %s.", self, repr(category), repr(pattern))
+                    return "category", match  # type: ignore
+
+        return None
+
     @property
     def post_url(self) -> str:
         """Return the URL to post."""
         return self.long_url
-
-    def listing(self, searchlist: Dict[str, List[str]]) -> Optional[Tuple[str, re.Match]]:
-        """Return the matching key name and regular expression match against the given match lists mapping."""
-        # Check title and long URL
-        for searchlist_key, val in {"title": self.title, "url": self.long_url}.items():
-            for pattern in searchlist.get(searchlist_key, []):
-                match = re.search(pattern, val)
-                if match:
-                    log.debug("%s matches %s pattern %s.", self, searchlist_key, repr(pattern))
-                    return searchlist_key, match
-        # Check categories
-        for pattern in searchlist.get("category", []):
-            for category in self.categories:
-                match = re.search(pattern, category)
-                if match:
-                    log.debug("%s having category %s matches category pattern %s.", self, repr(category), repr(pattern))
-                    return "category", match
-        return None
 
 
 @dataclasses.dataclass
