@@ -4,6 +4,8 @@ import logging
 import re
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+from more_itertools import collapse
+
 log = logging.getLogger(__name__)
 SearchPatterns = Dict[str, Union[List[str], Dict[str, List[str]]]]
 
@@ -21,7 +23,9 @@ class FeedEntry:
     def _applicable_patterns(patterns: SearchPatterns, key: str) -> List[str]:
         patterns = patterns.get(key, [])
         if isinstance(patterns, dict):
-            patterns = [pattern for patterns_list in patterns.values() for pattern in patterns_list]
+            patterns = patterns.values()  # type: ignore
+        patterns = list(filter(None.__ne__, collapse(patterns)))
+        # Note: `None.__ne__` helps remove None values. Refer to https://stackoverflow.com/a/16097112/
         return patterns
 
     def listing(self, search_patterns: SearchPatterns) -> Optional[Tuple[str, re.Match]]:

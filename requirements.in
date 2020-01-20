@@ -8,6 +8,7 @@ ircmessage
 jmespath
 lxml
 miniirc
+more-itertools
 peewee
 requests
 ruamel.yaml
