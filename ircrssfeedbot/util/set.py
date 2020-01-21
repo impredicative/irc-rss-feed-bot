@@ -5,16 +5,20 @@ from typing import Any, Dict, Set
 
 def leaves(struct: Any) -> Set[Any]:
     """Return a set of leaf values found in nested dicts and lists excluding None values."""
-    # Ref: https://stackoverflow.com/a/59832362/
+    # Ref: https://stackoverflow.com/a/59832594/
     values = set()
-    if isinstance(struct, dict):
-        for sub_struct in struct.values():
-            values.update(leaves(sub_struct))
-    elif isinstance(struct, list):
-        for sub_struct in struct:
-            values.update(leaves(sub_struct))
-    elif struct is not None:
-        values.add(struct)
+
+    def add_leaves(struct_: Any) -> None:
+        if isinstance(struct_, dict):
+            for sub_struct in struct_.values():
+                add_leaves(sub_struct)
+        elif isinstance(struct_, list):
+            for sub_struct in struct_:
+                add_leaves(sub_struct)
+        elif struct_ is not None:
+            values.add(struct_)
+
+    add_leaves(struct)
     return values
 
 
