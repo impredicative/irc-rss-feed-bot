@@ -29,6 +29,7 @@ ETAG_CACHE_PROHIBITED_NETLOCS: Final = {
     "blogs.cornell.edu",
     "bodyrecomposition.com",
     "deeplearning.ai",
+    "devblogs.nvidia.com",
     "export.arxiv.org",
     "rise.cs.berkeley.edu",
     "siliconangle.com",
