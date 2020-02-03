@@ -45,17 +45,21 @@ def main() -> None:
     unclear_colors = {"white", "black", "grey", "silver"}
     clear_colors = config.IRC_COLORS - unclear_colors
     for channel, channel_config in instance_config["feeds"].items():
-        if not (used_colors := {
-            fg_color
-            for feed_config in channel_config.values()
-            if (fg_color := feed_config.get("style", {}).get("name", {}).get("fg")) is not None
-        }):
-            log.info('%s has no foreground colors in use.', channel)
+        if not (
+            used_colors := {
+                fg_color
+                for feed_config in channel_config.values()
+                if (fg_color := feed_config.get("style", {}).get("name", {}).get("fg")) is not None
+            }
+        ):
+            log.info("%s has no foreground colors in use.", channel)
             continue
-        if not (unused_colors := clear_colors - used_colors):
-            log.info('%s has all foreground colors in use.', channel)
+        if not (unused_colors := clear_colors - used_colors):  # pylint: disable=superfluous-parens
+            log.info("%s has all foreground colors in use.", channel)
             continue
-        log.info("%s has %s unused foreground colors: %s", channel, len(unused_colors), ", ".join(sorted(unused_colors)))
+        log.info(
+            "%s has %s unused foreground colors: %s", channel, len(unused_colors), ", ".join(sorted(unused_colors))
+        )
 
     # Set alerts channel
     alerts_channel_format = instance_config.get("alerts_channel") or config.ALERTS_CHANNEL_FORMAT_DEFAULT
