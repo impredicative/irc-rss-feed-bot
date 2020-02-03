@@ -291,10 +291,11 @@ def _handle_loggedin(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: Lis
     config.runtime.nick_casefold = nick_casefold = nick.casefold()
     log.info("The client identity as <nick>!<user>@<host> is %s.", identity)
     if nick_casefold != config.INSTANCE["nick:casefold"]:
-        log.warning(
-            "The client nick was configured to be %s but it is %s. The configured nick will be regained.",
-            config.INSTANCE["nick"],
-            nick,
+        _alert(
+            irc,
+            f"The client nick was configured to be {config.INSTANCE['nick']} but it is {nick}. "
+            "The configured nick will be regained.",
+            log.warning,
         )
         irc.msg("nickserv", "REGAIN", config.INSTANCE["nick"], os.environ["IRC_PASSWORD"])
 
@@ -312,7 +313,7 @@ def _handle_nick(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[s
     new_nick = args[0]
     config.runtime.identity = identity = config.runtime.identity.replace(old_nick, new_nick, 1)
     config.runtime.nick_casefold = new_nick.casefold()
-    log.info("The updated client identity as <nick>!<user>@<host> is inferred to be %s.", identity)
+    _alert(_irc, f"The updated client identity as <nick>!<user>@<host> is inferred to be {identity}.", log.info)
 
 
 @miniirc.Handler("JOIN", colon=False)
