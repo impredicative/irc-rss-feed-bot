@@ -11,7 +11,7 @@ chardet==3.0.4            # via requests
 dickens==1.0.1
 feedparser==5.2.1
 hext==0.2.4
-humanize==0.5.1
+humanize==1.0.0
 idna==2.8                 # via requests
 ircmessage==0.1.1
 jmespath==0.9.4
