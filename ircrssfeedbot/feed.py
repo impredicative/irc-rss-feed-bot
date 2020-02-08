@@ -110,7 +110,7 @@ class Feed:
             entries = [
                 FeedEntry(
                     title=e["title"],
-                    long_url=e["link"],
+                    long_url=e.get("link") or e["links"][0]["href"],  # e.g. for https://feeds.buzzsprout.com/188368.rss
                     categories=[t["term"] for t in getattr(e, "tags", [])],
                     data=dict(e),
                 )

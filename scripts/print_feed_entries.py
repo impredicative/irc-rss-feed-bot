@@ -18,7 +18,7 @@ content = sanitize_xml(content)
 entries = feedparser.parse(content.lstrip())["entries"]
 
 for index, entry in enumerate(entries):
-    title, link = entry["title"], entry["link"]
+    title, link = entry["title"], (entry.get("link") or entry["links"][0]["href"])
     post = f"#{index+1}: {title}\n{link}\n"
     if hasattr(entry, "tags") and entry.tags:
         categories = ", ".join(t["term"] for t in entry.tags)
