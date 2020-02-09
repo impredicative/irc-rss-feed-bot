@@ -1,4 +1,6 @@
 """Print entries from an RSS or Atom feed parsed using feedparser."""
+from typing import List, Set
+
 import feedparser
 import requests
 
@@ -11,8 +13,8 @@ from ircrssfeedbot.util.urllib import url_to_netloc
 # Customize:
 
 URL = "https://tools.cdc.gov/api/v2/resources/media/316422.rss"
-BLACKLISTED_CATEGORIES = set([])
-BLACKLISTED_TITLE_TERMS = []
+BLACKLISTED_CATEGORIES: Set[str] = set([])
+BLACKLISTED_TITLE_TERMS: List[str] = []
 
 user_agent = config.USER_AGENT_OVERRIDES.get(url_to_netloc(URL), config.USER_AGENT_DEFAULT)
 content = requests.Session().get(URL, timeout=config.REQUEST_TIMEOUT, headers={"User-Agent": user_agent}).content

@@ -13,7 +13,7 @@ from ircrssfeedbot.util.urllib import url_to_netloc
 
 # Customize:
 URL = "https://www.reddit.com/r/Nootropics/hot/.json?limit=98"
-JMES = "data.children[*].data | [?(not_null(link_flair_text) && score > `5`)].{title: join(``, [`[`, link_flair_text, `] `, title]), link: join(``, [`https://redd.it/`, id]), category: link_flair_text} | [?category == `Scientific Study` || category ==`News Article`]"
+JMES = "data.children[*].data | [?(not_null(link_flair_text) && score > `5`)].{title: join(``, [`[`, link_flair_text, `] `, title]), link: join(``, [`https://redd.it/`, id]), category: link_flair_text} | [?category == `Scientific Study` || category ==`News Article`]"  # pylint: disable=line-too-long
 
 user_agent = config.USER_AGENT_OVERRIDES.get(url_to_netloc(URL), config.USER_AGENT_DEFAULT)
 content = requests.Session().get(URL, timeout=config.REQUEST_TIMEOUT, headers={"User-Agent": user_agent}).content
