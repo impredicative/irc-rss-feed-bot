@@ -144,6 +144,7 @@ class Feed:
         if whitelist := feed_config.get("whitelist", {}):
             log.debug("Filtering %s entries using whitelist for %s.", len(entries), self)
             explain = whitelist.get("explain")
+            is_feed_name_styled = bool(self.config.get("style", {}).get("name"))
             whitelisted_entries: List[FeedEntry] = []
             for entry in entries:
                 if listing := entry.listing(whitelist):
@@ -151,7 +152,9 @@ class Feed:
                     if explain and (key == "title"):
                         span0, span1 = match.span()
                         title = entry.title
-                        entry.title = title[:span0] + "*" + title[span0:span1] + "*" + title[span1:]
+                        title_mid = title[span0:span1]
+                        title_mid = style(title_mid, italics=True) if is_feed_name_styled else f"*{title_mid}*"
+                        entry.title = title[:span0] + title_mid + title[span1:]
                     whitelisted_entries.append(entry)
             entries = whitelisted_entries
             log.debug("Filtered to %s entries using whitelist for %s.", len(entries), self)
