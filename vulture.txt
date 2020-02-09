@@ -18,6 +18,7 @@ test_range  # unused function (ircrssfeedbot/util/hashlib.py:43)
 
 TestShortener  # unused class (ircrssfeedbot/util/textwrap.py:17)
 test_example  # unused function (ircrssfeedbot/util/textwrap.py:18)
+test_stylized_irc_text
 
 TestLeaves  # unused class (ircrssfeedbot/util/set.py:21)
 test_dict  # unused function (ircrssfeedbot/util/set.py:22)
