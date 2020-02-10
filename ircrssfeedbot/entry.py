@@ -56,12 +56,12 @@ class FeedEntry:
         # Define feed config
         feed_name = self.feed.name
         feed_config = self.feed.config
+        explain = feed_config.get("whitelist", {}).get("explain")
         feed_name_style = feed_config.get("style", {}).get("name")
 
         # Define post title
         title = self.title
-        is_explanation_required = feed_config.get("whitelist", {}).get("explain")
-        if is_explanation_required and (pattern := self.matching_title_search_pattern):
+        if explain and (pattern := self.matching_title_search_pattern):
             pattern = cast(str, pattern)
             if match := re.search(pattern, self.title):  # Not always guaranteed to be true due to sub, format, etc.
                 match = cast(re.Match, match)
