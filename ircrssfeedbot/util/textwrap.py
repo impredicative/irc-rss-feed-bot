@@ -1,7 +1,10 @@
 """textwrap utilities."""
+import re
 import unittest
 
 _MIN_WIDTH = 5  # == len(textwrap.shorten(string.ascii_letters, len(string.ascii_letters) - 1)) == len('[...]')
+_RE_COMBINE_WHITESPACE = re.compile(r"(?a:\s+)")
+_RE_STRIP_WHITESPACE = re.compile(r"(?a:^\s+|\s+$)")
 
 
 def shorten_to_bytes_width(string: str, maximum_bytes: int) -> str:
@@ -14,7 +17,9 @@ def shorten_to_bytes_width(string: str, maximum_bytes: int) -> str:
     encoded_placeholder = placeholder.encode().strip()
 
     # Get the UTF-8 bytes that represent the string and normalize the spaces.
-    string = " ".join(string.split())
+    # Ref: https://stackoverflow.com/a/2077906/
+    string = _RE_COMBINE_WHITESPACE.sub(" ", string)
+    string = _RE_STRIP_WHITESPACE.sub("", string)
     encoded_string = string.encode()
 
     # If the input string is empty simply return an empty string.
@@ -43,7 +48,7 @@ class TestShortener(unittest.TestCase):
         self.assertLessEqual(len(shortened.encode()), width)
 
     def test_stylized_irc_text(self):
-        self.assertEqual(shorten_to_bytes_width(r"\x1dZZZ\x0f " * 100, 30), r"\x1dZZZ\x0f \x1dZZZ\x0f [...]")
+        self.assertEqual(shorten_to_bytes_width("\x1dzzz\x0f " * 100, 20), "\x1dzzz\x0f \x1dzzz\x0f [...]")
 
 
 # python -m unittest -v ircrssfeedbot.util.textwrap
