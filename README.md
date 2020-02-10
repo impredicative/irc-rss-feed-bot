@@ -283,7 +283,8 @@ of the patterns in any of the categories of the entry.
 The nesting permits lists to be creatively reused between feeds via YAML anchors and references.
 * **`whitelist/explain`**: This applies only to `whitelist/title`.
 It can be useful for understanding which portion of a post's title matched the whitelist.
-If `true`, the matching text of each posted title is enclosed by asterisks.
+If `true` and if a `style` is defined, the matching text of each posted title is italicized.
+If `true` and if a `style` is not defined, the matching text of each posted title is enclosed by asterisks.
 For example, "This is a \*matching sample\* title". The default value is `false`.
 * **`whitelist/title`**: This is an arbitrarily nested dictionary or list or their mix of regular expression patterns 
 that result in an entry being skipped unless a [search](https://docs.python.org/3/library/re.html#re.search) finds any 

@@ -57,7 +57,8 @@ class FeedEntry:
         feed_name = self.feed.name
         feed_config = self.feed.config
         explain = feed_config.get("whitelist", {}).get("explain")
-        feed_name_style = feed_config.get("style", {}).get("name", {})
+        feed_style = feed_config.get("style", {})
+        feed_name_style = feed_style.get("name", {})
 
         # Define post title
         title = self.title
@@ -67,7 +68,7 @@ class FeedEntry:
                 match = cast(re.Match, match)
                 span0, span1 = match.span()
                 title_mid = title[span0:span1]
-                title_mid = style(title_mid, italics=True) if feed_name_style else f"*{title_mid}*"
+                title_mid = style(title_mid, italics=True) if feed_style else f"*{title_mid}*"
                 title = title[:span0] + title_mid + title[span1:]
 
         # Define other post params
