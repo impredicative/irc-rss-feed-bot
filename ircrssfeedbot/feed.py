@@ -14,11 +14,10 @@ from descriptors import cachedproperty
 
 from . import config
 from .db import Database
-from .entry import FeedEntry, ShortenedFeedEntry
+from .entry import FeedEntry
 from .gnews import decode_google_news_url
 from .url import URLReader
 from .util.hext import html_to_text
-from .util.ircmessage import style
 from .util.lxml import sanitize_xml
 from .util.textwrap import shorten_to_bytes_width
 
@@ -88,6 +87,7 @@ class Feed:
                     long_url=e["link"].strip(),
                     categories=[c.strip() for c in ensure_list(e.get("category", []))],
                     data=e,
+                    feed=self,
                 )
                 for e in raw_entries
             ]
@@ -100,6 +100,7 @@ class Feed:
                     long_url=e["link"].strip(),
                     categories=[html.unescape(c.strip()) for c in ensure_list(e.get("category", []))],
                     data=e,
+                    feed=self,
                 )
                 for e in raw_entries
             ]
@@ -113,6 +114,7 @@ class Feed:
                     long_url=e.get("link") or e["links"][0]["href"],  # e.g. for https://feeds.buzzsprout.com/188368.rss
                     categories=[t["term"] for t in getattr(e, "tags", [])],
                     data=dict(e),
+                    feed=self,
                 )
                 for e in raw_entries
             ]
@@ -143,18 +145,12 @@ class Feed:
         # Keep only whitelisted entries
         if whitelist := feed_config.get("whitelist", {}):
             log.debug("Filtering %s entries using whitelist for %s.", len(entries), self)
-            explain = whitelist.get("explain")
-            is_feed_name_styled = bool(self.config.get("style", {}).get("name"))
             whitelisted_entries: List[FeedEntry] = []
             for entry in entries:
                 if listing := entry.listing(whitelist):
-                    key, match = listing  # type: ignore
-                    if explain and (key == "title"):
-                        span0, span1 = match.span()
-                        title = entry.title
-                        title_mid = title[span0:span1]
-                        title_mid = style(title_mid, italics=True) if is_feed_name_styled else f"*{title_mid}*"
-                        entry.title = title[:span0] + title_mid + title[span1:]
+                    key, pattern = listing  # type: ignore
+                    if key == "title":
+                        entry.matching_title_search_pattern = pattern
                     whitelisted_entries.append(entry)
             entries = whitelisted_entries
             log.debug("Filtered to %s entries using whitelist for %s.", len(entries), self)
@@ -216,6 +212,11 @@ class Feed:
             if entry.title.isupper():  # e.g. for https://www.biorxiv.org/content/10.1101/667436v1
                 entry.title = entry.title.capitalize()
 
+        # Shorten titles
+        title_max_bytes = config.TITLE_MAX_BYTES
+        for entry in entries:
+            entry.title = shorten_to_bytes_width(entry.title, title_max_bytes)
+
         # Deduplicate entries again
         entries = self._dedupe_entries(entries, after_what="processing feed")
 
@@ -223,7 +224,7 @@ class Feed:
         return entries
 
     @cachedproperty
-    def postable_entries(self) -> List[Union[FeedEntry, ShortenedFeedEntry]]:
+    def postable_entries(self) -> List[FeedEntry]:
         """Return the subset of postable entries as a list."""
         log.debug("Retrieving postable entries for %s.", self)
         entries = self.unposted_entries
@@ -245,30 +246,12 @@ class Feed:
             log.debug("Shortening %s postable long URLs for %s.", len(entries), self)
             long_urls = [entry.long_url for entry in entries]
             short_urls = self.url_shortener.shorten_urls(long_urls)
-            entries = [
-                ShortenedFeedEntry(
-                    title=e.title, long_url=e.long_url, categories=e.categories, data=e.data, short_url=short_urls[i]
-                )
-                for i, e in enumerate(entries)
-            ]
+            for index, entry in enumerate(entries):
+                entry.short_url = short_urls[index]
             log.debug("Shortened %s postable long URLs for %s.", len(entries), self)
 
-        # Shorten titles, also relative to URLs
-        feed_styled = style(self.name, **self.config.get("style", {}).get("name", {}))
-        for entry in entries:
-            base_bytes_use = len(
-                config.PRIVMSG_FORMAT.format(
-                    identity=config.runtime.identity,
-                    channel=self.channel,
-                    feed=feed_styled,
-                    title="",
-                    url=entry.post_url,
-                ).encode()
-            )
-            title_bytes_width = max(0, config.QUOTE_LEN_MAX - base_bytes_use)
-            entry.title = shorten_to_bytes_width(entry.title, title_bytes_width)
-
         log.debug("Returning %s postable entries for %s.", len(entries), self)
+
         return entries
 
     @cachedproperty

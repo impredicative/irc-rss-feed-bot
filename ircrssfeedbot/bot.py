@@ -16,7 +16,6 @@ from . import config
 from .db import Database
 from .feed import Feed
 from .util.datetime import timedelta_desc
-from .util.ircmessage import style
 
 log = logging.getLogger(__name__)
 
@@ -78,7 +77,6 @@ class Bot:
         channel_queue = Bot.CHANNEL_QUEUES[channel]
         db = self._db
         irc = self._irc
-        message_format = config.MESSAGE_FORMAT
         seconds_per_msg = config.SECONDS_PER_MESSAGE
         Bot.CHANNEL_JOIN_EVENTS[channel].wait()
         Bot.CHANNEL_JOIN_EVENTS[instance["alerts_channel"]].wait()
@@ -117,9 +115,8 @@ class Bot:
                             log.info("IRC client is connected after waiting %s.", timedelta_desc(disconnection_time))
 
                         log.info("Posting %s entries for %s.", len(feed.postable_entries), feed)
-                        feed_styled = style(feed.name, **feed.config.get("style", {}).get("name", {}))
                         for entry in feed.postable_entries:
-                            msg = message_format.format(feed=feed_styled, title=entry.title, url=entry.post_url)
+                            msg = entry.message
                             outgoing_msg_time = time.monotonic()
                             irc.msg(channel, msg)
                             log.debug("Sent message to %s: %s", channel, msg)
