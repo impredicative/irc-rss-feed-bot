@@ -57,7 +57,7 @@ class FeedEntry:
         feed_name = self.feed.name
         feed_config = self.feed.config
         explain = feed_config.get("whitelist", {}).get("explain")
-        feed_name_style = feed_config.get("style", {}).get("name")
+        feed_name_style = feed_config.get("style", {}).get("name", {})
 
         # Define post title
         title = self.title
