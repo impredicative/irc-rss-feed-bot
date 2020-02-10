@@ -51,11 +51,12 @@ class FeedEntry:
         return None
 
     @property
-    def message(self) -> str:
+    def message(self) -> str:  # pylint: disable=too-many-locals
         """Return the message to post."""
         # Define feed config
         feed_name = self.feed.name
         feed_config = self.feed.config
+        feed_name_style = feed_config.get("style", {}).get("name")
 
         # Define post title
         title = self.title
@@ -66,12 +67,11 @@ class FeedEntry:
                 match = cast(re.Match, match)
                 span0, span1 = match.span()
                 title_mid = title[span0:span1]
-                is_feed_name_styled = feed_config.get("style", {}).get("name")
-                title_mid = style(title_mid, italics=True) if is_feed_name_styled else f"*{title_mid}*"
+                title_mid = style(title_mid, italics=True) if feed_name_style else f"*{title_mid}*"
                 title = title[:span0] + title_mid + title[span1:]
 
         # Define other post params
-        feed = style(feed_name, **feed_config.get("style", {}).get("name", {}))
+        feed = style(feed_name, **feed_name_style)
         url = self.short_url or self.long_url
 
         # Shorten title
@@ -83,4 +83,5 @@ class FeedEntry:
         title_bytes_width = max(0, config.QUOTE_LEN_MAX - base_bytes_use)
         title = shorten_to_bytes_width(title, title_bytes_width)
 
-        return config.MESSAGE_FORMAT.format(feed=feed, title=title, url=url)
+        msg = config.MESSAGE_FORMAT.format(feed=feed, title=title, url=url)
+        return msg
