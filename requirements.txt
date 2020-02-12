@@ -19,6 +19,7 @@ lxml==4.5.0
 miniirc==1.5.1
 peewee==3.13.1
 requests==2.22.0
-ruamel.yaml==0.16.7
+ruamel.yaml.clib==0.2.0   # via ruamel.yaml
+ruamel.yaml==0.16.10
 six==1.10.0               # via ircmessage
 urllib3==1.25.8           # via requests
