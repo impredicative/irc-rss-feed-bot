@@ -56,7 +56,7 @@ class FeedEntry:
         # Define feed config
         feed_name = self.feed.name
         feed_config = self.feed.config
-        explain = feed_config.get("whitelist", {}).get("explain")
+        explain = (feed_config.get("whitelist") or {}).get("explain")  # Note: get("whitelist") can be None.
         feed_style = feed_config.get("style", {})
         feed_name_style = feed_style.get("name", {})
 
