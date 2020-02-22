@@ -68,8 +68,6 @@ class Feed:
             len(entries_deduped),
             self,
         )
-        if num_removed == 0:
-            assert entries == entries_deduped
         return entries_deduped
 
     def _entries(self) -> List[FeedEntry]:  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
@@ -144,20 +142,20 @@ class Feed:
             log.debug("Conditionally decoded Google News URLs for %s.", self)
 
         # Remove blacklisted entries
-        if blacklist := feed_config.get("blacklist", {}):
+        if feed_config.get("blacklist", {}):
             log.debug("Filtering %s entries using blacklist for %s.", len(entries), self)
-            entries = [entry for entry in entries if not entry.listing(blacklist)]
+            entries = [entry for entry in entries if not entry.blacklisted_pattern]
             log.debug("Filtered to %s entries using blacklist for %s.", len(entries), self)
             if not entries:
                 return entries
 
         # Keep only whitelisted entries
-        if whitelist := feed_config.get("whitelist", {}):
+        if feed_config.get("whitelist", {}):
             log.debug("Filtering %s entries using whitelist for %s.", len(entries), self)
             whitelisted_entries: List[FeedEntry] = []
             for entry in entries:
-                if listing := entry.listing(whitelist):
-                    key, pattern = listing  # type: ignore
+                if key_pattern_tuple := entry.whitelisted_pattern:
+                    key, pattern = key_pattern_tuple  # type: ignore
                     if key == "title":
                         entry.matching_title_search_pattern = pattern
                     whitelisted_entries.append(entry)
@@ -167,7 +165,7 @@ class Feed:
                 return entries
 
         # Enforce HTTPS URLs
-        if feed_config.get("https", False):
+        if feed_config.get("https"):
             log.debug("Enforcing HTTPS for URLs in %s.", self)
             for entry in entries:
                 if entry.long_url.startswith("http://"):
