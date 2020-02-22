@@ -143,7 +143,6 @@ class Bot:
         feed_config = instance["feeds"][channel][feed_name]
 
         channel_queue = Bot.CHANNEL_QUEUES[channel]
-        feed_url = feed_config["url"]
         feed_period_avg = max(config.PERIOD_HOURS_MIN, feed_config.get("period", config.PERIOD_HOURS_DEFAULT)) * 3600
         feed_period_min = feed_period_avg * (1 - config.PERIOD_RANDOM_PERCENT / 100)
         feed_period_max = feed_period_avg * (1 + config.PERIOD_RANDOM_PERCENT / 100)
@@ -168,7 +167,7 @@ class Bot:
             try:
                 # Read feed
                 log.debug("Retrieving feed %s of %s.", feed_name, channel)
-                feed = Feed(channel=channel, name=feed_name, url=feed_url, db=db, url_shortener=url_shortener)
+                feed = Feed(channel=channel, name=feed_name, db=db, url_shortener=url_shortener)
                 log.info("Retrieved %s with %s approved entries.", feed, len(feed.entries))
 
                 # Wait for other feeds in group

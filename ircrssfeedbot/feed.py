@@ -36,39 +36,41 @@ class Feed:
 
     channel: str
     name: str
-    url: str = dataclasses.field(repr=False)
     db: Database = dataclasses.field(repr=False)
     url_shortener: bitlyshortener.Shortener = dataclasses.field(repr=False)
 
     def __post_init__(self):
         log.debug("Initializing instance of %s.", self)
         self.config: Dict = {**config.INSTANCE["defaults"], **config.INSTANCE["feeds"][self.channel][self.name]}
+        self.url = self.config["url"]
         self.min_channel_idle_time = (
             config.MIN_CHANNEL_IDLE_TIME_DEFAULT
             if (self.config.get("period", config.PERIOD_HOURS_DEFAULT) > config.PERIOD_HOURS_MIN)
             else 0
         )
         self.entries = self._entries()  # Entries are effectively cached here at this point in time.
-        log.debug("Initialized instance of %s.", self)
+        log.debug("Initialized instance of %s with %s entries.", self, len(self.entries))
 
     def __str__(self):
         return f"feed {self.name} of {self.channel}"
 
     def _dedupe_entries(self, entries: List[FeedEntry], *, after_what: str) -> List[FeedEntry]:
         # Remove duplicate entries while preserving order, e.g. for https://projecteuclid.org/feeds/euclid.ba_rss.xml
+        log.debug("After %s, removing duplicate entry URLs for %s.", after_what, self)
         entries_deduped = list(dict.fromkeys(entries))
         num_removed = len(entries) - len(entries_deduped)
-        if num_removed > 0:
-            log.info(
-                "After %s, removed %s duplicate entry URLs out of %s, leaving %s, for %s.",
-                after_what,
-                num_removed,
-                len(entries),
-                len(entries_deduped),
-                self,
-            )
-            return entries_deduped
-        return entries
+        logger = log.info if num_removed > 0 else log.debug
+        logger(
+            "After %s, removed %s duplicate entry URLs out of %s, leaving %s, for %s.",
+            after_what,
+            num_removed,
+            len(entries),
+            len(entries_deduped),
+            self,
+        )
+        if num_removed == 0:
+            assert entries == entries_deduped
+        return entries_deduped
 
     def _entries(self) -> List[FeedEntry]:  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
         feed_config = self.config
@@ -118,7 +120,7 @@ class Feed:
                 )
                 for e in raw_entries
             ]
-        log_msg = f"Parsed {len(entries)} entries for {self}."
+        log_msg = f"Parsed {len(entries)} entries for {self} using the {parser} parser."
         if entries:
             log.debug(log_msg)
         else:
@@ -130,17 +132,22 @@ class Feed:
                 config.runtime.alert(log_msg)
             else:
                 log.warning(log_msg)
+            return entries
 
         # Decode Google News URLs
         if self.url.startswith("https://news.google.com/rss/") and (parser == "default"):
+            log.debug("Conditionally decoding Google News URLs for %s.", self)
             for entry in entries:
                 entry.long_url = decode_google_news_url(entry.long_url)
+            log.debug("Conditionally decoded Google News URLs for %s.", self)
 
         # Remove blacklisted entries
         if blacklist := feed_config.get("blacklist", {}):
             log.debug("Filtering %s entries using blacklist for %s.", len(entries), self)
             entries = [entry for entry in entries if not entry.listing(blacklist)]
             log.debug("Filtered to %s entries using blacklist for %s.", len(entries), self)
+            if not entries:
+                return entries
 
         # Keep only whitelisted entries
         if whitelist := feed_config.get("whitelist", {}):
@@ -154,6 +161,8 @@ class Feed:
                     whitelisted_entries.append(entry)
             entries = whitelisted_entries
             log.debug("Filtered to %s entries using whitelist for %s.", len(entries), self)
+            if not entries:
+                return entries
 
         # Enforce HTTPS URLs
         if feed_config.get("https", False):
@@ -193,34 +202,41 @@ class Feed:
             log.debug("Formatted entries for %s.", self)
 
         # Strip HTML tags from titles
+        log.debug("Stripping HTML tags from titles for %s.", self)
         for entry in entries:
             # e.g. for http://rss.sciencedirect.com/publication/science/08999007  (Elsevier Nutrition journal)
             entry.title = html_to_text(entry.title)
+        log.debug("Stripped HTML tags from titles for %s.", self)
 
         # Strip unicode quotes around titles
         quote_begin, quote_end = "“”"
         # e.g. for https://www.sciencedirect.com/science/article/abs/pii/S0899900718307883
+        log.debug("Stripping unicode quotes around titles for %s.", self)
         for entry in entries:
             title = entry.title
             if (len(title) > 2) and (title[0] == quote_begin) and (title[-1] == quote_end):
                 title = title[1:-1]
                 if (quote_begin not in title) and (quote_end not in title):
                     entry.title = title
+        log.debug("Stripped unicode quotes around titles for %s.", self)
 
         # Replace all-caps titles
+        log.debug("Capitalizing all-caps titles for %s.", self)
         for entry in entries:
             if entry.title.isupper():  # e.g. for https://www.biorxiv.org/content/10.1101/667436v1
                 entry.title = entry.title.capitalize()
+        log.debug("Capitalized all-caps titles for %s.", self)
 
         # Shorten titles
         title_max_bytes = config.TITLE_MAX_BYTES
+        log.debug("Shortening titles to %s bytes for %s.", title_max_bytes, self)
         for entry in entries:
             entry.title = shorten_to_bytes_width(entry.title, title_max_bytes)
+        log.debug("Shortened titles to %s bytes for %s.", title_max_bytes, self)
 
-        # Deduplicate entries again
+        # Deduplicate entries
         entries = self._dedupe_entries(entries, after_what="processing feed")
 
-        log.debug("Returning %s entries for %s.", len(entries), self)
         return entries
 
     @cachedproperty

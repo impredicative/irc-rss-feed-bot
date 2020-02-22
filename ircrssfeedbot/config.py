@@ -75,7 +75,7 @@ LOGGING: Final = {  # Ref: https://docs.python.org/3/howto/logging.html#configur
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "level": "INFO",
+            "level": "DEBUG",
             "formatter": "detailed",
             "stream": "ext://sys.stdout",
         },

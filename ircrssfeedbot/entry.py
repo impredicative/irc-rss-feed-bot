@@ -19,10 +19,10 @@ class FeedEntry:
 
     title: str = dataclasses.field(compare=False)
     long_url: str = dataclasses.field(compare=True)
-    categories: List[str] = dataclasses.field(compare=False, repr=False)
+    categories: List[str] = dataclasses.field(compare=False, repr=True)
     data: Dict[str, Any] = dataclasses.field(compare=False, repr=False)
     feed: Any = dataclasses.field(compare=False, repr=False)
-    short_url: Optional[str] = dataclasses.field(default=None, compare=False, repr=False)
+    short_url: Optional[str] = dataclasses.field(default=None, compare=False, repr=True)
     matching_title_search_pattern: Optional[str] = dataclasses.field(default=None, compare=False, repr=False)
 
     @staticmethod
@@ -38,14 +38,16 @@ class FeedEntry:
         for search_key, val in {"title": self.title, "url": self.long_url}.items():
             for pattern in self._applicable_patterns(search_patterns, search_key):
                 if re.search(pattern, val):
-                    log.debug("%s matches %s pattern %s.", self, search_key, repr(pattern))
+                    log.log(5, "%s matches %s pattern %s.", self, search_key, repr(pattern))
                     return search_key, pattern
 
         # Check categories
         for pattern in self._applicable_patterns(search_patterns, "category"):
             for category in self.categories:  # This loop is only for categories.
                 if re.search(pattern, category):
-                    log.debug("%s having category %s matches category pattern %s.", self, repr(category), repr(pattern))
+                    log.log(
+                        5, "%s having category %s matches category pattern %s.", self, repr(category), repr(pattern)
+                    )
                     return "category", pattern
 
         return None
@@ -57,7 +59,7 @@ class FeedEntry:
         feed_name = self.feed.name
         feed_config = self.feed.config
         explain = (feed_config.get("whitelist") or {}).get("explain")  # Note: get("whitelist") can be None.
-        feed_style = feed_config.get("style", {})
+        feed_style = feed_config.get("style") or {}
         feed_name_style = feed_style.get("name", {})
 
         # Define post title

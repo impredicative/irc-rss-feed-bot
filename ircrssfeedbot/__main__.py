@@ -12,8 +12,8 @@ from ircrssfeedbot import Bot, config
 log = logging.getLogger(__name__)
 
 
-def main() -> None:
-    """Start the bot."""
+def load_instance_config(log_details: bool = True) -> None:
+    """Read and load the instance configuration."""
     # Read args
     parser = argparse.ArgumentParser(prog=config.PACKAGE_NAME, description="IRC RSS feed posting bot")
     parser.add_argument("--config-path", required=True, help="Configuration file path, e.g. /some/dir/config.yaml")
@@ -23,43 +23,44 @@ def main() -> None:
     log.debug("Reading instance configuration file %s", instance_config_path)
     instance_config = YAML().load(instance_config_path)
     instance_config = json.loads(json.dumps(instance_config))  # Recursively use a dict as the data structure.
+    log.info("Read user configuration file %s", instance_config_path)
 
-    # Log instance config
-    logged_instance_config = instance_config.copy()
-    del logged_instance_config["feeds"]
-    log.info(
-        "Read user configuration file %s having excerpted configuration %s for %s channels %s with %s feeds.",
-        instance_config_path,
-        logged_instance_config,
-        len(instance_config["feeds"]),
-        list(instance_config["feeds"]),
-        len([feed for channel in instance_config["feeds"].values() for feed in channel]),
-    )
+    if log_details:
 
-    # Log channel config
-    for channel, channel_config in instance_config["feeds"].items():
-        for feed, feed_config in channel_config.items():
-            log.info("%s has feed %s having config: %s", channel, feed, feed_config)
-
-    # Log unused channel colors
-    unclear_colors = {"white", "black", "grey", "silver"}
-    clear_colors = config.IRC_COLORS - unclear_colors
-    for channel, channel_config in instance_config["feeds"].items():
-        if not (
-            used_colors := {
-                fg_color
-                for feed_config in channel_config.values()
-                if (fg_color := feed_config.get("style", {}).get("name", {}).get("fg")) is not None
-            }
-        ):
-            log.info("%s has no foreground colors in use.", channel)
-            continue
-        if not (unused_colors := clear_colors - used_colors):  # pylint: disable=superfluous-parens
-            log.info("%s has all foreground colors in use.", channel)
-            continue
+        # Log instance config
+        logged_instance_config = instance_config.copy()
+        del logged_instance_config["feeds"]
         log.info(
-            "%s has %s unused foreground colors: %s", channel, len(unused_colors), ", ".join(sorted(unused_colors))
+            "The excerpted configuration for %s channels with %s feeds is:\n%s",
+            len(instance_config["feeds"]),
+            len([feed for channel in instance_config["feeds"].values() for feed in channel]),
+            logged_instance_config,
         )
+
+        # Log channel config
+        for channel, channel_config in instance_config["feeds"].items():
+            for feed, feed_config in channel_config.items():
+                log.info("%s has feed %s having config: %s", channel, feed, feed_config)
+
+        # Log unused channel colors
+        unclear_colors = {"white", "black", "grey", "silver"}
+        clear_colors = config.IRC_COLORS - unclear_colors
+        for channel, channel_config in instance_config["feeds"].items():
+            if not (
+                used_colors := {
+                    fg_color
+                    for feed_config in channel_config.values()
+                    if (fg_color := feed_config.get("style", {}).get("name", {}).get("fg")) is not None
+                }
+            ):
+                log.info("%s has no foreground colors in use.", channel)
+                continue
+            if not (unused_colors := clear_colors - used_colors):  # pylint: disable=superfluous-parens
+                log.info("%s has all foreground colors in use.", channel)
+                continue
+            log.info(
+                "%s has %s unused foreground colors: %s", channel, len(unused_colors), ", ".join(sorted(unused_colors))
+            )
 
     # Set alerts channel
     alerts_channel_format = instance_config.get("alerts_channel") or config.ALERTS_CHANNEL_FORMAT_DEFAULT
@@ -83,7 +84,10 @@ def main() -> None:
     }
     config.INSTANCE = instance_config
 
-    # Start bot
+
+def main() -> None:
+    """Start the bot."""
+    load_instance_config()
     Bot()
 
 
