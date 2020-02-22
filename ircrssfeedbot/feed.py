@@ -121,6 +121,8 @@ class Feed:
                 for e in raw_entries
             ]
         log_msg = f"Parsed {len(entries)} entries for {self} using the {parser} parser."
+
+        # Raise alert if no entries
         if entries:
             log.debug(log_msg)
         else:
