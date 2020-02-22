@@ -12,6 +12,7 @@ import requests
 from . import config
 from .util.hashlib import hash4
 from .util.humanize import humanize_len
+from .util.timeit import Timer
 from .util.urllib import url_to_netloc
 
 log = logging.getLogger(__name__)
@@ -87,6 +88,7 @@ class URLReader:
 
         # Read URL
         log.debug("Resiliently retrieving content for %s.", url)
+        timer = Timer()
         for num_attempt in range(1, config.READ_ATTEMPTS_MAX + 1):
             try:
                 response = requests.Session().get(url, timeout=config.REQUEST_TIMEOUT, headers=headers)
@@ -140,11 +142,11 @@ class URLReader:
                     # Update cache
                     action = "Updated cached content" if (url in cls._etag_cache) else "Cached content"
                     cls._etag_cache[url] = url_content
-                    log.debug("%s for %s having etag %s.", action, url, etag)
+                    log.debug("%s for %s having etag %s.", action, url, repr(etag))
             else:
                 # Delete cache
                 cls._del_etag_cache(url)
-        log.debug("Resiliently retrieved content of size %s for %s.", humanize_len(content), url)
+        log.debug("Resiliently retrieved content of size %s for %s in %s.", humanize_len(content), url, timer)
 
         # Note: Entry parsing is not done in this method in order to permit mutability of individual entries.
         return content

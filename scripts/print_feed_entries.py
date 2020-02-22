@@ -28,6 +28,7 @@ config.INSTANCE["feeds"][CHANNEL][FEED]["style"] = None
 log = logging.getLogger(__name__)
 
 feed = Feed(channel=CHANNEL, name=FEED, db=None, url_shortener=None)  # type: ignore
+# feed = Feed(channel=CHANNEL, name=FEED, db=None, url_shortener=None)  # type: ignore
 for index, entry in enumerate(feed.entries):
     post = f"\n#{index + 1}: {entry.message}"
     if entry.categories:

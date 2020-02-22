@@ -54,15 +54,18 @@ class Feed:
     def __str__(self):
         return f"feed {self.name} of {self.channel}"
 
-    def _dedupe_entries(self, entries: List[FeedEntry], *, after_what: str) -> List[FeedEntry]:
-        # Remove duplicate entries while preserving order, e.g. for https://projecteuclid.org/feeds/euclid.ba_rss.xml
-        log.debug("After %s, removing duplicate entry URLs for %s.", after_what, self)
+    def _dedupe_entries(self, entries: List[FeedEntry], *, after_what: Optional[str] = None) -> List[FeedEntry]:
+        """# Remove duplicate entries while preserving order."""
+        # e.g. for https://projecteuclid.org/feeds/euclid.ba_rss.xml
+        action = f"After {after_what}, removing" if after_what else "Removing"
+        log.debug("%s duplicate entry URLs for %s.", action, self)
         entries_deduped = list(dict.fromkeys(entries))
         num_removed = len(entries) - len(entries_deduped)
         logger = log.info if num_removed > 0 else log.debug
+        action = f"After {after_what}, removed" if after_what else "Removed"
         logger(
-            "After %s, removed %s duplicate entry URLs out of %s, leaving %s, for %s.",
-            after_what,
+            "%s %s duplicate entry URLs out of %s, leaving %s, for %s.",
+            action,
             num_removed,
             len(entries),
             len(entries_deduped),
@@ -77,7 +80,7 @@ class Feed:
         content = URLReader.url_content(self.url)
 
         # Parse entries
-        log.debug("Parsing entries for %s.", self.url)
+        log.debug("Parsing entries for %s.", self)
         if feed_config.get("jmes"):
             parser = "jmes"
             raw_entries = jmespath.search(feed_config["jmes"], json.loads(content)) or []  # search can return None
@@ -235,7 +238,7 @@ class Feed:
         log.debug("Shortened titles to %s bytes for %s.", title_max_bytes, self)
 
         # Deduplicate entries
-        entries = self._dedupe_entries(entries, after_what="processing feed")
+        entries = self._dedupe_entries(entries)
 
         return entries
 

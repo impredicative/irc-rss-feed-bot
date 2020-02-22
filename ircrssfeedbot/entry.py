@@ -22,12 +22,7 @@ def _patterns(channel: str, feed: str, list_type: str, key: str) -> List[Pattern
     patterns = leaves(key_config)
     patterns = [re.compile(pattern) for pattern in patterns]
     log.debug(
-        "Caching %s unique regular expression patterns for %s %s of feed %s of %s",
-        len(patterns),
-        key,
-        list_type,
-        feed,
-        channel,
+        "Caching %s unique regex patterns for %s %s of feed %s of %s", len(patterns), key, list_type, feed, channel,
     )
     return patterns
 
