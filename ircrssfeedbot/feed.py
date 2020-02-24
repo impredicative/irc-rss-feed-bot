@@ -4,7 +4,8 @@ import html
 import json
 import logging
 import re
-from typing import Callable, Dict, List, Optional, Set, Tuple, Union
+from functools import lru_cache
+from typing import Callable, Dict, List, Optional, Pattern
 
 import bitlyshortener
 import feedparser
@@ -18,16 +19,24 @@ from .entry import FeedEntry
 from .gnews import decode_google_news_url
 from .url import URLReader
 from .util.hext import html_to_text
+from .util.list import ensure_list
 from .util.lxml import sanitize_xml
+from .util.set import leaves
 from .util.textwrap import shorten_to_bytes_width
 
 log = logging.getLogger(__name__)
 
 
-def ensure_list(s: Optional[Union[str, List[str], Tuple[str], Set[str]]]) -> List[str]:  # pylint: disable=invalid-name
-    """Return the given object as a list of strings."""
-    # Ref: https://stackoverflow.com/a/56641168/
-    return s if isinstance(s, list) else list(s) if isinstance(s, (tuple, set)) else [] if s is None else [s]
+@lru_cache(maxsize=None)  # maxsize is bounded by a multiple of the number of feeds.
+def _patterns(channel: str, feed: str, list_type: str) -> Dict[str, List[Pattern]]:  # Cache-lookup friendly signature.
+    """Return a mapping of keys to a list of unique compiled regular expression patterns for the given args.
+
+    The mapping keys are `title`, `url`, and `category`.
+    """
+    list_config = config.INSTANCE["feeds"][channel][feed].get(list_type) or {}
+    patterns = {key: [re.compile(pat) for pat in leaves(list_config.get(key))] for key in ("title", "url", "category")}
+    log.debug("Caching regex patterns for %s of feed %s of %s.", list_type, feed, channel)
+    return patterns
 
 
 @dataclasses.dataclass
@@ -48,6 +57,8 @@ class Feed:
             if (self.config.get("period", config.PERIOD_HOURS_DEFAULT) > config.PERIOD_HOURS_MIN)
             else 0
         )
+        self.blacklist = _patterns(self.channel, self.name, "blacklist")
+        self.whitelist = _patterns(self.channel, self.name, "whitelist")
         self.entries = self._entries()  # Entries are effectively cached here at this point in time.
         log.debug("Initialized instance of %s with %s entries.", self, len(self.entries))
 

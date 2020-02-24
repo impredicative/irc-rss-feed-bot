@@ -1,30 +1,13 @@
 """Feed entry."""
 import dataclasses
-import functools
 import logging
-import re
 from typing import Any, Dict, List, Match, Optional, Pattern, Tuple, cast
 
 from . import config
 from .util.ircmessage import style
-from .util.set import leaves
 from .util.textwrap import shorten_to_bytes_width
 
 log = logging.getLogger(__name__)
-
-
-@functools.lru_cache(maxsize=None)  # maxsize is bounded by a multiple of the number of feeds.
-def _patterns(channel: str, feed: str, list_type: str, key: str) -> List[Pattern]:
-    """Return a list of unique compiled regular expression patterns for the given args."""
-    feed_config = config.INSTANCE["feeds"][channel][feed]
-    list_config = feed_config.get(list_type) or {}
-    key_config = list_config.get(key, [])
-    patterns = leaves(key_config)
-    patterns = [re.compile(pattern) for pattern in patterns]
-    log.debug(
-        "Caching %s unique regex patterns for %s %s of feed %s of %s", len(patterns), key, list_type, feed, channel,
-    )
-    return patterns
 
 
 @dataclasses.dataclass(unsafe_hash=True)
@@ -41,20 +24,17 @@ class FeedEntry:
         self.short_url: Optional[str] = None
         self.matching_title_search_pattern: Optional[Pattern] = None
 
-    def _matching_pattern(self, list_type: str) -> Optional[Tuple[str, Pattern]]:
+    def _matching_pattern(self, patterns: Dict[str, List[Pattern]]) -> Optional[Tuple[str, Pattern]]:
         """Return the matching key name and regular expression pattern, if any."""
-        channel = self.feed.channel
-        feed = self.feed.name
-
         # Check title and long URL
         for search_key, val in {"title": self.title, "url": self.long_url}.items():
-            for pattern in _patterns(channel, feed, list_type, search_key):
+            for pattern in patterns[search_key]:
                 if pattern.search(val):
                     log.log(5, "%s matches %s pattern %s.", self, search_key, repr(pattern.pattern))
                     return search_key, pattern
 
         # Check categories
-        for pattern in _patterns(channel, feed, list_type, "category"):
+        for pattern in patterns["category"]:
             for category in self.categories:  # This loop is only for categories.
                 if pattern.search(category):
                     log.log(
@@ -71,12 +51,12 @@ class FeedEntry:
     @property
     def blacklisted_pattern(self) -> Optional[Tuple[str, Pattern]]:
         """Return the matching key name and blacklisted regular expression pattern, if any."""
-        return self._matching_pattern("blacklist")
+        return self._matching_pattern(self.feed.blacklist)
 
     @property
     def whitelisted_pattern(self) -> Optional[Tuple[str, Pattern]]:
         """Return the matching key name and whitelisted regular expression pattern, if any."""
-        return self._matching_pattern("whitelist")
+        return self._matching_pattern(self.feed.whitelist)
 
     @property
     def message(self) -> str:  # pylint: disable=too-many-locals
