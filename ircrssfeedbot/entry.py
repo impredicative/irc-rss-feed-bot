@@ -1,7 +1,7 @@
 """Feed entry."""
 import dataclasses
 import logging
-from typing import Any, Dict, List, Match, Optional, Pattern, Tuple, cast
+from typing import Any, Dict, List, Optional, Pattern, Tuple
 
 from . import config
 from .util.ircmessage import style
@@ -71,9 +71,7 @@ class FeedEntry:
         # Define post title
         title = self.title
         if explain and (pattern := self.matching_title_search_pattern):
-            pattern = cast(Pattern, pattern)
             if match := pattern.search(self.title):  # Not always guaranteed to be true due to sub, format, etc.
-                match = cast(Match, match)
                 span0, span1 = match.span()
                 title_mid = title[span0:span1]
                 title_mid = style(title_mid, italics=True) if feed_style else f"*{title_mid}*"

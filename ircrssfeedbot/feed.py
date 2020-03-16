@@ -169,7 +169,7 @@ class Feed:
             whitelisted_entries: List[FeedEntry] = []
             for entry in entries:
                 if key_pattern_tuple := entry.whitelisted_pattern:
-                    key, pattern = key_pattern_tuple  # type: ignore
+                    key, pattern = key_pattern_tuple
                     if key == "title":
                         entry.matching_title_search_pattern = pattern
                     whitelisted_entries.append(entry)
@@ -190,10 +190,10 @@ class Feed:
         if sub := feed_config.get("sub"):
             log.debug("Substituting entries for %s.", self)
             re_sub: Callable[[Dict[str, str], str], str] = lambda r, v: re.sub(r["pattern"], r["repl"], v)
-            if title_sub := sub.get("title"):  # type: ignore
+            if title_sub := sub.get("title"):
                 for entry in entries:
                     entry.title = re_sub(title_sub, entry.title)
-            if url_sub := sub.get("url"):  # type: ignore
+            if url_sub := sub.get("url"):
                 for entry in entries:
                     entry.long_url = re_sub(url_sub, entry.long_url)
             log.debug("Substituted entries for %s.", self)
@@ -201,15 +201,15 @@ class Feed:
         # Format entries
         if format_config := feed_config.get("format"):
             log.debug("Formatting entries for %s.", self)
-            format_re = format_config.get("re", {})  # type: ignore
-            format_str = format_config["str"]  # type: ignore
+            format_re = format_config.get("re", {})
+            format_str = format_config["str"]
             for entry in entries:
                 # Collect:
                 re_params = {"title": entry.title, "url": entry.long_url}
                 params = {**entry.data, **re_params}
                 for re_key, re_val in format_re.items():
                     if match := re.search(re_val, params[re_key]):
-                        params.update(match.groupdict())  # type: ignore
+                        params.update(match.groupdict())
                 # Format:
                 entry.title = format_str.get("title", "{title}").format_map(params)
                 entry.long_url = format_str.get("url", "{url}").format_map(params)
