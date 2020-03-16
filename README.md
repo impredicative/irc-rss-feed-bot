@@ -361,8 +361,8 @@ services:
     restart: always
     logging:
       options:
-        max-size: 10m
-        max-file: "3"
+        max-size: 2m
+        max-file: "5"
     volumes:
       - ./irc-rss-feed-bot:/config
     env_file:
