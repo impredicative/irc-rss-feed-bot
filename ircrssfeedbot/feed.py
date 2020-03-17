@@ -215,6 +215,13 @@ class Feed:
                 entry.long_url = format_str.get("url", "{url}").format_map(params)
             log.debug("Formatted entries for %s.", self)
 
+        # Escape spaces in URLs
+        log.debug("Escaping spaces in URLs for %s.", self)
+        for entry in entries:
+            # e.g. for https://covid-api.com/api/reports?iso=USA&region_province=New York&date=2020-03-15
+            entry.long_url = entry.long_url.strip().replace(" ", "%20")
+        log.debug("Escaped spaces in URLs for %s.", self)
+
         # Strip HTML tags from titles
         log.debug("Stripping HTML tags from titles for %s.", self)
         for entry in entries:
