@@ -205,7 +205,7 @@ class Feed:
             format_str = format_config["str"]
             for entry in entries:
                 # Collect:
-                re_params = {"title": entry.title, "url": entry.long_url}
+                re_params = {"title": entry.title, "url": entry.long_url, "categories": entry.categories}
                 params = {**entry.data, **re_params}
                 for re_key, re_val in format_re.items():
                     if match := re.search(re_val, params[re_key]):

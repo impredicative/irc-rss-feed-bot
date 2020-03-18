@@ -316,7 +316,7 @@ It is used to collect named [key-value pairs](https://docs.python.org/3/library/
 match if there is one.
 * **`format/re/url`**: Similar to `format/re/title`.
 * **`format/str/title`**: The key-value pairs collected using `format/re/title` and `format/re/url`,
-both of which are optional, are combined along with the default additions of both `title` and `url` as keys.
+both of which are optional, are combined along with the default additions of `title`, `url`, and `categories` as keys.
 Any additional keys returned by the extractor are also available.
 The key-value pairs are used to [format](https://docs.python.org/3/library/stdtypes.html#str.format_map) the provided
 quoted title string.
