@@ -318,6 +318,8 @@ Before using, it can be tested in the form [here](http://jmespath.org/).
 of entries. The raw content is made available to the extractor as a file-like object named `file`.
 This extractor uses [`eval`](https://docs.python.org/3/library/functions.html?#eval) which is unsafe, and so its
 use must be confirmed to be safe.
+Its value requires compatibility with the version of Pandas defined in [`requirements.txt`](requirements.txt),
+and this version requirement is expected to be routinely updated.
 
 ##### Conditional
 The sample configuration above contains examples of these:
