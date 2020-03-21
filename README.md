@@ -1,5 +1,5 @@
 # irc-rss-feed-bot
-**irc-rss-feed-bot** is a Python 3.8 and IRC based RSS/Atom and scraped HTML/JSON feed posting bot.
+**irc-rss-feed-bot** is a Python 3.8 and IRC based RSS/Atom and scraped HTML/JSON/CSV feed posting bot.
 It essentially posts the entries of feeds in IRC channels, one entry per message.
 More specifically, it posts the titles and shortened URLs of entries.
 
@@ -16,8 +16,9 @@ There is however no delay for any feed which has a polling period less than or e
 considered urgent.
 * A SQLite database file records hashes of the entries that have been posted, thereby preventing them from being
 reposted.
-* The [`hext`](https://pypi.org/project/hext/) and [`jmespath`](https://pypi.org/project/jmespath/) DSLs are used for
-parsing arbitrary HTML and JSON content respectively.
+* The [`hext`](https://pypi.org/project/hext/), [`jmespath`](https://pypi.org/project/jmespath/), and 
+[`pandas`](https://pandas.pydata.org/) DSLs are used for flexibly parsing arbitrary HTML, JSON, and CSV content 
+respectively.
 * Entry titles are formatted for neatness.
 Any HTML tags and excessive whitespace are stripped, all-caps are replaced,
 and excessively long titles are sanely truncated. 
@@ -98,7 +99,10 @@ feeds:
           repl: https://redd.it/\g<id>
     LitCovid:
       url: https://www.ncbi.nlm.nih.gov/research/coronavirus-api/export
-      pandas: 'read_csv(file, comment="#", sep="\t").assign(link=lambda r: "https://pubmed.ncbi.nlm.nih.gov/" + r["pmid"].astype("str")).convert_dtypes()'
+      pandas: |-
+        read_csv(file, comment="#", sep="\t") \
+        .assign(link=lambda r: "https://pubmed.ncbi.nlm.nih.gov/" + r["pmid"].astype("str")) \
+        .convert_dtypes()
   "##some_chan2":
     ArXiv:cs.AI: &ArXiv
       url: http://export.arxiv.org/rss/cs.AI
@@ -311,7 +315,7 @@ list of entries from a HTML web page. Before using, it can be tested in the form
 * **`jmes`**: This is a string representing the [jmespath](http://jmespath.org/examples.html) DSL for extracting a list
 of entries from JSON. Before using, it can be tested in the form [here](http://jmespath.org/).
 * **`pandas`**: This is a string command evaluated using [pandas](https://pandas.pydata.org/) for extracting a dataframe
-of entries.
+of entries. The raw content is made available as a file-like object named `file`.
 
 ##### Conditional
 The sample configuration above contains examples of these:
