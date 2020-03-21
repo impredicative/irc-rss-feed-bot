@@ -257,11 +257,12 @@ class Feed:
         log.debug("Stripped unicode quotes around titles for %s.", self)
 
         # Replace all-caps titles
-        log.debug("Capitalizing all-caps titles for %s.", self)
+        log.debug("Capitalizing all-caps multi-word titles for %s.", self)
         for entry in entries:
-            if entry.title.isupper():  # e.g. for https://www.biorxiv.org/content/10.1101/667436v1
+            entry_has_multiple_words = len(entry.title.split(maxsplit=1)) > 1
+            if entry_has_multiple_words and entry.title.isupper():  # e.g. for https://redd.it/fm8z83
                 entry.title = entry.title.capitalize()
-        log.debug("Capitalized all-caps titles for %s.", self)
+        log.debug("Capitalized all-caps multi-word titles for %s.", self)
 
         # Shorten titles
         title_max_bytes = config.TITLE_MAX_BYTES
