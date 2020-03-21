@@ -92,9 +92,9 @@ class Feed:
 
         # Parse entries
         log.debug("Parsing entries for %s.", self)
-        if feed_config.get("jmes"):
+        if extract_config := feed_config.get("jmes"):
             parser = "jmes"
-            raw_entries = jmespath.search(feed_config["jmes"], json.loads(content)) or []  # search can return None
+            raw_entries = jmespath.search(extract_config, json.loads(content)) or []  # search can return None
             entries = [
                 FeedEntry(
                     title=e["title"].strip(),
@@ -105,9 +105,9 @@ class Feed:
                 )
                 for e in raw_entries
             ]
-        elif feed_config.get("hext"):
+        elif extract_config := feed_config.get("hext"):
             parser = "hext"
-            raw_entries = hext.Rule(feed_config["hext"]).extract(hext.Html(content.decode()))
+            raw_entries = hext.Rule(extract_config).extract(hext.Html(content.decode()))
             entries = [
                 FeedEntry(
                     title=html.unescape(e["title"].strip()),
