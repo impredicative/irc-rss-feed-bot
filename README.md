@@ -316,6 +316,8 @@ list of entries from a HTML web page. Before using, it can be tested in the form
 of entries from JSON. Before using, it can be tested in the form [here](http://jmespath.org/).
 * **`pandas`**: This is a string command evaluated using [pandas](https://pandas.pydata.org/) for extracting a dataframe
 of entries. The raw content is made available as a file-like object named `file`.
+This extractor uses [`eval`](https://docs.python.org/3/library/functions.html?#eval) which is unsafe, and therefore its
+use must be confirmed to be safe.
 
 ##### Conditional
 The sample configuration above contains examples of these:
