@@ -297,7 +297,7 @@ class Feed:
         log.debug("Retrieving unposted entries for %s.", self)
         entries = self.entries
         long_urls = [entry.long_url for entry in entries]
-        dedup_strategy = self.config.get("dedup", config.DEDUP_STRATEGY_DEFAULT)
+        dedup_strategy = self.config.get("dedup") or config.DEDUP_STRATEGY_DEFAULT
         if dedup_strategy == "channel":
             long_urls = self.db.select_unposted_for_channel(self.channel, self.name, long_urls)
         else:
