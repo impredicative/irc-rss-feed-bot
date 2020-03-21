@@ -96,6 +96,9 @@ feeds:
         url:
           pattern: ^https://www\.reddit\.com/r/.+?/comments/(?P<id>.+?)/.+$
           repl: https://redd.it/\g<id>
+    LitCovid:
+      url: https://www.ncbi.nlm.nih.gov/research/coronavirus-api/export
+      pandas: 'read_csv(file, comment="#", sep="\t").assign(link=lambda r: "https://pubmed.ncbi.nlm.nih.gov/" + r["pmid"].astype("str")).convert_dtypes()'
   "##some_chan2":
     ArXiv:cs.AI: &ArXiv
       url: http://export.arxiv.org/rss/cs.AI
@@ -307,6 +310,8 @@ requested by creating an issue.
 list of entries from a HTML web page. Before using, it can be tested in the form [here](https://hext.thomastrapp.com/).
 * **`jmes`**: This is a string representing the [jmespath](http://jmespath.org/examples.html) DSL for extracting a list
 of entries from JSON. Before using, it can be tested in the form [here](http://jmespath.org/).
+* **`pandas`**: This is a string command evaluated using [pandas](https://pandas.pydata.org/) for extracting a dataframe
+of entries.
 
 ##### Conditional
 The sample configuration above contains examples of these:
