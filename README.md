@@ -303,20 +303,20 @@ The nesting permits lists to be creatively reused between feeds via YAML anchors
 
 ##### Extractor
 For a non-XML feed, one of the following extractors can be used.
-Its value must be such that a list of entry
-[_dictionaries_](https://en.wikipedia.org/wiki/Associative_array#Example) is extracted.
-Each extracted entry _dictionary_ must at a minimum include a `title`, a valid `link`, and zero or more values for
+Each extracted entry must at a minimum include a `title`, a `link`, and zero or more values for
 `category`.
 
 Some sites require a custom user agent or other custom headers for successful scraping; such a customization can be
 requested by creating an issue.
 * **`hext`**: This is a string representing the [hext](https://hext.thomastrapp.com/documentation) DSL for extracting a
-list of entries from a HTML web page. Before using, it can be tested in the form [here](https://hext.thomastrapp.com/).
+list of entry [dictionaries](https://en.wikipedia.org/wiki/Associative_array#Example) from a HTML web page. 
+Before using, it can be tested in the form [here](https://hext.thomastrapp.com/).
 * **`jmes`**: This is a string representing the [jmespath](http://jmespath.org/examples.html) DSL for extracting a list
-of entries from JSON. Before using, it can be tested in the form [here](http://jmespath.org/).
+of entry [dictionaries](https://en.wikipedia.org/wiki/Associative_array#Example) from JSON.
+Before using, it can be tested in the form [here](http://jmespath.org/).
 * **`pandas`**: This is a string command evaluated using [pandas](https://pandas.pydata.org/) for extracting a dataframe
-of entries. The raw content is made available as a file-like object named `file`.
-This extractor uses [`eval`](https://docs.python.org/3/library/functions.html?#eval) which is unsafe, and therefore its
+of entries. The raw content is made available to the extractor as a file-like object named `file`.
+This extractor uses [`eval`](https://docs.python.org/3/library/functions.html?#eval) which is unsafe, and so its
 use must be confirmed to be safe.
 
 ##### Conditional
