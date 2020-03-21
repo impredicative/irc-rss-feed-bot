@@ -4,22 +4,26 @@
 #
 #    pip-compile
 #
-bitlyshortener==0.3.3     # via -r requirements.in (line 1)
-cachetools==4.0.0         # via -r requirements.in (line 2)
+bitlyshortener==0.3.3     # via -r requirements.in
+cachetools==4.0.0         # via -r requirements.in
 certifi==2019.11.28       # via miniirc, requests
 chardet==3.0.4            # via requests
-dickens==1.0.1            # via -r requirements.in (line 3)
-feedparser==5.2.1         # via -r requirements.in (line 4)
-hext==0.2.4               # via -r requirements.in (line 5)
-humanize==1.0.0           # via -r requirements.in (line 6)
+dickens==1.0.1            # via -r requirements.in
+feedparser==5.2.1         # via -r requirements.in
+hext==0.2.4               # via -r requirements.in
+humanize==2.1.0           # via -r requirements.in
 idna==2.9                 # via requests
-ircmessage==0.1.1         # via -r requirements.in (line 7)
-jmespath==0.9.4           # via -r requirements.in (line 8)
-lxml==4.5.0               # via -r requirements.in (line 9)
-miniirc==1.5.1            # via -r requirements.in (line 10)
-peewee==3.13.1            # via -r requirements.in (line 11)
-requests==2.23.0          # via -r requirements.in (line 12), bitlyshortener
+ircmessage==0.1.1         # via -r requirements.in
+jmespath==0.9.5           # via -r requirements.in
+lxml==4.5.0               # via -r requirements.in
+miniirc==1.5.1            # via -r requirements.in
+numpy==1.18.2             # via pandas
+pandas==1.0.3             # via -r requirements.in
+peewee==3.13.1            # via -r requirements.in
+python-dateutil==2.8.1    # via pandas
+pytz==2019.3              # via pandas
+requests==2.23.0          # via -r requirements.in, bitlyshortener
 ruamel.yaml.clib==0.2.0   # via ruamel.yaml
-ruamel.yaml==0.16.10      # via -r requirements.in (line 13)
-six==1.10.0               # via ircmessage
+ruamel.yaml==0.16.10      # via -r requirements.in
+six==1.10.0               # via ircmessage, python-dateutil
 urllib3==1.25.8           # via requests

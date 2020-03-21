@@ -1,6 +1,7 @@
 """Feed."""
 import dataclasses
 import html
+import io
 import json
 import logging
 import re
@@ -11,6 +12,7 @@ import bitlyshortener
 import feedparser
 import hext
 import jmespath
+import pandas as pd
 from descriptors import cachedproperty
 
 from . import config
@@ -117,6 +119,19 @@ class Feed:
                     feed=self,
                 )
                 for e in raw_entries
+            ]
+        elif extract_config := feed_config.get("pandas"):
+            parser = "pandas"
+            df = eval(f"pd.{extract_config}", {"pd": pd}, {"file": io.BytesIO(content)})  # pylint: disable=eval-used
+            entries = [
+                FeedEntry(
+                    title=e["title"],
+                    long_url=e["link"],
+                    categories=ensure_list(e.get("category", [])),
+                    data=dict(e),
+                    feed=self,
+                )
+                for _, e in df.iterrows()
             ]
         else:
             parser = "default"
