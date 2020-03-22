@@ -12,6 +12,7 @@ import bitlyshortener
 import feedparser
 import hext
 import jmespath
+import numpy as np
 import pandas as pd
 from descriptors import cachedproperty
 
@@ -123,7 +124,7 @@ class Feed:
         elif extract_config := feed_config.get("pandas"):
             parser = "pandas"
             df = eval(  # pylint: disable=eval-used
-                f"pd.{extract_config}", {"pd": pd, "json": json}, {"file": io.BytesIO(content)}
+                f"pd.{extract_config}", {"json": json, "np": np, "pd": pd}, {"file": io.BytesIO(content)}
             )
             entries = [
                 FeedEntry(

@@ -8,6 +8,7 @@ ircmessage
 jmespath
 lxml
 miniirc
+numpy
 pandas
 peewee
 requests
