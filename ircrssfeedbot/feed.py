@@ -122,7 +122,9 @@ class Feed:
             ]
         elif extract_config := feed_config.get("pandas"):
             parser = "pandas"
-            df = eval(f"pd.{extract_config}", {"pd": pd}, {"file": io.BytesIO(content)})  # pylint: disable=eval-used
+            df = eval(  # pylint: disable=eval-used
+                f"pd.{extract_config}", {"pd": pd, "json": json}, {"file": io.BytesIO(content)}
+            )
             entries = [
                 FeedEntry(
                     title=e["title"],
