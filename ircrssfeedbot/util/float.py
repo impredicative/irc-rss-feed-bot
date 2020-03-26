@@ -5,7 +5,7 @@ class Float(float):
     """Directional percentage representation of float."""
 
     def _percent(self, precision: int) -> str:
-        indicator = "↑" if self > 0 else ("↓" if self < 0 else "")
+        indicator = "↓" if self < 0 else "↑"
         return f"{indicator}{abs(self):.{precision}%}"
 
     @property
