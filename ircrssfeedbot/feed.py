@@ -219,8 +219,8 @@ class Feed:
         # Format entries
         if format_config := feed_config.get("format"):
             log.debug("Formatting entries for %s.", self)
-            format_re = format_config.get("re", {})
-            format_str = format_config["str"]
+            format_re = format_config.get("re") or {}
+            format_str = format_config.get("str") or {}
             for entry in entries:
                 # Collect:
                 re_params = {"title": entry.title, "url": entry.long_url, "categories": entry.categories}
