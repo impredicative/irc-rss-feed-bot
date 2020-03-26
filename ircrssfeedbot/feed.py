@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 from descriptors import cachedproperty
 
-from . import config
+from . import config, util
 from .db import Database
 from .entry import FeedEntry
 from .gnews import decode_google_news_url
@@ -124,7 +124,7 @@ class Feed:
         elif extract_config := feed_config.get("pandas"):
             parser = "pandas"
             df = eval(  # pylint: disable=eval-used
-                f"pd.{extract_config}", {"json": json, "np": np, "pd": pd}, {"file": io.BytesIO(content)}
+                f"pd.{extract_config}", {"json": json, "np": np, "pd": pd, "util": util}, {"file": io.BytesIO(content)}
             )
             entries = [
                 FeedEntry(
