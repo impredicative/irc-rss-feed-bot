@@ -14,7 +14,7 @@ STOPSIGNAL SIGINT
 FROM build as test
 WORKDIR /app
 USER root
-COPY pylintrc pyproject.toml requirements-dev.in setup.cfg vulture.txt ./
+COPY pylintrc pyproject.toml requirements-dev.in setup.cfg ./
 COPY scripts/test.sh ./scripts/test.sh
 RUN pip install --no-cache-dir -Ur requirements-dev.in && \
     ./scripts/test.sh

@@ -6,5 +6,4 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd "${DIR}"/..
 
 black --check .  # This is done separately from pytest because pytest-black==0.3.7 is incompatible with black==19.10b0
-vulture . ./vulture.txt --exclude scripts/archived
 pytest -v
