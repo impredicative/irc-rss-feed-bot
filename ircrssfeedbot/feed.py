@@ -260,10 +260,11 @@ class Feed:
         log.debug("Stripped unicode quotes around titles for %s.", self)
 
         # Remove trailing periods from title
-        log.debug("Removing trailing periods from titles for %s.", self)
+        log.debug("Removing trailing periods from single-sentence titles for %s.", self)
         for entry in entries:
-            entry.title = entry.title.rstrip().rstrip(".")  # e.g. for PubMed RSS feeds
-        log.debug("Removed trailing periods from titles for %s.", self)
+            if len(entry.title.rstrip().split(". ", maxsplit=1)) < 2:  # Crude check.
+                entry.title = entry.title.rstrip().rstrip(".")  # e.g. for PubMed RSS feeds
+        log.debug("Removed trailing periods from single-sentence titles for %s.", self)
 
         # Replace all-caps titles
         log.debug("Capitalizing all-caps multi-word titles for %s.", self)
