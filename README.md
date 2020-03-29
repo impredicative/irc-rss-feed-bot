@@ -335,15 +335,16 @@ both of which are optional, are combined along with the default additions of `ti
 Any additional keys returned by the extractor are also available.
 The key-value pairs are used to [format](https://docs.python.org/3/library/stdtypes.html#str.format_map) the provided
 quoted title string.
+If the title formatting fails for any reason, a warning is logged, and the title remains unchanged.
 The default value is `{title}`.
 * **`format/str/url`**: Similar to `format/str/title`. The default value is `{url}`.
-If this is specified, it can be relevant to set `shorten` to `false` for the feed.
+If this is specified, it can sometimes be relevant to set `shorten` to `false` for the feed.
 * **`sub/title/pattern`**: This is a single regular expression pattern that if found results in the entry
 title being [substituted](https://docs.python.org/3/library/re.html#re.sub).
 * **`sub/title/repl`**: If `sub/title/pattern` is found, the entry title is replaced with this replacement, otherwise it
 is forwarded unchanged.
 * **`sub/url/pattern`**: Similar to `sub/title/pattern`.
-If a pattern is specified, it can be relevant to set `shorten` to `false` for the feed.
+If a pattern is specified, it can sometimes be relevant to set `shorten` to `false` for the feed.
 * **`sub/url/repl`**: Similar to `sub/title/repl`.
 
 #### Feed default settings

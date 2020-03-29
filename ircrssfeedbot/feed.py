@@ -228,9 +228,22 @@ class Feed:
                 for re_key, re_val in format_re.items():
                     if match := re.search(re_val, params[re_key]):
                         params.update(match.groupdict())
-                # Format:
-                entry.title = format_str.get("title", "{title}").format_map(params)
-                entry.long_url = format_str.get("url", "{url}").format_map(params)
+                # Format title:
+                title_format_str = format_str.get("title", "{title}")
+                try:
+                    entry.title = title_format_str.format_map(params)
+                except Exception as exc:  # pylint: disable=broad-except
+                    log.warning(
+                        f"Unable to format entry title for {entry} of {entry.feed} due to exception {exc!r} using format string {title_format_str!r}."  # pylint: disable=line-too-long
+                    )
+                # Format URL:
+                url_format_str = format_str.get("url", "{url}")
+                try:
+                    entry.long_url = url_format_str.format_map(params)
+                except Exception as exc:  # pylint: disable=broad-except
+                    log.warning(
+                        f"Unable to format entry URL for {entry} of {entry.feed} due to exception {exc!r} using format string {url_format_str!r}."  # pylint: disable=line-too-long
+                    )
             log.debug("Formatted entries for %s.", self)
 
         # Escape spaces in URLs
