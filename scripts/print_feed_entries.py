@@ -21,12 +21,12 @@ FEED = "TDS"  # CUSTOMIZE
 config.LOGGING["loggers"][config.PACKAGE_NAME]["level"] = "DEBUG"  # type: ignore
 config.configure_logging()
 
+log = logging.getLogger(__name__)
+
 config.runtime.alert = lambda *args: log.exception(args[0])
 config.runtime.identity = ""
 load_instance_config(log_details=False)
 config.INSTANCE["feeds"][CHANNEL][FEED]["style"] = None
-
-log = logging.getLogger(__name__)
 
 feed = Feed(channel=CHANNEL, name=FEED, db=None, url_shortener=None)  # type: ignore
 # feed = Feed(channel=CHANNEL, name=FEED, db=None, url_shortener=None)  # type: ignore
