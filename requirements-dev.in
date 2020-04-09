@@ -8,8 +8,8 @@ pycodestyle
 pydocstyle
 pylint
 pytest
-pytest-codestyle
-pytest-docstyle
+pytest-pycodestyle
+pytest-pydocstyle
 pytest-isort
 pytest-mypy
 pytest-pylint
