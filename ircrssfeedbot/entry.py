@@ -16,6 +16,7 @@ class FeedEntry:
 
     title: str = dataclasses.field(compare=False)
     long_url: str = dataclasses.field(compare=True)
+    summary: str = dataclasses.field(compare=False)
     categories: List[str] = dataclasses.field(compare=False, repr=True)
     data: Dict[str, Any] = dataclasses.field(compare=False, repr=False)
     feed: Any = dataclasses.field(compare=False, repr=False)
@@ -61,34 +62,47 @@ class FeedEntry:
     @property
     def message(self) -> str:  # pylint: disable=too-many-locals
         """Return the message to post."""
-        # Define feed config
-        feed_name = self.feed.name
+        # Obtain feed config
         feed_config = self.feed.config
-        explain = (feed_config.get("whitelist") or {}).get("explain")  # Note: get("whitelist") can be None.
-        feed_style = feed_config.get("style") or {}
-        feed_name_style = feed_style.get("name", {})
+        explain = (feed_config.get("whitelist") or {}).get("explain")
+        msg_config = feed_config.get("message") or {}
+        style_config = feed_config.get("style") or {}
+        name_style_config = style_config.get("name", {})
 
-        # Define post title
-        title = self.title
-        if explain and (pattern := self.matching_title_search_pattern):
-            if match := pattern.search(self.title):  # Not always guaranteed to be true due to sub, format, etc.
-                span0, span1 = match.span()
-                title_mid = title[span0:span1]
-                title_mid = style(title_mid, italics=True) if feed_style else f"*{title_mid}*"
-                title = title[:span0] + title_mid + title[span1:]
-
-        # Define other post params
-        feed = style(feed_name, **feed_name_style)
-        url = self.short_url or self.long_url
-
-        # Shorten title
-        base_bytes_use = len(
-            config.PRIVMSG_FORMAT.format(
-                identity=config.runtime.identity, channel=self.feed.channel, feed=feed, title="", url=url,
-            ).encode()
+        # Define post params
+        format_map = dict(
+            identity=config.runtime.identity,
+            channel=self.feed.channel,
+            feed=style(self.feed.name, **name_style_config),
+            url=self.short_url or self.long_url,
         )
-        title_bytes_width = max(0, config.QUOTE_LEN_MAX - base_bytes_use)
-        title = shorten_to_bytes_width(title, title_bytes_width)
 
-        msg = config.MESSAGE_FORMAT.format(feed=feed, title=title, url=url)
+        # Define post caption
+        format_map["caption"] = ""
+        if msg_config.get("title", True) and (title := self.title):
+            if explain and (pattern := self.matching_title_search_pattern):
+                if match := pattern.search(title):  # Not always guaranteed to be true due to sub, format, etc.
+                    span0, span1 = match.span()
+                    title_mid = title[span0:span1]
+                    title_mid = style(title_mid, italics=True) if style_config else f"*{title_mid}*"
+                    title = title[:span0] + title_mid + title[span1:]
+            format_map["caption"] += title
+        if msg_config.get("summary") and self.summary:
+            if format_map["caption"]:
+                format_map["caption"] += ": "
+            format_map["caption"] += self.summary
+
+        # Define message format
+        msg_format = "[{feed}]"
+        if format_map["caption"]:
+            msg_format += " {caption} →"
+        msg_format += " {url}"
+        privmsg_format = f":{{identity}} PRIVMSG {{channel}} :{msg_format}"
+
+        # Shorten caption
+        base_bytes_use = len(privmsg_format.format_map({**format_map, "caption": ""}).encode())
+        caption_bytes_width = max(0, config.QUOTE_LEN_MAX - base_bytes_use)
+        format_map["caption"] = shorten_to_bytes_width(format_map["caption"], caption_bytes_width)
+
+        msg = msg_format.format_map(format_map)
         return msg

@@ -39,7 +39,6 @@ ETAG_CACHE_PROHIBITED_NETLOCS: Final = {
 ETAG_TEST_PROBABILITY: Final = 0.1
 FEED_DEFAULTS: Final = {"new": "some", "shorten": True}
 IRC_COLORS = set(ircmessage.colors.idToName.values())
-MESSAGE_FORMAT: Final = "[{feed}] {title} → {url}"
 MIN_CHANNEL_IDLE_TIME_DEFAULT: Final = {"dev": 1}.get(ENV, 15 * 60)
 MIN_CONSECUTIVE_FEED_FAILURES_FOR_ALERT: Final = 3
 NEW_FEED_POSTS_MAX: Final = {"none": 0, "some": 3, "all": None}
@@ -62,7 +61,6 @@ USER_AGENT_OVERRIDES: Final = {  # Site-specific overrides (without www prefix).
 }
 
 # Calculated
-PRIVMSG_FORMAT: Final = f":{{identity}} PRIVMSG {{channel}} :{MESSAGE_FORMAT}"  # Assumed.
 URL_CACHE_TTL: Final = PERIOD_HOURS_MIN * 3600 * ((100 - PERIOD_RANDOM_PERCENT) / 100) * 0.99
 
 LOGGING: Final = {  # Ref: https://docs.python.org/3/howto/logging.html#configuring-logging

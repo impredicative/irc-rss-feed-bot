@@ -102,6 +102,7 @@ class Feed:
                 FeedEntry(
                     title=e["title"].strip(),
                     long_url=e["link"].strip(),
+                    summary=(e.get("summary") or "").strip(),
                     categories=[c.strip() for c in ensure_list(e.get("category", []))],
                     data=e,
                     feed=self,
@@ -115,6 +116,7 @@ class Feed:
                 FeedEntry(
                     title=html.unescape(e["title"].strip()),
                     long_url=e["link"].strip(),
+                    summary=(e.get("summary") or "").strip(),
                     categories=[html.unescape(c.strip()) for c in ensure_list(e.get("category", []))],
                     data=e,
                     feed=self,
@@ -128,8 +130,9 @@ class Feed:
             )
             entries = [
                 FeedEntry(
-                    title=e["title"],
-                    long_url=e["link"],
+                    title=e["title"].strip(),
+                    long_url=e["link"].strip(),
+                    summary=(e.get("summary") or "").strip(),
                     categories=ensure_list(e.get("category", [])),
                     data=dict(e),
                     feed=self,
@@ -142,8 +145,9 @@ class Feed:
             raw_entries = feedparser.parse(content.lstrip())["entries"]
             entries = [
                 FeedEntry(
-                    title=e["title"],
+                    title=e["title"].strip(),
                     long_url=e.get("link") or e["links"][0]["href"],  # e.g. for https://feeds.buzzsprout.com/188368.rss
+                    summary=(e.get("summary") or "").strip(),
                     categories=[t["term"] for t in getattr(e, "tags", [])],
                     data=dict(e),
                     feed=self,
@@ -223,8 +227,13 @@ class Feed:
             format_str = format_config.get("str") or {}
             for entry in entries:
                 # Collect:
-                re_params = {"title": entry.title, "url": entry.long_url, "categories": entry.categories}
-                params = {**entry.data, **re_params}
+                params = {
+                    **entry.data,
+                    "title": entry.title,
+                    "url": entry.long_url,
+                    "summary": entry.summary,
+                    "categories": entry.categories,
+                }
                 for re_key, re_val in format_re.items():
                     if match := re.search(re_val, params[re_key]):
                         params.update(match.groupdict())
@@ -253,12 +262,13 @@ class Feed:
             entry.long_url = entry.long_url.strip().replace(" ", "%20")
         log.debug("Escaped spaces in URLs for %s.", self)
 
-        # Strip HTML tags from titles
-        log.debug("Stripping HTML tags from titles for %s.", self)
+        # Strip HTML tags from titles and summaries
+        log.debug("Stripping HTML tags from titles and summaries for %s.", self)
         for entry in entries:
             # e.g. for http://rss.sciencedirect.com/publication/science/08999007  (Elsevier Nutrition journal)
             entry.title = html_to_text(entry.title)
-        log.debug("Stripped HTML tags from titles for %s.", self)
+            entry.summary = html_to_text(entry.summary)
+        log.debug("Stripped HTML tags from titles and summaries for %s.", self)
 
         # Strip unicode quotes around titles
         quote_begin, quote_end = "“”"
