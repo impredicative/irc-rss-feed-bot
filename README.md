@@ -43,6 +43,8 @@ For more features, see the customizable [global settings](#global-settings) and
 <Feed[bot]> [ArXiv:cs.AI] Attack Graph Obfuscation → https://arxiv.org/abs/1903.02601v1
 <Feed[bot]> [InfoWorld] What is a devops engineer? And how do you become one? → https://j.mp/2NOgQ3g
 <Feed[bot]> [InfoWorld] What is Jupyter Notebook? Data analysis made easier → https://j.mp/2NMailP
+<Feed[bot]> [AWS:OpenData] COVID-19 Open Research Dataset (CORD-19): Full-text and metadata dataset of COVID-19 and 
+coronavirus-related research articles optimized for machine readability. → https://registry.opendata.aws/cord-19
 ```
 ![](images/sample_posts.png)
 
@@ -82,8 +84,8 @@ feeds:
       period: 12
       shorten: false
   "#some_chan1":
-    AWS:API:changes:
-      url: https://awsapichanges.info/feed/feed.rss
+    AWS:OpenData:
+      url: https://registry.opendata.aws/rss.xml
       message:
         summary: true
     j:AJCN:
@@ -316,8 +318,8 @@ The nesting permits lists to be creatively reused between feeds via YAML anchors
 
 ##### Extractor
 For a non-XML feed, one of the following extractors can be used.
-Each extracted entry must at a minimum include a `title`, a `link`, and zero or more values for
-`category`.
+Each extracted entry must at a minimum include a `title`, a `link`, an optional `summary` (description),
+and zero or more values for `category`.
 
 Some sites require a custom user agent or other custom headers for successful scraping; such a customization can be
 requested by creating an issue.
