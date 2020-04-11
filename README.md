@@ -316,22 +316,22 @@ of the patterns in the title.
 The nesting permits lists to be creatively reused between feeds via YAML anchors and references.
 * **`whitelist.url`**: Similar to `whitelist.title`.
 
-##### Extractor
-For a non-XML feed, one of the following extractors can be used.
-Each extracted entry must at a minimum include a `title`, a `link`, an optional `summary` (description),
+##### Parser
+For a non-XML feed, one of the following parsers can be used.
+Each parsed entry must at a minimum include a `title`, a `link`, an optional `summary` (description),
 and zero or more values for `category`.
 
 Some sites require a custom user agent or other custom headers for successful scraping; such a customization can be
 requested by creating an issue.
-* **`hext`**: This is a string representing the [hext](https://hext.thomastrapp.com/documentation) DSL for extracting a
+* **`hext`**: This is a string representing the [hext](https://hext.thomastrapp.com/documentation) DSL for parsing a
 list of entry [dictionaries](https://en.wikipedia.org/wiki/Associative_array#Example) from a HTML web page. 
 Before using, it can be tested in the form [here](https://hext.thomastrapp.com/).
-* **`jmes`**: This is a string representing the [jmespath](http://jmespath.org/examples.html) DSL for extracting a list
+* **`jmes`**: This is a string representing the [jmespath](http://jmespath.org/examples.html) DSL for parsing a list
 of entry [dictionaries](https://en.wikipedia.org/wiki/Associative_array#Example) from JSON.
 Before using, it can be tested in the form [here](http://jmespath.org/).
-* **`pandas`**: This is a string command evaluated using [pandas](https://pandas.pydata.org/) for extracting a dataframe
-of entries. The raw content is made available to the extractor as a file-like object named `file`.
-This extractor uses [`eval`](https://docs.python.org/3/library/functions.html?#eval) which is unsafe, and so its
+* **`pandas`**: This is a string command evaluated using [pandas](https://pandas.pydata.org/) for parsing a dataframe
+of entries. The raw content is made available to the parser as a file-like object named `file`.
+This parser uses [`eval`](https://docs.python.org/3/library/functions.html?#eval) which is unsafe, and so its
 use must be confirmed to be safe.
 The provisioned packages are `json`, `numpy` (as `np`), and `pandas` (as `pd`).
 The value requires compatibility with the versions of `pandas` and `numpy` defined in 
@@ -347,7 +347,7 @@ match if there is one.
 * **`format.re.url`**: Similar to `format.re.title`.
 * **`format.str.title`**: The key-value pairs collected using `format.re.title` and `format.re.url`,
 both of which are optional, are combined along with the default additions of `title`, `url`, and `categories` as keys.
-Any additional keys returned by the extractor are also available.
+Any additional keys returned by the parser are also available.
 The key-value pairs are used to [format](https://docs.python.org/3/library/stdtypes.html#str.format_map) the provided
 quoted title string.
 If the title formatting fails for any reason, a warning is logged, and the title remains unchanged.
