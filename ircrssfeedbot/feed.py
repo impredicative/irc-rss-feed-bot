@@ -95,7 +95,7 @@ class Feed:
             parser_name = "feedparser"
         log.debug("Parsing entries for %s using the %s parser.", self, parser_name)
         parser = getattr(parsers, parser_name).Parser
-        entries = parser(parser_config, content, self).entries
+        entries = parser(parser_config, content, self).entries  # pylint: disable=no-member
         log_msg = f"Parsed {len(entries)} entries for {self} using the {parser_name} parser."
 
         # Raise alert if no entries
