@@ -8,6 +8,7 @@ from pathlib import Path
 from ruamel.yaml import YAML
 
 from ircrssfeedbot import Bot, config
+from ircrssfeedbot.util.list import ensure_list
 
 log = logging.getLogger(__name__)
 
@@ -24,6 +25,15 @@ def load_instance_config(log_details: bool = True) -> None:
     instance_config = YAML().load(instance_config_path)
     instance_config = json.loads(json.dumps(instance_config))  # Recursively use a dict as the data structure.
     log.info("Read user configuration file %s", instance_config_path)
+    if "taxonomies" in instance_config:
+        del instance_config["taxonomies"]
+
+    url_counter = collections.Counter(
+        feed_url
+        for channel_cfg in instance_config["feeds"].values()
+        for feed_cfg in channel_cfg.values()
+        for feed_url in ensure_list(feed_cfg["url"])
+    )
 
     if log_details:
 
@@ -31,9 +41,10 @@ def load_instance_config(log_details: bool = True) -> None:
         logged_instance_config = instance_config.copy()
         del logged_instance_config["feeds"]
         log.info(
-            "The excerpted configuration for %s channels with %s feeds is:\n%s",
+            "The excerpted configuration for %s channels with %s feeds having %s unique URLs is:\n%s",
             len(instance_config["feeds"]),
             len([feed for channel in instance_config["feeds"].values() for feed in channel]),
+            len(url_counter),
             logged_instance_config,
         )
 
@@ -72,16 +83,12 @@ def load_instance_config(log_details: bool = True) -> None:
     instance_config["dir"] = instance_config_path.parent
     instance_config["nick:casefold"] = instance_config["nick"].casefold()
     instance_config["channels:casefold"] = [channel.casefold() for channel in instance_config["feeds"]]
-    instance_config["repeated_urls"] = {
-        url
-        for url, count in collections.Counter(
-            feed_cfg["url"] for channel_cfg in instance_config["feeds"].values() for feed_cfg in channel_cfg.values()
-        ).items()
-        if count > 1
-    }
+    instance_config["repeated_urls"] = {url for url, count in url_counter.items() if count > 1}
+
     instance_config["defaults"] = {
         k: instance_config.get("defaults", {}).get(k, v) for k, v in config.FEED_DEFAULTS.items()
     }
+
     config.INSTANCE = instance_config
 
 

@@ -2,6 +2,7 @@
 import dataclasses
 import logging
 import re
+import time
 from functools import lru_cache
 from typing import Callable, Dict, List, Optional, Pattern
 
@@ -13,6 +14,7 @@ from .db import Database
 from .entry import FeedEntry
 from .url import URLReader
 from .util.hext import html_to_text
+from .util.list import ensure_list
 from .util.set import leaves
 from .util.textwrap import shorten_to_bytes_width
 
@@ -43,7 +45,7 @@ class Feed:
     def __post_init__(self):
         log.debug("Initializing instance of %s.", self)
         self.config: Dict = {**config.INSTANCE["defaults"], **config.INSTANCE["feeds"][self.channel][self.name]}
-        self.url = self.config["url"]
+        self.urls = ensure_list(self.config["url"])
         self.min_channel_idle_time = (
             config.MIN_CHANNEL_IDLE_TIME_DEFAULT
             if (self.config.get("period", config.PERIOD_HOURS_DEFAULT) > config.PERIOD_HOURS_MIN)
@@ -58,58 +60,78 @@ class Feed:
         return f"feed {self.name} of {self.channel}"
 
     def _dedupe_entries(self, entries: List[FeedEntry], *, after_what: Optional[str] = None) -> List[FeedEntry]:
-        """# Remove duplicate entries while preserving order."""
+        """Remove duplicate entries while preserving order."""
         # e.g. for https://projecteuclid.org/feeds/euclid.ba_rss.xml
         action = f"After {after_what}, removing" if after_what else "Removing"
         log.debug("%s duplicate entry URLs for %s.", action, self)
         entries_deduped = list(dict.fromkeys(entries))
         num_removed = len(entries) - len(entries_deduped)
-        logger = log.info if num_removed > 0 else log.debug
         action = f"After {after_what}, removed" if after_what else "Removed"
-        logger(
-            "%s %s duplicate entry URLs out of %s, leaving %s, for %s.",
+        log.debug(
+            "%s %s duplicate entry URLs out of %s, leaving %s, for %s having %s URLs.",
             action,
             num_removed,
             len(entries),
             len(entries_deduped),
             self,
+            len(self.urls),
         )
         return entries_deduped
 
-    def _entries(self) -> List[FeedEntry]:  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
+    def _entries(self) -> List[FeedEntry]:  # pylint: disable=too-many-locals
         feed_config = self.config
 
         # Select entry parser
-        if parser_config := (feed_config.get("jmespath") or feed_config.get("jmes")):
-            parser_name = "jmespath"
-        elif parser_config := feed_config.get("hext"):
-            parser_name = "hext"
-        elif parser_config := feed_config.get("pandas"):
-            parser_name = "pandas"
+        for parser_name in ("hext", "jmes", "jmespath", "pandas"):
+            if parser_config := feed_config.get(parser_name):
+                if parser_name == "jmes":  # Deprecated name.
+                    parser_name = "jmespath"
+                break
         else:
-            parser_config = {}
             parser_name = "feedparser"
+            parser_config = {}
         parser = getattr(parsers, parser_name).Parser
 
         # Retrieve URL content and parse entries
-        content = URLReader.url_content(self.url)
-        log.debug("Parsing entries for %s using the %s parser.", self, parser_name)
-        entries = parser(parser_config, content, self).entries  # pylint: disable=no-member
-        log_msg = f"Parsed {len(entries)} entries for {self} using the {parser_name} parser."
+        num_urls = len(self.urls)
+        entries = []
+        for url_index, url in enumerate(self.urls):
+            url_num = url_index + 1
+            content = URLReader.url_content(url)
+            url_read_time = time.monotonic()
+            log.debug(f"Parsing entries for URL {url_num} of {num_urls} of {self} using {parser_name}.")
+            url_entries = parser(parser_config, content, self).entries  # pylint: disable=no-member
+            log_msg = f"Parsed {len(url_entries)} entries for URL {url_num} of {num_urls} of {self} using {parser_name}."  # pylint: disable=line-too-long
+            entries.extend(url_entries)
 
-        # Raise alert if no entries
-        if entries:
-            log.debug(log_msg)
-        else:
-            if feed_config.get("alerts", {}).get("empty", True):
-                log_msg += (
-                    " Either check the feed configuration, or wait for its next read, "
-                    "or set `alerts/empty` to `false` for it."
-                )
-                config.runtime.alert(log_msg)
+            # Raise alert if no entries for URL
+            if url_entries:
+                log.debug(log_msg)
             else:
-                log.warning(log_msg)
-            return entries
+                if feed_config.get("alerts", {}).get("empty", True):
+                    log_msg += (
+                        " Either check the feed configuration, or wait for its next read, "
+                        "or set `alerts/empty` to `false` for it."
+                    )
+                    config.runtime.alert(log_msg)
+                else:
+                    log.warning(log_msg)
+
+            # Sleep between URLs
+            if url_num < num_urls:
+                time_elapsed_since_url_read = time.monotonic() - url_read_time
+                sleep_time = max(0, config.SECONDS_BETWEEN_FEED_URLS - time_elapsed_since_url_read)
+                if sleep_time > 0:
+                    log.debug("Sleeping for %.1fs before next URL.", sleep_time)
+                    time.sleep(sleep_time)
+
+        log.debug("Parsed %s entries from %s URLs for %s using %s.", len(entries), num_urls, self, parser_name)
+        return self._process_entries(entries)
+
+    def _process_entries(  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
+        self, entries: List[FeedEntry]
+    ) -> List[FeedEntry]:
+        feed_config = self.config
 
         # Remove blacklisted entries
         if feed_config.get("blacklist", {}):

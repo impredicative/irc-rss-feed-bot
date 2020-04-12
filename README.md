@@ -146,11 +146,6 @@ feeds:
         str:
           title: '[{service}] {title} | {summary}'
           url: '{id}'
-    BioRxiv:
-      url: https://connect.biorxiv.org/biorxiv_xml.php?subject=all
-      alerts:
-        read: false
-      https: true
     Fb:Research:
       url: https://research.fb.com/publications/
       hext: |-
@@ -172,6 +167,13 @@ feeds:
       new: none
       period: 8
       shorten: false
+    MedRxiv:
+      url:
+        - https://connect.medrxiv.org/medrxiv_xml.php?subject=Health_Informatics
+        - https://connect.medrxiv.org/medrxiv_xml.php?subject=Nutrition
+      alerts:
+        read: false
+      https: true
     r/MachineLearning:100+:
       url: https://www.reddit.com/r/MachineLearning/hot/.json?limit=50
       jmespath: 'data.children[*].data | [?score >= `100`].{title: title, link: join(``, [`https://redd.it/`, id])}'
@@ -242,7 +244,8 @@ YAML [anchors and references](https://en.wikipedia.org/wiki/YAML#Advanced_compon
 Examples of this are in the sample.
 
 ##### Mandatory
-* **`url`**: This is the URL of the feed.
+* **`url`**: This is either a single URL or a list of URLs of the feed.
+If a list, the URLs are read in sequence with an interval of one second between them.
 
 ##### Optional
 These are optional and are independent of each other:

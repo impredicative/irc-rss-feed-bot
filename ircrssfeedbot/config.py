@@ -48,6 +48,7 @@ PERIOD_RANDOM_PERCENT: Final = {"dev": 20}.get(ENV, 5)
 QUOTE_LEN_MAX: Final = 510  # Leaving 2 for "\r\n".
 READ_ATTEMPTS_MAX: Final = 3
 REQUEST_TIMEOUT: Final = 90
+SECONDS_BETWEEN_FEED_URLS: Final = 1
 SECONDS_PER_MESSAGE: Final = 2
 TEMPDIR: Final = Path(tempfile.gettempdir())
 TITLE_MAX_BYTES = 2048  # Relevant for publishing.
