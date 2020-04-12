@@ -174,7 +174,7 @@ feeds:
       shorten: false
     r/MachineLearning:100+:
       url: https://www.reddit.com/r/MachineLearning/hot/.json?limit=50
-      jmes: 'data.children[*].data | [?score >= `100`].{title: title, link: join(``, [`https://redd.it/`, id])}'
+      jmespath: 'data.children[*].data | [?score >= `100`].{title: title, link: join(``, [`https://redd.it/`, id])}'
       shorten: false
     PwC:Trending:
       url: https://us-east1-ml-feeds.cloudfunctions.net/pwc/trending
@@ -326,7 +326,7 @@ requested by creating an issue.
 * **`hext`**: This is a string representing the [hext](https://hext.thomastrapp.com/documentation) DSL for parsing a
 list of entry [dictionaries](https://en.wikipedia.org/wiki/Associative_array#Example) from a HTML web page. 
 Before using, it can be tested in the form [here](https://hext.thomastrapp.com/).
-* **`jmes`**: This is a string representing the [jmespath](http://jmespath.org/examples.html) DSL for parsing a list
+* **`jmespath`**: This is a string representing the [jmespath](http://jmespath.org/examples.html) DSL for parsing a list
 of entry [dictionaries](https://en.wikipedia.org/wiki/Associative_array#Example) from JSON.
 Before using, it can be tested in the form [here](http://jmespath.org/).
 * **`pandas`**: This is a string command evaluated using [pandas](https://pandas.pydata.org/) for parsing a dataframe

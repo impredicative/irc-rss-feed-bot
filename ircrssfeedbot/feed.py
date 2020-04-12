@@ -1,29 +1,19 @@
 """Feed."""
 import dataclasses
-import html
-import io
-import json
 import logging
 import re
 from functools import lru_cache
 from typing import Callable, Dict, List, Optional, Pattern
 
 import bitlyshortener
-import feedparser
-import hext
-import jmespath
-import numpy as np
-import pandas as pd
 from descriptors import cachedproperty
 
-from . import config, util
+from . import config, parsers
 from .db import Database
 from .entry import FeedEntry
 from .gnews import decode_google_news_url
 from .url import URLReader
 from .util.hext import html_to_text
-from .util.list import ensure_list
-from .util.lxml import sanitize_xml
 from .util.set import leaves
 from .util.textwrap import shorten_to_bytes_width
 
@@ -94,67 +84,19 @@ class Feed:
         content = URLReader.url_content(self.url)
 
         # Parse entries
-        log.debug("Parsing entries for %s.", self)
-        if extract_config := feed_config.get("jmes"):
-            parser = "jmes"
-            raw_entries = jmespath.search(extract_config, json.loads(content)) or []  # search can return None
-            entries = [
-                FeedEntry(
-                    title=e["title"].strip(),
-                    long_url=e["link"].strip(),
-                    summary=(e.get("summary") or "").strip(),
-                    categories=[c.strip() for c in ensure_list(e.get("category", []))],
-                    data=e,
-                    feed=self,
-                )
-                for e in raw_entries
-            ]
-        elif extract_config := feed_config.get("hext"):
-            parser = "hext"
-            raw_entries = hext.Rule(extract_config).extract(hext.Html(content.decode()))
-            entries = [
-                FeedEntry(
-                    title=html.unescape(e["title"].strip()),
-                    long_url=e["link"].strip(),
-                    summary=(e.get("summary") or "").strip(),
-                    categories=[html.unescape(c.strip()) for c in ensure_list(e.get("category", []))],
-                    data=e,
-                    feed=self,
-                )
-                for e in raw_entries
-            ]
-        elif extract_config := feed_config.get("pandas"):
-            parser = "pandas"
-            df = eval(  # pylint: disable=eval-used
-                f"pd.{extract_config}", {"json": json, "np": np, "pd": pd, "util": util}, {"file": io.BytesIO(content)}
-            )
-            entries = [
-                FeedEntry(
-                    title=e["title"].strip(),
-                    long_url=e["link"].strip(),
-                    summary=(e.get("summary") or "").strip(),
-                    categories=ensure_list(e.get("category", [])),
-                    data=dict(e),
-                    feed=self,
-                )
-                for _, e in df.iterrows()
-            ]
+        if parser_config := (feed_config.get("jmespath") or feed_config.get("jmes")):
+            parser_name = "jmespath"
+        elif parser_config := feed_config.get("hext"):
+            parser_name = "hext"
+        elif parser_config := feed_config.get("pandas"):
+            parser_name = "pandas"
         else:
-            parser = "default"
-            content = sanitize_xml(content)  # e.g. for unescaped "&" char in https://deepmind.com/blog/feed/basic/
-            raw_entries = feedparser.parse(content.lstrip())["entries"]
-            entries = [
-                FeedEntry(
-                    title=e["title"].strip(),
-                    long_url=e.get("link") or e["links"][0]["href"],  # e.g. for https://feeds.buzzsprout.com/188368.rss
-                    summary=(e.get("summary") or "").strip(),
-                    categories=[t["term"] for t in getattr(e, "tags", [])],
-                    data=dict(e),
-                    feed=self,
-                )
-                for e in raw_entries
-            ]
-        log_msg = f"Parsed {len(entries)} entries for {self} using the {parser} parser."
+            parser_config = {}
+            parser_name = "feedparser"
+        log.debug("Parsing entries for %s using the %s parser.", self, parser_name)
+        parser = getattr(parsers, parser_name).Parser
+        entries = parser(parser_config, content, self).entries
+        log_msg = f"Parsed {len(entries)} entries for {self} using the {parser_name} parser."
 
         # Raise alert if no entries
         if entries:

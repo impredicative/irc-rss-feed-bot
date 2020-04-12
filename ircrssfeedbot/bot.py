@@ -193,8 +193,7 @@ class Bot:
                 try:
                     channel_queue.put_nowait(feed)
                 except queue.Full:
-                    feed_desc = str(feed).capitalize()
-                    msg = f"Queue for {channel} is full. {feed_desc} will be put in the queue in blocking mode."
+                    msg = f"Queue for {channel} is full. {feed} will be put in the queue in blocking mode."
                     _alert(irc, msg, log.warning)
                     channel_queue.put(feed)
                 else:

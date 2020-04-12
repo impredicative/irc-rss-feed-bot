@@ -5,9 +5,37 @@ from typing import Any, Dict, List, Optional, Pattern, Tuple
 
 from . import config
 from .util.ircmessage import style
+from .util.list import ensure_list
 from .util.textwrap import shorten_to_bytes_width
 
 log = logging.getLogger(__name__)
+
+
+class BaseRawEntry(dict):
+    """Base class of raw feed entry.
+
+    This is used for creating a `FeedEntry`.
+    """
+
+    @property
+    def title(self) -> str:
+        """Return the entry title."""
+        return self["title"].strip()
+
+    @property
+    def link(self) -> str:
+        """Return the entry link (URL)."""
+        return self["link"].strip()
+
+    @property
+    def summary(self) -> str:
+        """Return the entry summary (description)."""
+        return (self.get("summary") or "").strip()
+
+    @property
+    def categories(self) -> List[str]:
+        """Return a list of entry categories."""
+        return [c.strip() for c in ensure_list(self.get("category"))]
 
 
 @dataclasses.dataclass(unsafe_hash=True)
