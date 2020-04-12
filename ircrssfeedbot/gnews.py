@@ -5,7 +5,8 @@ import re
 
 # Ref: https://stackoverflow.com/a/59023463/
 
-_ENCODED_URL_RE = re.compile(r"^https://news\.google\.com/__i/rss/rd/articles/(?P<encoded_url>[^?]+)")
+_ENCODED_URL_PREFIX = "https://news.google.com/__i/rss/rd/articles/"
+_ENCODED_URL_RE = re.compile(fr"^{re.escape(_ENCODED_URL_PREFIX)}(?P<encoded_url>[^?]+)")
 _DECODED_URL_RE = re.compile(rb'^\x08\x13".+?(?P<primary_url>http[^\xd2]+)\xd2\x01')
 
 
@@ -23,5 +24,5 @@ def _decode_google_news_url(url: str) -> str:
 
 
 def decode_google_news_url(url: str) -> str:  # Not cached because not all Google News URLs are encoded.
-    """Return Google News entry URLs after decoding their encoding if it exists."""
-    return _decode_google_news_url(url) if url.startswith("https://news.google.com/") else url
+    """Return Google News entry URLs after decoding their encoding as applicable."""
+    return _decode_google_news_url(url) if url.startswith(_ENCODED_URL_PREFIX) else url

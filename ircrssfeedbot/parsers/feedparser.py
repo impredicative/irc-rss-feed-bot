@@ -4,6 +4,7 @@ from typing import List
 import feedparser
 
 from ..entry import BaseRawEntry
+from ..gnews import decode_google_news_url
 from ..util.lxml import sanitize_xml
 from .base import BaseParser
 
@@ -14,7 +15,9 @@ class RawEntry(BaseRawEntry):
     @property
     def link(self) -> str:
         link = self.get("link") or self["links"][0]["href"]
-        return link.strip()  # e.g. for https://feeds.buzzsprout.com/188368.rss
+        link = link.strip()  # e.g. for https://feeds.buzzsprout.com/188368.rss
+        link = decode_google_news_url(link).strip()
+        return link
 
     @property
     def categories(self) -> List[str]:

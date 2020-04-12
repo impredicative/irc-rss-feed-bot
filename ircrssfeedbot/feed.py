@@ -11,7 +11,6 @@ from descriptors import cachedproperty
 from . import config, parsers
 from .db import Database
 from .entry import FeedEntry
-from .gnews import decode_google_news_url
 from .url import URLReader
 from .util.hext import html_to_text
 from .util.set import leaves
@@ -80,10 +79,7 @@ class Feed:
     def _entries(self) -> List[FeedEntry]:  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
         feed_config = self.config
 
-        # Retrieve URL content
-        content = URLReader.url_content(self.url)
-
-        # Parse entries
+        # Select entry parser
         if parser_config := (feed_config.get("jmespath") or feed_config.get("jmes")):
             parser_name = "jmespath"
         elif parser_config := feed_config.get("hext"):
@@ -93,8 +89,11 @@ class Feed:
         else:
             parser_config = {}
             parser_name = "feedparser"
-        log.debug("Parsing entries for %s using the %s parser.", self, parser_name)
         parser = getattr(parsers, parser_name).Parser
+
+        # Retrieve URL content and parse entries
+        content = URLReader.url_content(self.url)
+        log.debug("Parsing entries for %s using the %s parser.", self, parser_name)
         entries = parser(parser_config, content, self).entries  # pylint: disable=no-member
         log_msg = f"Parsed {len(entries)} entries for {self} using the {parser_name} parser."
 
@@ -111,13 +110,6 @@ class Feed:
             else:
                 log.warning(log_msg)
             return entries
-
-        # Decode Google News URLs
-        if self.url.startswith("https://news.google.com/rss/") and (parser == "default"):
-            log.debug("Conditionally decoding Google News URLs for %s.", self)
-            for entry in entries:
-                entry.long_url = decode_google_news_url(entry.long_url)
-            log.debug("Conditionally decoded Google News URLs for %s.", self)
 
         # Remove blacklisted entries
         if feed_config.get("blacklist", {}):
