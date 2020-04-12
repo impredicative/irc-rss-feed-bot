@@ -24,3 +24,6 @@ output-format=colorized
 
 [FORMAT]
 max-line-length=120
+
+[SIMILARITIES]
+min-similarity-lines=10
