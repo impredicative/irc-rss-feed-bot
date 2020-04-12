@@ -14,6 +14,7 @@ disable=
     locally-enabled,
     logging-format-interpolation,
     no-init,
+    reimported, # for Docker Hub
     relative-beyond-top-level,
     too-few-public-methods,
     too-many-instance-attributes,
