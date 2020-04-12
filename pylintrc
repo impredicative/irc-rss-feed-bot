@@ -10,7 +10,6 @@ method-rgx=([a-z_][a-z0-9_]{2,60}|test_[a-z0-9_]{2,90})$
 [MESSAGES CONTROL]
 disable=
     bad-continuation,
-    duplicate-code,  # for Docker Hub
     locally-disabled,
     locally-enabled,
     logging-format-interpolation,
