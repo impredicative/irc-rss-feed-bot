@@ -24,7 +24,7 @@ COPY pylintrc pyproject.toml requirements-dev.in setup.cfg ./
 COPY scripts/test.sh ./scripts/test.sh
 RUN set -x && \
     pip install --no-cache-dir -Ur requirements-dev.in && \
-    pip list && \
+    pip freeze --all && \
     ./scripts/test.sh
 
 FROM build
