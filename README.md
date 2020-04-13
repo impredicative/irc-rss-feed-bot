@@ -44,7 +44,7 @@ For more features, see the customizable [global settings](#global-settings) and
 <Feed[bot]> [InfoWorld] What is a devops engineer? And how do you become one? → https://j.mp/2NOgQ3g
 <Feed[bot]> [InfoWorld] What is Jupyter Notebook? Data analysis made easier → https://j.mp/2NMailP
 <Feed[bot]> [AWS:OpenData] COVID-19 Open Research Dataset (CORD-19): Full-text and metadata dataset of
-COVID-19 and coronavirus-related research articles. → https://registry.opendata.aws/cord-19
+            COVID-19 research articles. → https://registry.opendata.aws/cord-19
 ```
 ![](images/sample_posts.png)
 
