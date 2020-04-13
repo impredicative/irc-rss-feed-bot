@@ -50,8 +50,10 @@ def load_instance_config(log_details: bool = True) -> None:
 
         # Log channel config
         for channel, channel_config in instance_config["feeds"].items():
+            feed_names = sorted(channel_config)
+            log.info("%s has %s feeds: %s", channel, len(feed_names), ", ".join(feed_names))
             for feed, feed_config in channel_config.items():
-                log.info("%s has feed %s having config: %s", channel, feed, feed_config)
+                log.debug("%s has feed %s having config: %s", channel, feed, feed_config)
 
         # Log unused channel colors
         unclear_colors = {"white", "black", "grey", "silver"}
