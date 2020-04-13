@@ -16,6 +16,7 @@ from . import config
 from .db import Database
 from .feed import Feed
 from .util.datetime import timedelta_desc
+from .util.list import ensure_list
 
 log = logging.getLogger(__name__)
 
@@ -222,7 +223,7 @@ class Bot:
                 del feed
                 num_consecutive_failures = 0
 
-    def _setup_channels(self) -> None:
+    def _setup_channels(self) -> None:  # pylint: disable=too-many-locals
         instance = config.INSTANCE
         channels = instance["feeds"]
         channels_str = ", ".join(channels)
@@ -233,6 +234,7 @@ class Bot:
             threading.active_count(),
         )
         num_feeds_setup = 0
+        num_urls = 0
         num_reads_daily = 0
         barriers_parties: Dict[str, int] = {}
         for channel, channel_config in channels.items():
@@ -245,13 +247,15 @@ class Bot:
                 threading.Thread(
                     target=self._read_feed, name=f"FeedReader-{channel}-{feed}", args=(channel, feed)
                 ).start()
-                num_feeds_setup += 1
-                num_reads_daily += 24 / max(
-                    config.PERIOD_HOURS_MIN, feed_config.get("period", config.PERIOD_HOURS_DEFAULT)
-                )
+                num_feed_urls = len(ensure_list(feed_config["url"]))
+                num_urls += num_feed_urls
+                feed_period = max(config.PERIOD_HOURS_MIN, feed_config.get("period", config.PERIOD_HOURS_DEFAULT))
+                num_feed_reads_daily = (24 / feed_period) * num_feed_urls
+                num_reads_daily += num_feed_reads_daily
                 if feed_config.get("group"):
                     group = feed_config["group"]
                     barriers_parties[group] = barriers_parties.get(group, 0) + 1
+                num_feeds_setup += 1
             log.debug(
                 "Finished setting up threads and queue for %s and its %s feeds with %s currently active threads.",
                 channel,
@@ -261,10 +265,11 @@ class Bot:
         for barrier, parties in barriers_parties.items():
             self.FEED_GROUP_BARRIERS[barrier] = threading.Barrier(parties)
         log.info(
-            "Finished setting up %s channels (%s) and their %s feeds with %s currently active threads.",
+            "Finished setting up %s channels (%s) and their %s feeds having %s URLs with %s currently active threads.",
             len(channels),
             channels_str,
             num_feeds_setup,
+            num_urls,
             threading.active_count(),
         )
         log.info(
