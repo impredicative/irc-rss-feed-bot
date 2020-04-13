@@ -1,10 +1,12 @@
 """Base class with helper attributes and methods for parsers."""
 import abc
 import dataclasses
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List
 
-from .. import feed  # pylint: disable=unused-import
 from ..entry import FeedEntry
+
+if TYPE_CHECKING:
+    from .. import feed  # pylint: disable=unused-import
 
 
 @dataclasses.dataclass  # type: ignore
