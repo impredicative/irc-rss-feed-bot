@@ -13,7 +13,7 @@ from ircrssfeedbot.util.list import ensure_list
 log = logging.getLogger(__name__)
 
 
-def load_instance_config(log_details: bool = True) -> None:
+def load_instance_config(log_details: bool = True) -> None:  # pylint: disable=too-many-locals
     """Read and load the instance configuration."""
     # Read args
     parser = argparse.ArgumentParser(prog=config.PACKAGE_NAME, description="IRC RSS feed posting bot")
