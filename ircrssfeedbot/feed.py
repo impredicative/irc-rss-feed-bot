@@ -4,7 +4,7 @@ import logging
 import re
 import time
 from functools import lru_cache
-from typing import Callable, Dict, List, Optional, Pattern
+from typing import Callable, Dict, List, Optional, Pattern, Tuple
 
 import bitlyshortener
 from descriptors import cachedproperty
@@ -18,6 +18,7 @@ from .util.hext import html_to_text
 from .util.list import ensure_list
 from .util.set import leaves
 from .util.textwrap import shorten_to_bytes_width
+from .util.timeit import Timer
 
 log = logging.getLogger(__name__)
 
@@ -45,6 +46,7 @@ class Feed:
 
     def __post_init__(self):
         log.debug("Initializing instance of %s.", self)
+        self.timer = Timer()
         self.config: Dict = {**config.INSTANCE["defaults"], **config.INSTANCE["feeds"][self.channel][self.name]}
         self.urls = ensure_list(self.config["url"])
         self.min_channel_idle_time = (
@@ -54,8 +56,15 @@ class Feed:
         )
         self.blacklist = _patterns(self.channel, self.name, "blacklist")
         self.whitelist = _patterns(self.channel, self.name, "whitelist")
-        self.entries = self._entries()  # Entries are effectively cached here at this point in time.
-        log.debug("Initialized instance of %s with %s entries.", self, len(self.entries))
+        self.entries, self.num_urls_read = self._read_entries()
+        log.debug(
+            "Initialized in %.1fs an instance of %s having %s configured URLs, %s URLs read, and %s entries.",
+            self.timer(),
+            self,
+            len(self.urls),
+            self.num_urls_read,
+            len(self.entries),
+        )
 
     def __str__(self):
         return f"feed {self.name} of {self.channel}"
@@ -78,7 +87,7 @@ class Feed:
         )
         return entries_deduped
 
-    def _entries(self) -> List[FeedEntry]:  # pylint: disable=too-many-locals
+    def _read_entries(self) -> Tuple[List[FeedEntry], int]:  # pylint: disable=too-many-locals
         feed_config = self.config
 
         # Select entry parser
@@ -140,7 +149,7 @@ class Feed:
                     time.sleep(sleep_time)
 
         log.debug("Parsed %s entries from %s URLs for %s using %s.", len(entries), len(urls_read), self, parser_name)
-        return self._process_entries(entries)
+        return self._process_entries(entries), len(urls_read)
 
     def _process_entries(  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
         self, entries: List[FeedEntry]

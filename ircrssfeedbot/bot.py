@@ -169,7 +169,13 @@ class Bot:
                 # Read feed
                 log.debug("Retrieving feed %s of %s.", feed_name, channel)
                 feed = Feed(channel=channel, name=feed_name, db=db, url_shortener=url_shortener)
-                log.info("Retrieved %s with %s approved entries.", feed, len(feed.entries))
+                log.info(
+                    "Retrieved in %.1fs the %s with %s approved entries after reading %s URLs.",
+                    feed.timer(),
+                    feed,
+                    len(feed.entries),
+                    feed.num_urls_read,
+                )
 
                 # Wait for other feeds in group
                 if feed_config.get("group"):
