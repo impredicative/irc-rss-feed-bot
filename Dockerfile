@@ -1,7 +1,8 @@
-FROM python:3.8-buster as build
+FROM python:3.8-slim-buster as build
 WORKDIR /app
 COPY requirements.txt .
 RUN set -x && \
+    apt-get update && apt-get -y install gcc && \
     sed -i 's/@SECLEVEL=2/@SECLEVEL=1/' /etc/ssl/openssl.cnf && \
     pip install --no-cache-dir -U pip && \
     pip install --no-cache-dir -r ./requirements.txt
