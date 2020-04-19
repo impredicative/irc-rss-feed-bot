@@ -1,26 +1,35 @@
 """Base class with helper attributes and methods for parsers."""
 import abc
 import dataclasses
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from ..entry import FeedEntry
 
 if TYPE_CHECKING:
-    from .. import feed  # pylint: disable=unused-import
+    from ..feed import Feed  # pylint: disable=unused-import
 
 
 @dataclasses.dataclass  # type: ignore
 class BaseParser(abc.ABC):
     """Base class with helper attributes and methods for parsers."""
 
-    parser_config: Dict[str, Any]
+    selector: Optional[str]  # Is None for feedparser.
+    follower: Optional[str]
     content: bytes
-    feed: "feed.Feed"
+    feed: "Feed"
 
     @property
     @abc.abstractmethod
     def _raw_entries(self) -> List:
-        """Return a list of raw entries."""
+        """Return a list of parsed raw entries, each of which is instance of `BaseRawEntry` or of its subclass."""
+
+    @property
+    def _raw_urls(self) -> List[Union[Dict[str, str], str]]:
+        """Return a list of parsed raw URLs to scrape.
+
+        Each raw URL in the list is either a string or a dictionary having the key `url` with the URL as its value.
+        """
+        return []
 
     @property
     def entries(self) -> List[FeedEntry]:
@@ -36,3 +45,9 @@ class BaseParser(abc.ABC):
             )
             for e in self._raw_entries
         ]
+
+    @property
+    def urls(self) -> List[str]:
+        """Return a list of unique URLs to follow."""
+        urls = [(d if isinstance(d, str) else d["url"]) for d in self._raw_urls]
+        return list(dict.fromkeys(urls))

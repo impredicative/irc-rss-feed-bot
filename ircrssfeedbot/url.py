@@ -63,7 +63,7 @@ class URLReader:
     @classmethod
     @cachetools.func.ttl_cache(maxsize=sys.maxsize, ttl=config.URL_CACHE_TTL)
     def _ttl_cached_compressed_url_content(cls, url: str) -> bytes:
-        log.debug("Compressed content of %s will be stored in the TTL cache.", url)
+        # log.debug("Compressed content of %s will be stored in the TTL cache.", url)
         return zlib.compress(cls._url_content(url))
 
     @classmethod
@@ -148,14 +148,14 @@ class URLReader:
                 cls._del_etag_cache(url)
         log.debug("Resiliently retrieved content of size %s for %s in %s.", humanize_len(content), url, timer)
 
-        # Note: Entry parsing is not done in this method in order to permit mutability of individual entries.
         return content
 
     @classmethod
     def url_content(cls, url: str) -> bytes:
         """Return the URL content."""
-        return (
-            zlib.decompress(cls._ttl_cached_compressed_url_content(url))
-            if (url in config.INSTANCE["repeated_urls"])
-            else cls._url_content(url)
-        )
+        # return (
+        #     zlib.decompress(cls._ttl_cached_compressed_url_content(url))
+        #     if (url in config.INSTANCE["repeated_urls"])
+        #     else cls._url_content(url)
+        # )
+        return zlib.decompress(cls._ttl_cached_compressed_url_content(url))

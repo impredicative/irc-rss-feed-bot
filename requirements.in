@@ -9,6 +9,7 @@ jmespath
 lxml
 miniirc
 numpy
+orderedset
 pandas
 peewee
 requests

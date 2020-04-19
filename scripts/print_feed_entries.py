@@ -15,8 +15,14 @@ from ircrssfeedbot.feed import Feed
 
 # pylint: disable=invalid-name
 
-CHANNEL = "##CompMed"  # CUSTOMIZE
-FEED = "TDS"  # CUSTOMIZE
+CHANNEL = "##CoV"  # CUSTOMIZE
+# FEED = "stats:🌎"  # World
+FEED = "stats:🇺🇸"  # USA
+# FEED = "stats:🇮🇹"  # Italy
+# FEED = "stats:🇷🇺"  # Russia
+# FEED = "stats:🇨🇳"  # China
+# FEED = "COVID-19:stats:USA:NY"
+CHANNEL, FEED = "##CoV", "MX" or "SSRN"
 
 config.LOGGING["loggers"][config.PACKAGE_NAME]["level"] = "DEBUG"  # type: ignore
 config.configure_logging()

@@ -8,6 +8,7 @@ from typing import Callable, Dict, List, Optional, Pattern
 
 import bitlyshortener
 from descriptors import cachedproperty
+from orderedset import OrderedSet
 
 from . import config, parsers
 from .db import Database
@@ -68,13 +69,12 @@ class Feed:
         num_removed = len(entries) - len(entries_deduped)
         action = f"After {after_what}, removed" if after_what else "Removed"
         log.debug(
-            "%s %s duplicate entry URLs out of %s, leaving %s, for %s having %s URLs.",
+            "%s %s duplicate entry URLs out of %s, leaving %s, for %s.",
             action,
             num_removed,
             len(entries),
             len(entries_deduped),
             self,
-            len(self.urls),
         )
         return entries_deduped
 
@@ -86,26 +86,40 @@ class Feed:
             if parser_config := feed_config.get(parser_name):
                 if parser_name == "jmes":  # Deprecated name.
                     parser_name = "jmespath"
+
+                if isinstance(parser_config, str):
+                    parser_config = {"select": parser_config, "follow": None}
+                parser_selector, parser_follower = parser_config["select"], parser_config.get("follow")
+
                 break
         else:
             parser_name = "feedparser"
-            parser_config = {}
-        parser = getattr(parsers, parser_name).Parser
+            parser_selector, parser_follower = None, None
+        Parser = getattr(parsers, parser_name).Parser
 
         # Retrieve URL content and parse entries
-        num_urls = len(self.urls)
+        urls_pending, urls_read = OrderedSet(self.urls), OrderedSet()
         entries = []
-        for url_index, url in enumerate(self.urls):
-            url_num = url_index + 1
+        while urls_pending:
+            # Read URL
+            url = urls_pending.pop(last=False)
             content = URLReader.url_content(url)
-            url_read_time = time.monotonic()
-            log.debug(f"Parsing entries for URL {url_num} of {num_urls} of {self} using {parser_name}.")
-            url_entries = parser(parser_config, content, self).entries  # pylint: disable=no-member
-            log_msg = f"Parsed {len(url_entries)} entries for URL {url_num} of {num_urls} of {self} using {parser_name}."  # pylint: disable=line-too-long
-            entries.extend(url_entries)
+            url_read_finish_time = time.monotonic()
+            urls_read.add(url)
+
+            # Parse content
+            log.debug(f"Parsing entries for {url} for {self} using {parser_name}.")
+            parser = Parser(parser_selector, parser_follower, content, self)
+            selected_entries, follow_urls = parser.entries, parser.urls  # pylint: disable=no-member
+            log_msg = (
+                f"Parsed {len(selected_entries)} entries and {len(follow_urls)} followable URLs for {url} for "
+                f"{self} using {parser_name}."
+            )
+            entries.extend(selected_entries)
+            urls_pending.update(follow_urls - urls_read)
 
             # Raise alert if no entries for URL
-            if url_entries:
+            if selected_entries:
                 log.debug(log_msg)
             else:
                 if feed_config.get("alerts", {}).get("empty", True):
@@ -118,14 +132,14 @@ class Feed:
                     log.warning(log_msg)
 
             # Sleep between URLs
-            if url_num < num_urls:
-                time_elapsed_since_url_read = time.monotonic() - url_read_time
+            if urls_pending:
+                time_elapsed_since_url_read = time.monotonic() - url_read_finish_time
                 sleep_time = max(0, config.SECONDS_BETWEEN_FEED_URLS - time_elapsed_since_url_read)
                 if sleep_time > 0:
                     log.debug("Sleeping for %.1fs before next URL.", sleep_time)
                     time.sleep(sleep_time)
 
-        log.debug("Parsed %s entries from %s URLs for %s using %s.", len(entries), num_urls, self, parser_name)
+        log.debug("Parsed %s entries from %s URLs for %s using %s.", len(entries), len(urls_read), self, parser_name)
         return self._process_entries(entries)
 
     def _process_entries(  # pylint: disable=too-many-locals,too-many-branches,too-many-statements

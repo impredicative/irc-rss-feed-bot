@@ -1,4 +1,5 @@
 """Parse entries using `feedparser`."""
+import dataclasses
 from typing import List
 
 import feedparser
@@ -24,11 +25,12 @@ class RawEntry(BaseRawEntry):
         return [tag["term"].strip() for tag in self.get("tags", [])]
 
 
+@dataclasses.dataclass
 class Parser(BaseParser):
     """Parse entries using `feedparser`."""
 
     @property
     def _raw_entries(self) -> List[RawEntry]:
-        """Return a list of raw entries."""
+        """Return a list of parsed raw entries."""
         content = sanitize_xml(self.content)  # e.g. for unescaped "&" char in https://deepmind.com/blog/feed/basic/
         return [RawEntry(e) for e in feedparser.parse(content.lstrip())["entries"]]
