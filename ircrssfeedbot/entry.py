@@ -94,6 +94,7 @@ class FeedEntry:
         feed_config = self.feed.config
         explain = (feed_config.get("whitelist") or {}).get("explain")
         msg_config = feed_config.get("message") or {}
+        include_summary = msg_config.get("summary") and self.summary
         style_config = feed_config.get("style") or {}
         name_style_config = style_config.get("name", {})
 
@@ -112,13 +113,22 @@ class FeedEntry:
                 if match := pattern.search(title):  # Not always guaranteed to be true due to sub, format, etc.
                     span0, span1 = match.span()
                     title_mid = title[span0:span1]
-                    title_mid = style(title_mid, italics=True) if style_config else f"*{title_mid}*"
-                    title = title[:span0] + title_mid + title[span1:]
+                    if include_summary:
+                        if style_config:
+                            title_mid = style(title_mid, bold=True, italics=True)
+                            title = style(title[:span0], bold=True) + title_mid + style(title[span1:], bold=True)
+                        else:
+                            title = title[:span0] + f"*{title_mid}*" + title[span1:]
+                    else:
+                        title_mid = style(title_mid, italics=True) if style_config else f"*{title_mid}*"
+                        title = title[:span0] + title_mid + title[span1:]
+                elif include_summary and style_config:
+                    title = style(title, bold=True)
+            elif include_summary and style_config:
+                title = style(title, bold=True)
             format_map["caption"] += title
-        if msg_config.get("summary") and self.summary:
+        if include_summary:
             if format_map["caption"]:
-                if style_config:
-                    format_map["caption"] = style(format_map["caption"], bold=True)
                 format_map["caption"] += ": "
             format_map["caption"] += self.summary
 
