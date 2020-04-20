@@ -276,7 +276,7 @@ It is recommended that feeds in the same group have the same `period`.
 * **`https`**: If `true`, entry links that start with `http://` are changed to start with `https://` instead.
 Its default value is `false`.
 * **`message.summary`**: If `true`, the entry summary (description) is included in its message.
-Its default value is `false`.
+The entry title, if included, is then formatted bold. The default value is `false`.
 * **`message.title`**: If `false`, the entry title is not included in its message. Its default value is `true`.
 * **`new`**: This indicates up to how many entries of a new feed to post.
 A new feed is defined as one with no prior posts in its channel.

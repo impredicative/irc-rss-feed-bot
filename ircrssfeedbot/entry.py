@@ -117,6 +117,8 @@ class FeedEntry:
             format_map["caption"] += title
         if msg_config.get("summary") and self.summary:
             if format_map["caption"]:
+                if style_config:
+                    format_map["caption"] = style(format_map["caption"], bold=True)
                 format_map["caption"] += ": "
             format_map["caption"] += self.summary
 
