@@ -222,7 +222,8 @@ class Feed:
                     entry.title = title_format_str.format_map(params)
                 except Exception as exc:  # pylint: disable=broad-except
                     log.warning(
-                        f"Unable to format entry title for {entry} of {entry.feed} due to exception {exc!r} using format string {title_format_str!r}."  # pylint: disable=line-too-long
+                        f"Unable to format entry title for {entry} of {entry.feed} due to exception {exc!r} using "
+                        f"format string {title_format_str!r}."
                     )
                 # Format URL:
                 url_format_str = format_str.get("url", "{url}")
@@ -230,7 +231,8 @@ class Feed:
                     entry.long_url = url_format_str.format_map(params)
                 except Exception as exc:  # pylint: disable=broad-except
                     log.warning(
-                        f"Unable to format entry URL for {entry} of {entry.feed} due to exception {exc!r} using format string {url_format_str!r}."  # pylint: disable=line-too-long
+                        f"Unable to format entry URL for {entry} of {entry.feed} due to exception {exc!r} using "
+                        f"format string {url_format_str!r}."
                     )
             log.debug("Formatted entries for %s.", self)
 
