@@ -4,27 +4,32 @@
 #
 #    pip-compile
 #
+beautifulsoup4==4.9.0     # via bs4
 bitlyshortener==0.3.3     # via -r requirements.in
+bs4==0.0.1                # via -r requirements.in
 cachetools==4.1.0         # via -r requirements.in
 certifi==2020.4.5.1       # via miniirc, requests
 chardet==3.0.4            # via requests
 dickens==1.0.1            # via -r requirements.in
 feedparser==5.2.1         # via -r requirements.in
 hext==0.2.4               # via -r requirements.in
-humanize==2.3.0           # via -r requirements.in
+html5lib==1.0.1           # via -r requirements.in
+humanize==2.4.0           # via -r requirements.in
 idna==2.9                 # via requests
 ircmessage==0.1.1         # via -r requirements.in
 jmespath==0.9.5           # via -r requirements.in
 lxml==4.5.0               # via -r requirements.in
 miniirc==1.5.1            # via -r requirements.in
-numpy==1.18.2             # via -r requirements.in, pandas
+numpy==1.18.3             # via -r requirements.in, pandas
 orderedset==2.0.3         # via -r requirements.in
 pandas==1.0.3             # via -r requirements.in
-peewee==3.13.2            # via -r requirements.in
+peewee==3.13.3            # via -r requirements.in
 python-dateutil==2.8.1    # via pandas
 pytz==2019.3              # via pandas
 requests==2.23.0          # via -r requirements.in, bitlyshortener
 ruamel.yaml.clib==0.2.0   # via ruamel.yaml
 ruamel.yaml==0.16.10      # via -r requirements.in
-six==1.10.0               # via ircmessage, python-dateutil
+six==1.10.0               # via html5lib, ircmessage, python-dateutil
+soupsieve==2.0            # via beautifulsoup4
 urllib3==1.25.9           # via requests
+webencodings==0.5.1       # via html5lib
