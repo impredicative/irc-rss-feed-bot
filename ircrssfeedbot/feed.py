@@ -91,7 +91,7 @@ class Feed:
         feed_config = self.config
 
         # Select entry parser
-        for parser_name in ("hext", "jmes", "jmespath", "pandas"):
+        for parser_name in ("hext", "jmes", "jmespath", "pandas"):  # Searched in alphabetical order.
             if parser_config := feed_config.get(parser_name):
                 if parser_name == "jmes":  # Deprecated name.
                     parser_name = "jmespath"
@@ -179,13 +179,23 @@ class Feed:
             if not entries:
                 return entries
 
-        # Enforce HTTPS URLs
+        # Enforce HTTPS for URLs
         if feed_config.get("https"):
             log.debug("Enforcing HTTPS for URLs in %s.", self)
             for entry in entries:
                 if entry.long_url.startswith("http://"):
                     entry.long_url = entry.long_url.replace("http://", "https://", 1)
             log.debug("Enforced HTTPS for URLs in %s.", self)
+
+        # Remove WWW from URLs
+        if feed_config.get("www") is False:
+            log.debug("Removing WWW from URLs in %s.", self)
+            for entry in entries:
+                for protocol in ("https", "http"):
+                    prefix = f"{protocol}://www."
+                    if entry.long_url.startswith(prefix):
+                        entry.long_url = entry.long_url.replace(prefix, prefix[:-4], 1)
+            log.debug("Removed WWW from URLs in %s.", self)
 
         # Substitute entries
         if sub := feed_config.get("sub"):
