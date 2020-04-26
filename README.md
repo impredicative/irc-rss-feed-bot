@@ -18,7 +18,7 @@ considered urgent.
 reposted.
 * The [`hext`](https://pypi.org/project/hext/), [`jmespath`](https://pypi.org/project/jmespath/), and 
 [`pandas`](https://pandas.pydata.org/) DSLs are supported for flexibly parsing arbitrary HTML, JSON, and CSV content 
-respectively.
+respectively. These parsers also support configurable recursive crawling.
 * Entry titles are formatted for neatness.
 Any HTML tags and excessive whitespace are stripped, all-caps are replaced,
 and excessively long titles are sanely truncated. 
@@ -94,6 +94,12 @@ feeds:
       blacklist:
         title:
           - ^Calendar\ of\ Events$
+    LitCovid:
+      url: https://www.ncbi.nlm.nih.gov/research/coronavirus-api/export
+      pandas: |-
+        read_csv(file, comment="#", sep="\t") \
+        .assign(link=lambda r: "https://pubmed.ncbi.nlm.nih.gov/" + r["pmid"].astype("str")) \
+        .convert_dtypes()
     MedicalXpress:nutrition:
       url: https://medicalxpress.com/rss-feed/search/?search=nutrition
     r/FoodNerds:
@@ -103,12 +109,12 @@ feeds:
         url:
           pattern: ^https://www\.reddit\.com/r/.+?/comments/(?P<id>.+?)/.+$
           repl: https://redd.it/\g<id>
-    LitCovid:
-      url: https://www.ncbi.nlm.nih.gov/research/coronavirus-api/export
-      pandas: |-
-        read_csv(file, comment="#", sep="\t") \
-        .assign(link=lambda r: "https://pubmed.ncbi.nlm.nih.gov/" + r["pmid"].astype("str")) \
-        .convert_dtypes()
+    SSRN:
+      url: https://papers.ssrn.com/sol3/Jeljour_results.cfm?form_name=journalBrowse&journal_id=3526423&Network=no&lim=false&npage=1
+      hext:
+        select: <a href:link href^="https://ssrn.com/abstract=" @text:title />
+        follow: <a class="jeljour_pagination_number" @text:prepend("https://papers.ssrn.com/sol3/Jeljour_results.cfm?form_name=journalBrowse&journal_id=3526423&Network=no&lim=false&npage="):url/>
+      period: 6
   "##some_chan2":
     ArXiv:cs.AI: &ArXiv
       url: http://export.arxiv.org/rss/cs.AI
@@ -321,11 +327,9 @@ The nesting permits lists to be creatively reused between feeds via YAML anchors
 
 ##### Parser
 For a non-XML feed, one of the following parsers can be used.
-Each parsed entry must at a minimum include a `title`, a `link`, an optional `summary` (description),
+Each parsed entry must at a minimum return a `title`, a `link`, an optional `summary` (description),
 and zero or more values for `category`.
 
-Some sites require a custom user agent or other custom headers for successful scraping; such a customization can be
-requested by creating an issue.
 * **`hext`**: This is a string representing the [hext](https://hext.thomastrapp.com/documentation) DSL for parsing a
 list of entry [dictionaries](https://en.wikipedia.org/wiki/Associative_array#Example) from a HTML web page. 
 Before using, it can be tested in the form [here](https://hext.thomastrapp.com/).
@@ -340,6 +344,10 @@ The provisioned packages are `json`, `numpy` (as `np`), and `pandas` (as `pd`).
 The value requires compatibility with the versions of `pandas` and `numpy` defined in 
 [`requirements.txt`](requirements.txt), noting that these version requirements are expected to be routinely updated.
 
+For recursive crawling, the value of a parser can alternatively be a dictionary with the keys `select` and `follow`, both having a string value. In this case, the value of `select` is what was hitherto documented as the single string value which the parser uses to return the entries to post. The value of `follow` is used by the parser to return zero or more additional URLs to read, and this can be a list of strings or a list of dictionaries with the key `url`. Each unique URL is read once. There is an interval of at least one second between the end of a read and the start of the next read. Care should nevertheless be taken to avoid crawling a large number of URLs.
+
+Some sites require a custom user agent or other custom headers for successful scraping; such a customization can be
+requested by creating an issue.
 
 ##### Conditional
 The sample configuration above contains examples of these:
