@@ -254,42 +254,42 @@ YAML [anchors and references](https://en.wikipedia.org/wiki/YAML#Advanced_compon
 Examples of this are in the sample.
 
 ##### Mandatory
-* **`<channel>.<feed>.url`**: This is either a single URL or a list of URLs of the feed.
+* **`<feed>.url`**: This is either a single URL or a list of URLs of the feed.
 If a list, the URLs are read in sequence with an interval of one second between them.
 
 ##### Optional
 These are optional and are independent of each other:
-* **`<channel>.<feed>.alerts.empty`**: If `true`, an alert is sent if the feed has no entries. If `false`, such an alert
+* **`<feed>.alerts.empty`**: If `true`, an alert is sent if the feed has no entries. If `false`, such an alert
 is not sent. Its default value is `true`.
-* **`<channel>.<feed>.alerts.read`**: If `true`, an alert is sent if an error occurs three or more consecutive times 
+* **`<feed>.alerts.read`**: If `true`, an alert is sent if an error occurs three or more consecutive times 
 when reading or processing the feed. If `false`, such an alert is not sent. Its default value is `true`.
-* **`<channel>.<feed>.blacklist.category`**: This is an arbitrarily nested dictionary or list or their mix of regular 
+* **`<feed>.blacklist.category`**: This is an arbitrarily nested dictionary or list or their mix of regular 
 expression patterns that result in an entry being skipped if a 
 [search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in any of the categories of the 
 entry.
 The nesting permits lists to be creatively reused between feeds via YAML anchors and references.
-* **`<channel>.<feed>.blacklist.title`**: This is an arbitrarily nested dictionary or list or their mix of regular 
+* **`<feed>.blacklist.title`**: This is an arbitrarily nested dictionary or list or their mix of regular 
 expression patterns that result in an entry being skipped if a 
 [search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in the title.
 The nesting permits lists to be creatively reused between feeds via YAML anchors and references.
-* **`<channel>.<feed>.blacklist.url`**: Similar to `<channel>.<feed>.blacklist.title`.
-* **`<channel>.<feed>.dedup`**: This indicates how to deduplicate posts for the feed, thereby preventing them from being 
+* **`<feed>.blacklist.url`**: Similar to `<feed>.blacklist.title`.
+* **`<feed>.dedup`**: This indicates how to deduplicate posts for the feed, thereby preventing them from being 
 reposted.
 The default value is `channel` (per-channel), and an alternate possible value is `feed` (per-feed per-channel).
-* **`<channel>.<feed>.group`**: If a string, this delays the processing of a feed that has just been read until all 
+* **`<feed>.group`**: If a string, this delays the processing of a feed that has just been read until all 
 other feeds having the same group are also read.
 This encourages multiple feeds having the same group to be be posted in succession, except if interrupted by
 conversation.
 It is however possible that unrelated feeds of any channel gets posted between ones having the same group.
 To explicitly specify the absence of a group when using a YAML reference, the value can be specified as `null`.
 It is recommended that feeds in the same group have the same `period`.
-* **`<channel>.<feed>.https`**: If `true`, entry links that start with `http://` are changed to start with `https://` 
+* **`<feed>.https`**: If `true`, entry links that start with `http://` are changed to start with `https://` 
 instead. Its default value is `false`.
-* **`<channel>.<feed>.message.summary`**: If `true`, the entry summary (description) is included in its message.
+* **`<feed>.message.summary`**: If `true`, the entry summary (description) is included in its message.
 The entry title, if included, is then formatted bold. The default value is `false`.
-* **`<channel>.<feed>.message.title`**: If `false`, the entry title is not included in its message.
+* **`<feed>.message.title`**: If `false`, the entry title is not included in its message.
 Its default value is `true`.
-* **`<channel>.<feed>.new`**: This indicates up to how many entries of a new feed to post.
+* **`<feed>.new`**: This indicates up to how many entries of a new feed to post.
 A new feed is defined as one with no prior posts in its channel.
 The default value is `some` which is interpreted as 3.
 The default is intended to limit flooding a channel when one or more new feeds are added.
@@ -297,43 +297,43 @@ A string value of `none` is interpreted as 0 and will skip all entries for a new
 A value of `all` will skip no entries for a new feed; it is not recommended and should be used sparingly if at all.
 In any case, future entries in the feed are not affected by this option on subsequent reads,
 and they are all forwarded without a limit.
-* **`<channel>.<feed>.period`**: This indicates how frequently to read the feed in hours on an average.
+* **`<feed>.period`**: This indicates how frequently to read the feed in hours on an average.
 Its default value is 1.
 Conservative polling is recommended. Any value below 0.2 is changed to a minimum of 0.2.
 Note that 0.2 hours is equal to 12 minutes.
 To make service restarts safer by preventing excessive reads, the first read is delayed by half the period.
 To better distribute the load of reading multiple feeds, a uniformly distributed random ±5% is applied to the period for
 each read.
-* **`<channel>.<feed>.shorten`**: This indicates whether to post shortened URLs for the feed.
+* **`<feed>.shorten`**: This indicates whether to post shortened URLs for the feed.
 The default value is `true`.
 The alternative value `false` is recommended if the URL is naturally small, or if `sub` or `format` can be used to make
 it small.
-* **`<channel>.<feed>.style.name.bg`**: This is a string representing the name of a background color applied to the 
+* **`<feed>.style.name.bg`**: This is a string representing the name of a background color applied to the 
 feed's name.
 It can be one of: white, black, blue, green, red, brown, purple, orange, yellow, lime, teal, aqua, royal, pink, grey,
 silver. The channel modes must allow formatting for this option to be effective.
-* **`<channel>.<feed>.style.name.bold`**: If `true`, bold formatting is applied to the feed's name. 
+* **`<feed>.style.name.bold`**: If `true`, bold formatting is applied to the feed's name. 
 Its default value is `false`.
 The channel modes must allow formatting for this option to be effective.
-* **`<channel>.<feed>.style.name.fg`**: Foreground color similar to `<channel>.<feed>.style.name.bg`.
-* **`<channel>.<feed>.whitelist.category`**: This is an arbitrarily nested dictionary or list or their mix of regular 
+* **`<feed>.style.name.fg`**: Foreground color similar to `<feed>.style.name.bg`.
+* **`<feed>.whitelist.category`**: This is an arbitrarily nested dictionary or list or their mix of regular 
 expression patterns that result in an entry being skipped unless a 
 [search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in any of the categories of the 
 entry.
 The nesting permits lists to be creatively reused between feeds via YAML anchors and references.
-* **`<channel>.<feed>.whitelist.explain`**: This applies only to `<channel>.<feed>.whitelist.title`.
+* **`<feed>.whitelist.explain`**: This applies only to `<feed>.whitelist.title`.
 It can be useful for understanding which portion of a post's title matched the whitelist.
 If `true` and if a `style` is defined, the matching text of each posted title is italicized.
 For example, "This is a _matching sample_ title".
 If `true` and if a `style` is not defined, the matching text of each posted title is enclosed by asterisks.
 For example, "This is a \*matching sample\* title".
 The default value is `false`.
-* **`<channel>.<feed>.whitelist.title`**: This is an arbitrarily nested dictionary or list or their mix of regular 
+* **`<feed>.whitelist.title`**: This is an arbitrarily nested dictionary or list or their mix of regular 
 expression patterns that result in an entry being skipped unless a 
 [search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in the title.
 The nesting permits lists to be creatively reused between feeds via YAML anchors and references.
-* **`<channel>.<feed>.whitelist.url`**: Similar to `<channel>.<feed>.whitelist.title`.
-* **`<channel>.<feed>.www`**: If `false`, entry links that contain the `www.` prefix are changed to remove this prefix.
+* **`<feed>.whitelist.url`**: Similar to `<feed>.whitelist.title`.
+* **`<feed>.www`**: If `false`, entry links that contain the `www.` prefix are changed to remove this prefix.
 Its default value is `null`.
 
 ##### Parser
@@ -343,14 +343,14 @@ The parsers are searched for in the alphabetical order listed below, and the fir
 Each parsed entry must at a minimum return a `title`, a `link`, an optional `summary` (description),
 and zero or more values for `category`.
 
-* **`<channel>.<feed>.hext`**: This is a string representing the [hext](https://hext.thomastrapp.com/documentation) DSL 
+* **`<feed>.hext`**: This is a string representing the [hext](https://hext.thomastrapp.com/documentation) DSL 
 for parsing a list of entry [dictionaries](https://en.wikipedia.org/wiki/Associative_array#Example) from a HTML web 
 page. 
 Before using, it can be tested in the form [here](https://hext.thomastrapp.com/).
-* **`<channel>.<feed>.jmespath`**: This is a string representing the [jmespath](http://jmespath.org/examples.html) DSL 
+* **`<feed>.jmespath`**: This is a string representing the [jmespath](http://jmespath.org/examples.html) DSL 
 for parsing a list of entry [dictionaries](https://en.wikipedia.org/wiki/Associative_array#Example) from JSON.
 Before using, it can be tested in the form [here](http://jmespath.org/).
-* **`<channel>.<feed>.pandas`**: This is a string command evaluated using [pandas](https://pandas.pydata.org/) for 
+* **`<feed>.pandas`**: This is a string command evaluated using [pandas](https://pandas.pydata.org/) for 
 parsing a dataframe of entries. The raw content is made available to the parser as a file-like object named `file`.
 This parser uses [`eval`](https://docs.python.org/3/library/functions.html?#eval) which is unsafe, and so its
 use must be confirmed to be safe.
@@ -359,9 +359,9 @@ The value requires compatibility with the versions of `pandas` and `numpy` defin
 [`requirements.txt`](requirements.txt), noting that these version requirements are expected to be routinely updated.
 
 For recursive crawling, the value of a parser can alternatively be:
-* **`<channel>.<feed>.<parser>.select`**: This is the string which was hitherto documented as the value for 
-`<channel>.<feed>.<parser>.`. The parser uses it to return the entries to post.
-* **`<channel>.<feed>.<parser>.follow`**: The is an optional string which the parser uses to return zero or more 
+* **`<feed>.<parser>.select`**: This is the string which was hitherto documented as the value for 
+`<feed>.<parser>.`. The parser uses it to return the entries to post.
+* **`<feed>.<parser>.follow`**: The is an optional string which the parser uses to return zero or more 
 additional URLs to read.
 The returned URLs can a list of strings or a list of dictionaries with the key `url`.
 Crawling applies recursively to each returned URL. Each unique URL is read once.
@@ -373,28 +373,28 @@ requested by creating an issue.
 
 ##### Conditional
 The sample configuration above contains examples of these:
-* **`<channel>.<feed>.format.re.title`**: This is a single regular expression pattern that is
+* **`<feed>.format.re.title`**: This is a single regular expression pattern that is
 [searched](https://docs.python.org/3/library/re.html#re.search) for in the title.
 It is used to collect named [key-value pairs](https://docs.python.org/3/library/re.html#re.Match.groupdict) from the
 match if there is one.
-* **`<channel>.<feed>.format.re.url`**: Similar to `<channel>.<feed>.format.re.title`.
-* **`<channel>.<feed>.format.str.title`**: The key-value pairs collected using `<channel>.<feed>.format.re.title` and 
-`<channel>.<feed>.format.re.url`, 
+* **`<feed>.format.re.url`**: Similar to `<feed>.format.re.title`.
+* **`<feed>.format.str.title`**: The key-value pairs collected using `<feed>.format.re.title` and 
+`<feed>.format.re.url`, 
 both of which are optional, are combined along with the default additions of `title`, `url`, and `categories` as keys.
 Any additional keys returned by the parser are also available.
 The key-value pairs are used to [format](https://docs.python.org/3/library/stdtypes.html#str.format_map) the provided
 quoted title string.
 If the title formatting fails for any reason, a warning is logged, and the title remains unchanged.
 The default value is `{title}`.
-* **`<channel>.<feed>.format.str.url`**: Similar to `<channel>.<feed>.format.str.title`. The default value is `{url}`.
+* **`<feed>.format.str.url`**: Similar to `<feed>.format.str.title`. The default value is `{url}`.
 If this is specified, it can sometimes be relevant to set `shorten` to `false` for the feed.
-* **`<channel>.<feed>.sub.title.pattern`**: This is a single regular expression pattern that if found results in the 
+* **`<feed>.sub.title.pattern`**: This is a single regular expression pattern that if found results in the 
 entry title being [substituted](https://docs.python.org/3/library/re.html#re.sub).
-* **`<channel>.<feed>.sub.title.repl`**: If `<channel>.<feed>.sub.title.pattern` is found, the entry title is replaced 
+* **`<feed>.sub.title.repl`**: If `<feed>.sub.title.pattern` is found, the entry title is replaced 
 with this replacement, otherwise it is forwarded unchanged.
-* **`<channel>.<feed>.sub.url.pattern`**: Similar to `<channel>.<feed>.sub.title.pattern`.
+* **`<feed>.sub.url.pattern`**: Similar to `<feed>.sub.title.pattern`.
 If a pattern is specified, it can sometimes be relevant to set `shorten` to `false` for the feed.
-* **`<channel>.<feed>.sub.url.repl`**: Similar to `<channel>.<feed>.sub.title.repl`.
+* **`<feed>.sub.url.repl`**: Similar to `<feed>.sub.title.repl`.
 
 #### Feed default settings
 A global default value can optionally be set under `defaults` for some feed-specific settings, 
