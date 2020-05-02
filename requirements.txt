@@ -5,7 +5,7 @@
 #    pip-compile
 #
 beautifulsoup4==4.9.0     # via bs4
-bitlyshortener==0.3.3     # via -r requirements.in
+bitlyshortener==0.3.5     # via -r requirements.in
 bs4==0.0.1                # via -r requirements.in
 cachetools==4.1.0         # via -r requirements.in
 certifi==2020.4.5.1       # via miniirc, requests
