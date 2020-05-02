@@ -15,6 +15,7 @@ disable=
     locally-disabled,
     locally-enabled,
     logging-format-interpolation,
+    logging-fstring-interpolation,
     missing-function-docstring, # for Docker Hub
     no-init,
     reimported, # for Docker Hub
