@@ -13,3 +13,4 @@ pytest-pydocstyle
 pytest-isort
 pytest-mypy
 pytest-pylint
+wheel
