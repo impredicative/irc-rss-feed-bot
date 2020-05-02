@@ -286,7 +286,9 @@ It is recommended that feeds in the same group have the same `period`.
 * **`<feed>.https`**: If `true`, entry links that start with `http://` are changed to start with `https://` 
 instead. Its default value is `false`.
 * **`<feed>.message.summary`**: If `true`, the entry summary (description) is included in its message.
-The entry title, if included, is then formatted bold. The default value is `false`.
+The entry title, if included, is then formatted bold.
+This is applied using IRC formatting if a `style` is defined for the feed, otherwise using unicode formatting.
+The default value is `false`.
 * **`<feed>.message.title`**: If `false`, the entry title is not included in its message.
 Its default value is `true`.
 * **`<feed>.new`**: This indicates up to how many entries of a new feed to post.
@@ -323,14 +325,14 @@ entry.
 The nesting permits lists to be creatively reused between feeds via YAML anchors and references.
 * **`<feed>.whitelist.explain`**: This applies only to `<feed>.whitelist.title`.
 It can be useful for understanding which portion of a post's title matched the whitelist.
-If `true` and if a `style` is defined, the matching text of each posted title is italicized.
+If `true`, the first match of each posted title is italicized.
+This is applied using IRC formatting if a `style` is defined for the feed, otherwise using unicode formatting.
 For example, "This is a _matching sample_ title".
-If `true` and if a `style` is not defined, the matching text of each posted title is enclosed by asterisks.
-For example, "This is a \*matching sample\* title".
 The default value is `false`.
-* **`<feed>.whitelist.title`**: This is an arbitrarily nested dictionary or list or their mix of regular 
-expression patterns that result in an entry being skipped unless a 
-[search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in the title.
+* **`<feed>.whitelist.title`**: This is an arbitrarily nested dictionary or list from which all leaf values are used.
+The leaf values are regular expression patterns.
+This result in an entry being skipped unless a [search](https://docs.python.org/3/library/re.html#re.search) finds any 
+of the patterns in the title.
 The nesting permits lists to be creatively reused between feeds via YAML anchors and references.
 * **`<feed>.whitelist.url`**: Similar to `<feed>.whitelist.title`.
 * **`<feed>.www`**: If `false`, entry links that contain the `www.` prefix are changed to remove this prefix.

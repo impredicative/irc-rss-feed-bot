@@ -4,7 +4,7 @@ import logging
 from typing import Any, Dict, List, Optional, Pattern, Tuple
 
 from . import config
-from .util.ircmessage import style
+from .style import style
 from .util.list import ensure_list
 from .util.textwrap import shorten_to_bytes_width
 
@@ -96,36 +96,41 @@ class FeedEntry:
         msg_config = feed_config.get("message") or {}
         include_summary = msg_config.get("summary") and self.summary
         style_config = feed_config.get("style") or {}
-        name_style_config = style_config.get("name", {})
+
+        def _style_name(text: str) -> str:
+            return style(text, styler="irc", **style_config.get("name", {}))
+
+        def _style_title(text: str, **kwargs: Any) -> str:
+            return style(text, styler="irc" if style_config else "unicode", **kwargs)
 
         # Define post params
         format_map = dict(
             identity=config.runtime.identity,
             channel=self.feed.channel,
-            feed=style(self.feed.name, **name_style_config),
+            feed=_style_name(self.feed.name),
             url=self.short_url or self.long_url,
         )
 
         # Define post caption
         format_map["caption"] = ""
         if msg_config.get("title", True) and (title := self.title):
-            if explain and (pattern := self.matching_title_search_pattern):
-                if match := pattern.search(title):  # Not always guaranteed to be true due to sub, format, etc.
-                    span0, span1 = match.span()
-                    title_mid = title[span0:span1]
-                    if include_summary:
-                        if style_config:
-                            title_mid = style(title_mid, bold=True, italics=True)
-                            title = style(title[:span0], bold=True) + title_mid + style(title[span1:], bold=True)
-                        else:
-                            title = title[:span0] + f"*{title_mid}*" + title[span1:]
-                    else:
-                        title_mid = style(title_mid, italics=True) if style_config else f"*{title_mid}*"
-                        title = title[:span0] + title_mid + title[span1:]
-                elif include_summary and style_config:
-                    title = style(title, bold=True)
-            elif include_summary and style_config:
-                title = style(title, bold=True)
+            if (
+                explain
+                and (pattern := self.matching_title_search_pattern)
+                and (match := pattern.search(title))  # pylint: disable=used-before-assignment
+            ):
+                # Note: A match is not always guaranteed to exist due to sub, format, etc.
+                span0, span1 = match.span()
+                title_pre, title_mid, title_post = title[:span0], title[span0:span1], title[span1:]
+                if include_summary:
+                    title_pre = _style_title(title_pre, bold=True)
+                    title_mid = _style_title(title_mid, bold=True, italics=True)
+                    title_post = _style_title(title_post, bold=True)
+                    title = title_pre + title_mid + title_post
+                else:
+                    title = title_pre + _style_title(title_mid, italics=True) + title_post
+            elif include_summary:
+                title = _style_title(title, bold=True)
             format_map["caption"] += title
         if include_summary:
             if format_map["caption"]:
