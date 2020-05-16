@@ -280,7 +280,7 @@ class Bot:
         )
         log.info(
             "Ignoring any caches and crawls, %s URL reads are expected daily, i.e. once every %s on an average.",
-            f"{round(num_reads_daily):n}",
+            f"{round(num_reads_daily):,}",
             timedelta_desc(datetime.timedelta(days=1) / num_reads_daily),
         )
 

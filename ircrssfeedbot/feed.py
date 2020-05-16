@@ -121,7 +121,7 @@ class Feed:
             parser = Parser(parser_selector, parser_follower, content, self)
             selected_entries, follow_urls = parser.entries, parser.urls  # pylint: disable=no-member
             log_msg = (
-                f"Parsed {len(selected_entries)} entries and {len(follow_urls)} followable URLs for {url} for "
+                f"Parsed {len(selected_entries):,} entries and {len(follow_urls):,} followable URLs for {url} for "
                 f"{self} using {parser_name}."
             )
             entries.extend(selected_entries)

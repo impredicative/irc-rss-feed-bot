@@ -126,9 +126,9 @@ class URLReader:
                         config.runtime.alert(
                             f"Etag test failed for {url} with strong etag {repr(etag)}. "
                             f"The content was unexpectedly found to be changed whereas the etag stayed unchanged. "
-                            f"The previously cached content has length {len(etag_cache.content)} with "
+                            f"The previously cached content has length {len(etag_cache.content):,} with "
                             f"hash {hash4(etag_cache.content)} and the dissimilar current content has "
-                            f"length {len(content)} with hash {hash4(content)}. ",
+                            f"length {len(content):,} with hash {hash4(content)}. ",
                             log.warning,
                         )
                         config.runtime.alert(
