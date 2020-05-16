@@ -24,10 +24,11 @@ ENV: Final = os.getenv(f"{PACKAGE_NAME.upper()}_ENV", "prod")  # Externally set 
 
 # Main
 ALERTS_CHANNEL_FORMAT_DEFAULT: Final = "##{nick}-alerts"
-BITLY_SHORTENER_MAX_CACHE_SIZE: Final = 2048
+BITLY_SHORTENER_MAX_CACHE_SIZE: Final = 1024
 DB_FILENAME: Final = "posts.v2.db"
 DEDUP_STRATEGY_DEFAULT: Final = "channel"
 ETAG_CACHE_PROHIBITED_NETLOCS: Final = {
+    "blog.ml.cmu.edu",
     "blogs.cornell.edu",
     "bodyrecomposition.com",
     "deeplearning.ai",
