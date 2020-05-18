@@ -390,13 +390,15 @@ If the title formatting fails for any reason, a warning is logged, and the title
 The default value is `{title}`.
 * **`<feed>.format.str.url`**: Similar to `<feed>.format.str.title`. The default value is `{url}`.
 If this is specified, it can sometimes be relevant to set `shorten` to `false` for the feed.
-* **`<feed>.sub.title.pattern`**: This is a single regular expression pattern that if found results in the 
-entry title being [substituted](https://docs.python.org/3/library/re.html#re.sub).
-* **`<feed>.sub.title.repl`**: If `<feed>.sub.title.pattern` is found, the entry title is replaced 
+* **`<feed>.sub.summary.pattern`**: This is a single regular expression pattern that if found results in the 
+entry summary being [substituted](https://docs.python.org/3/library/re.html#re.sub).
+* **`<feed>.sub.summary.repl`**: If `<feed>.sub.summary.pattern` is found, the entry summary is replaced 
 with this replacement, otherwise it is forwarded unchanged.
-* **`<feed>.sub.url.pattern`**: Similar to `<feed>.sub.title.pattern`.
+* **`<feed>.sub.title.pattern`**: Similar to `<feed>.sub.summary.pattern`.
+* **`<feed>.sub.title.repl`**: Similar to `<feed>.sub.summary.repl`.
+* **`<feed>.sub.url.pattern`**: Similar to `<feed>.sub.summary.pattern`.
 If a pattern is specified, it can sometimes be relevant to set `shorten` to `false` for the feed.
-* **`<feed>.sub.url.repl`**: Similar to `<feed>.sub.title.repl`.
+* **`<feed>.sub.url.repl`**: Similar to `<feed>.sub.summary.repl`.
 
 #### Feed default settings
 A global default value can optionally be set under `defaults` for some feed-specific settings, 

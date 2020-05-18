@@ -201,12 +201,12 @@ class Feed:
         if sub := feed_config.get("sub"):
             log.debug("Substituting entries for %s.", self)
             re_sub: Callable[[Dict[str, str], str], str] = lambda r, v: re.sub(r["pattern"], r["repl"], v)
-            if title_sub := sub.get("title"):
-                for entry in entries:
-                    entry.title = re_sub(title_sub, entry.title)
-            if url_sub := sub.get("url"):
-                for entry in entries:
-                    entry.long_url = re_sub(url_sub, entry.long_url)
+            for attr in ("title", "url", "summary"):
+                if attr_sub := sub.get(attr):
+                    for entry in entries:
+                        if attt_val_old := getattr(entry, attr):
+                            attr_val_new = re_sub(attr_sub, attt_val_old)
+                            setattr(entry, attr, attr_val_new)
             log.debug("Substituted entries for %s.", self)
 
         # Format entries
