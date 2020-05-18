@@ -198,15 +198,15 @@ class Feed:
             log.debug("Removed WWW from URLs in %s.", self)
 
         # Substitute entries
-        if sub := feed_config.get("sub"):
+        if sub_config := feed_config.get("sub"):
             log.debug("Substituting entries for %s.", self)
             re_sub: Callable[[Dict[str, str], str], str] = lambda r, v: re.sub(r["pattern"], r["repl"], v)
-            for attr in ("title", "url", "summary"):
-                if attr_sub := sub.get(attr):
+            for sub_attr, entry_attr in {"title": "title", "url": "long_url", "summary": "summary"}.items():
+                if sub_attr_config := sub_config.get(sub_attr):
                     for entry in entries:
-                        if attt_val_old := getattr(entry, attr):
-                            attr_val_new = re_sub(attr_sub, attt_val_old)
-                            setattr(entry, attr, attr_val_new)
+                        if entry_attr_val_old := getattr(entry, entry_attr):
+                            entry_attr_val_new = re_sub(sub_attr_config, entry_attr_val_old)
+                            setattr(entry, entry_attr, entry_attr_val_new)
             log.debug("Substituted entries for %s.", self)
 
         # Format entries
