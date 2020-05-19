@@ -17,6 +17,7 @@ from .db import Database
 from .feed import Feed
 from .util.datetime import timedelta_desc
 from .util.list import ensure_list
+from .util.time import Throttle
 
 log = logging.getLogger(__name__)
 
@@ -121,21 +122,20 @@ class Bot:
                         log.info("Posting %s entries for %s.", len(feed.postable_entries), feed)
                         for entry in feed.postable_entries:
                             # Send message
-                            msg = entry.message
-                            outgoing_msg_time = time.monotonic()
-                            irc.msg(channel, msg)
-                            log.debug("Sent message to %s: %s", channel, msg)
-                            time.sleep(max(0.0, outgoing_msg_time + seconds_per_msg - time.monotonic()))
+                            with Throttle(seconds_per_msg):
+                                msg = entry.message
+                                irc.msg(channel, msg)
+                                log.debug("Sent message to %s: %s", channel, msg)
 
                             # Update topic
-                            if (old_topic := self.CHANNEL_TOPICS.get(channel, "")) != (
-                                new_topic := entry.topic(old_topic)
-                            ):
+                            with Throttle(seconds_per_msg) as throttle:
+                                old_topic = self.CHANNEL_TOPICS.get(channel, "")
+                                new_topic = entry.topic(old_topic)
+                                if old_topic == new_topic:
+                                    raise throttle.Break()
                                 self.CHANNEL_TOPICS[channel] = new_topic
-                                outgoing_msg_time = time.monotonic()
                                 irc.quote("TOPIC", channel, f":{new_topic}")
                                 log.info(f"Updated {channel} topic: {new_topic}")
-                                time.sleep(max(0.0, outgoing_msg_time + seconds_per_msg - time.monotonic()))
                     finally:
                         self._outgoing_msg_lock.release()
                     log.info("Posted %s entries for %s.", len(feed.postable_entries), feed)
