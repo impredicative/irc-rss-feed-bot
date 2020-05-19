@@ -27,7 +27,7 @@ reads.
 Any websites with a mismatched _strong_ ETag are probabilistically detected, and this caching is then disabled for them
 for the duration of the process. Note that this detection is skipped for a _weak_ ETag.
 The TTL cache is used only for URLs that are used by more than one feed each.
-* Encoded Google News URLs are decoded.
+* Encoded Google News and FeedBurner URLs are decoded.
 
 For more features, see the customizable [global settings](#global-settings) and
 [feed-specific settings](#feed-specific-settings).

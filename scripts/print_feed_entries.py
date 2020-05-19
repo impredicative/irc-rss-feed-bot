@@ -25,7 +25,7 @@ FEED = "stats:🇺🇸"  # USA
 # FEED = "stats:🇷🇺"  # Russia
 # FEED = "stats:🇨🇳"  # China
 # FEED = "COVID-19:stats:USA:NY"
-CHANNEL, FEED = "##CoV", "LitCovid:TSV"
+CHANNEL, FEED = "##us-market-news", "ZeroHedge"
 
 config.LOGGING["loggers"][config.PACKAGE_NAME]["level"] = "DEBUG"  # type: ignore
 config.configure_logging()
@@ -35,7 +35,7 @@ log = logging.getLogger(__name__)
 config.runtime.alert = lambda *args: log.exception(args[0])
 config.runtime.identity = ""
 load_instance_config(log_details=False)
-config.INSTANCE["feeds"][CHANNEL][FEED]["style"] = None
+# config.INSTANCE["feeds"][CHANNEL][FEED]["style"] = None
 
 _url_shortener = bitlyshortener.Shortener(
     tokens=[token.strip() for token in os.environ["BITLY_TOKENS"].strip().split(",")],
@@ -47,5 +47,5 @@ feed = Feed(channel=CHANNEL, name=FEED, db=None, url_shortener=_url_shortener)  
 for index, entry in enumerate(feed.entries[:100]):
     post = f"\n#{index + 1:,}: {entry.message}"
     if entry.categories:
-        post += "\nCategories: " + ", ".join(entry.categories)
+        post += "\nCategories: " + "; ".join(entry.categories)
     print(post)

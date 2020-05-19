@@ -18,6 +18,8 @@ class RawEntry(BaseRawEntry):
         link = self.get("link") or self["links"][0]["href"]
         link = link.strip()  # e.g. for https://feeds.buzzsprout.com/188368.rss
         link = decode_google_news_url(link).strip()
+        if link.startswith("http://feedproxy.google.com/") and (origlink := self.get("feedburner_origlink")):
+            link = origlink.strip()
         return link
 
     @property
