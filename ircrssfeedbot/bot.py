@@ -31,6 +31,7 @@ class Bot:
 
     CHANNEL_JOIN_EVENTS: Dict[str, threading.Event] = {}
     CHANNEL_LAST_INCOMING_MSG_TIMES: Dict[str, float] = {}
+    CHANNEL_TOPICS: Dict[str, str] = {}
     CHANNEL_QUEUES: Dict[str, queue.Queue] = {}
     FEED_GROUP_BARRIERS: Dict[str, threading.Barrier] = {}
 
@@ -72,7 +73,9 @@ class Bot:
         log.info("Duration of TTL cache of URL content is %s.", timedelta_desc(config.URL_CACHE_TTL))
         log.info("Alerts will be sent to %s.", config.INSTANCE["alerts_channel"])
 
-    def _msg_channel(self, channel: str) -> None:  # pylint: disable=too-many-locals,too-many-statements
+    def _msg_channel(  # pylint: disable=too-many-branches,too-many-locals,too-many-statements
+        self, channel: str
+    ) -> None:
         log.debug("Channel messenger for %s is starting and is waiting to be notified of channel join.", channel)
         instance = config.INSTANCE
         channel_queue = Bot.CHANNEL_QUEUES[channel]
@@ -117,11 +120,22 @@ class Bot:
 
                         log.info("Posting %s entries for %s.", len(feed.postable_entries), feed)
                         for entry in feed.postable_entries:
+                            # Send message
                             msg = entry.message
                             outgoing_msg_time = time.monotonic()
                             irc.msg(channel, msg)
                             log.debug("Sent message to %s: %s", channel, msg)
                             time.sleep(max(0.0, outgoing_msg_time + seconds_per_msg - time.monotonic()))
+
+                            # Update topic
+                            if (old_topic := self.CHANNEL_TOPICS.get(channel, "")) != (
+                                new_topic := entry.topic(old_topic)
+                            ):
+                                self.CHANNEL_TOPICS[channel] = new_topic
+                                outgoing_msg_time = time.monotonic()
+                                irc.quote("TOPIC", channel, f":{new_topic}")
+                                log.info(f"Updated {channel} topic: {new_topic}")
+                                time.sleep(max(0.0, outgoing_msg_time + seconds_per_msg - time.monotonic()))
                     finally:
                         self._outgoing_msg_lock.release()
                     log.info("Posted %s entries for %s.", len(feed.postable_entries), feed)
@@ -367,3 +381,24 @@ def _handle_privmsg(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List
     log.debug(
         "Updated the last incoming message time for %s to %s.", channel, Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel]
     )
+
+
+@miniirc.Handler(332, colon=False)
+def _handle_notice(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
+    log.debug("Received initial topic: hostmask=%s args=%s", hostmask, args)
+    _nick, channel, topic = args
+
+    # Store topic
+    Bot.CHANNEL_TOPICS[channel] = topic
+    log.debug("Received initial topic of %s: %s", channel, topic)
+
+
+@miniirc.Handler("TOPIC", colon=False)
+def _handle_topic(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
+    log.debug("Received updated topic: hostmask=%s, args=%s", hostmask, args)
+    channel, topic = args
+
+    # Store topic if changed
+    if topic != Bot.CHANNEL_TOPICS.get(channel):
+        Bot.CHANNEL_TOPICS[channel] = topic
+        log.debug("Received updated topic of %s: %s", channel, topic)

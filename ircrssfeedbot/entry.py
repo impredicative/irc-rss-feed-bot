@@ -1,6 +1,7 @@
 """Feed entry."""
 import dataclasses
 import logging
+import re
 from typing import Any, Dict, List, Optional, Pattern, Tuple
 
 from . import config
@@ -151,3 +152,14 @@ class FeedEntry:
 
         msg = msg_format.format_map(format_map)
         return msg
+
+    def topic(self, topic: str) -> str:
+        """Return the updated or unchanged channel topic as updated by the entry."""
+        if not (topic_config := self.feed.config.get("topic")):  # pylint: disable=superfluous-parens
+            return topic
+        topic_parts = {k: v for k, _, v in (p.partition(": ") for p in topic.split(" | "))}
+        for key, pattern in topic_config.items():
+            if re.search(pattern, self.title):
+                topic_parts[key] = self.short_url or self.feed.url_shortener.shorten_urls([self.long_url])[0]
+        topic = " | ".join((f"{k}: {v}" if v else k) for k, v in topic_parts.items())
+        return topic
