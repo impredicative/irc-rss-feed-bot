@@ -185,6 +185,22 @@ feeds:
       url: https://us-east1-ml-feeds.cloudfunctions.net/pwc/trending
       period: 0.5
       dedup: feed
+    SeekingAlpha:
+      period: 0.2
+      sub:
+        url:
+          pattern: ^(?P<main_url>https://seekingalpha\.com/[a-z]+/[0-9]+).*$
+          repl: \g<main_url>
+      shorten: false
+      topic:
+        "Daily calendar": \b(?i:economic\ calendar)\b
+        "Daily prep": '^Wall\ Street\ Breakfast:\ '
+        "Hourly status": ^On\ the\ hour$
+      url:
+        - https://seekingalpha.com/market_currents.xml
+        - https://seekingalpha.com/feed.xml
+        - https://seekingalpha.com/tag/etf-portfolio-strategy.xml
+        - https://seekingalpha.com/tag/wall-st-breakfast.xml
     SSRN:
       url: https://papers.ssrn.com/sol3/Jeljour_results.cfm?form_name=journalBrowse&journal_id=3526423&Network=no&lim=false&npage=1
       hext:
@@ -318,6 +334,14 @@ silver. The channel modes must allow formatting for this option to be effective.
 Its default value is `false`.
 The channel modes must allow formatting for this option to be effective.
 * **`<feed>.style.name.fg`**: Foreground color similar to `<feed>.style.name.bg`.
+* **`<feed>.topic`**: This updates the channel topic with the short URL of a matching entry.
+It requires auto-op (+O) to allow the topic to be updated.
+The topic is divided into logical sections separated by ` | ` (`<space><pipe><space>`).
+For any matching entry, only its matching section in the topic is updated.
+Its value can be a dictionary in which each key is a section name and each value is a regular expression pattern.
+If a regular expression [search](https://docs.python.org/3/library/re.html#re.search) matches an entry's title,
+the section in the topic is updated with the entry's short URL.
+The topic's length is not checked.
 * **`<feed>.whitelist.category`**: This is an arbitrarily nested dictionary or list or their mix of regular 
 expression patterns that result in an entry being skipped unless a 
 [search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in any of the categories of the 
@@ -426,7 +450,7 @@ version: '3.7'
 services:
   irc-rss-feed-bot:
     container_name: irc-rss-feed-bot
-    image: ascensive/irc-rss-feed-bot:latest
+    image: ascensive/irc-rss-feed-bot:<VERSION>
     restart: always
     logging:
       options:
@@ -439,8 +463,8 @@ services:
 ```
 
 * In the above service definition in `docker-compose.yml`:
-  * `image`: For better reproducibility, use a specific
-  [versioned tag](https://hub.docker.com/r/ascensive/irc-rss-feed-bot/tags?ordering=last_updated), e.g. `0.9.1` instead of `latest`.
+  * `image`: Use a specific
+  [versioned tag](https://hub.docker.com/r/ascensive/irc-rss-feed-bot/tags?ordering=last_updated), e.g. `0.9.16`.
   * `volumes`: Customize the relative path to the previously created `config.yaml` file, e.g. `./irc-rss-feed-bot`.
   This volume source directory must be writable by the container using the UID defined in the Dockerfile; it is 999.
   A simple way to ensure it is writable is to run a command such as `chmod a+w ./irc-rss-feed-bot` once on the host.
