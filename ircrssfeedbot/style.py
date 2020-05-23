@@ -29,9 +29,11 @@ def _dressup_style(text: str, bold: bool = False, italics: bool = False) -> str:
 
     # Style
     try:
-        return dressup.convert(text, unicode_type=unicode_type)
-    except Exception as exc:
+        text = dressup.convert(text, unicode_type=unicode_type)
+    except Exception as exc:  # pylint: disable=broad-except
         log.exception(f"Error using dressup with {unicode_type=} to format {text!r}: {exc}")
+
+    return text
 
 
 def _ircmessage_style(text: str, **style_config: Union[bool, str]) -> str:

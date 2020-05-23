@@ -8,13 +8,15 @@ Customize CHANNEL and FEED.
 """
 
 import logging
-import os
-
-import bitlyshortener
 
 from ircrssfeedbot import config
 from ircrssfeedbot.__main__ import load_instance_config
 from ircrssfeedbot.feed import FeedReader
+
+# import os
+#
+# import bitlyshortener
+
 
 # pylint: disable=invalid-name
 
@@ -25,7 +27,7 @@ FEED = "stats:🇺🇸"  # USA
 # FEED = "stats:🇷🇺"  # Russia
 # FEED = "stats:🇨🇳"  # China
 # FEED = "COVID-19:stats:USA:NY"
-CHANNEL, FEED = "##us-market-news", "ZeroHedge"
+CHANNEL, FEED = "##us-market-news", "MarketWatch"
 
 config.LOGGING["loggers"][config.PACKAGE_NAME]["level"] = "DEBUG"  # type: ignore
 config.configure_logging()
