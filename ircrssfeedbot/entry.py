@@ -48,7 +48,7 @@ class FeedEntry:
     summary: str = dataclasses.field(compare=False)
     categories: List[str] = dataclasses.field(compare=False, repr=True)
     data: Dict[str, Any] = dataclasses.field(compare=False, repr=False)
-    feed: Any = dataclasses.field(compare=False, repr=False)
+    feed_reader: Any = dataclasses.field(compare=False, repr=False)
 
     def __post_init__(self):
         self.short_url: Optional[str] = None
@@ -81,18 +81,18 @@ class FeedEntry:
     @property
     def blacklisted_pattern(self) -> Optional[Tuple[str, Pattern]]:
         """Return the matching key name and blacklisted regular expression pattern, if any."""
-        return self._matching_pattern(self.feed.blacklist)
+        return self._matching_pattern(self.feed_reader.blacklist)
 
     @property
     def whitelisted_pattern(self) -> Optional[Tuple[str, Pattern]]:
         """Return the matching key name and whitelisted regular expression pattern, if any."""
-        return self._matching_pattern(self.feed.whitelist)
+        return self._matching_pattern(self.feed_reader.whitelist)
 
     @property
     def message(self) -> str:  # pylint: disable=too-many-locals
         """Return the message to post."""
         # Obtain feed config
-        feed_config = self.feed.config
+        feed_config = self.feed_reader.config
         explain = (feed_config.get("whitelist") or {}).get("explain")
         msg_config = feed_config.get("message") or {}
         include_summary = msg_config.get("summary") and self.summary
@@ -107,8 +107,8 @@ class FeedEntry:
         # Define post params
         format_map = dict(
             identity=config.runtime.identity,
-            channel=self.feed.channel,
-            feed=_style_name(self.feed.name),
+            channel=self.feed_reader.channel,
+            feed=_style_name(self.feed_reader.name),
             url=self.short_url or self.long_url,
         )
 
@@ -155,11 +155,11 @@ class FeedEntry:
 
     def topic(self, topic: str) -> str:
         """Return the updated or unchanged channel topic as updated by the entry."""
-        if not (topic_config := self.feed.config.get("topic")):  # pylint: disable=superfluous-parens
+        if not (topic_config := self.feed_reader.config.get("topic")):  # pylint: disable=superfluous-parens
             return topic
         topic_parts = {k: v for k, _, v in (p.partition(": ") for p in topic.split(" | "))}
         for key, pattern in topic_config.items():
             if re.search(pattern, self.title):
-                topic_parts[key] = self.short_url or self.feed.url_shortener.shorten_urls([self.long_url])[0]
+                topic_parts[key] = self.short_url or self.feed_reader.url_shortener.shorten_urls([self.long_url])[0]
         topic = " | ".join((f"{k}: {v}" if v else k) for k, v in topic_parts.items())
         return topic

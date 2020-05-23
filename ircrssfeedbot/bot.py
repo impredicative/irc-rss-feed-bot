@@ -14,17 +14,11 @@ import miniirc
 
 from . import config
 from .db import Database
-from .feed import Feed
+from .feed import FeedReader
 from .util.datetime import timedelta_desc
 from .util.list import ensure_list
-from .util.time import Throttle
 
 log = logging.getLogger(__name__)
-
-
-def _alert(irc: miniirc.IRC, msg: str, logger: Callable[[str], None] = log.exception) -> None:
-    logger(msg)
-    irc.msg(config.INSTANCE["alerts_channel"], msg)
 
 
 class Bot:
@@ -32,15 +26,13 @@ class Bot:
 
     CHANNEL_JOIN_EVENTS: Dict[str, threading.Event] = {}
     CHANNEL_LAST_INCOMING_MSG_TIMES: Dict[str, float] = {}
-    CHANNEL_TOPICS: Dict[str, str] = {}
     CHANNEL_QUEUES: Dict[str, queue.Queue] = {}
     FEED_GROUP_BARRIERS: Dict[str, threading.Barrier] = {}
 
     def __init__(self) -> None:
         log.info(
-            "Initializing bot as: %s",
-            subprocess.check_output("id", text=True).rstrip(),  # pylint: disable=unexpected-keyword-arg
-        )
+            f"Initializing bot as: {subprocess.check_output('id', text=True).rstrip()}"
+        )  # pylint: disable=unexpected-keyword-arg
         instance = config.INSTANCE
         self._outgoing_msg_lock = threading.Lock()  # Used for rate limiting across multiple channels.
         self._db = Database()
@@ -51,6 +43,7 @@ class Bot:
 
         # Setup miniirc
         log.debug("Initializing IRC client.")
+        config.runtime.channel_topics = {}
         self._irc = miniirc.IRC(
             ip=instance["host"],
             port=instance["ssl_port"],
@@ -63,98 +56,73 @@ class Bot:
             quit_message="",
             ping_interval=30,
         )
-        config.runtime.alert = lambda *args: _alert(self._irc, *args)
         log.info("Initialized IRC client.")
-
+        self._setup_alerter()
         self._setup_channels()
         self._log_config()
 
     @staticmethod
     def _log_config() -> None:
-        log.info("Duration of TTL cache of URL content is %s.", timedelta_desc(config.URL_CACHE_TTL))
-        log.info("Alerts will be sent to %s.", config.INSTANCE["alerts_channel"])
+        log.info(f"Duration of TTL cache of URL content is {timedelta_desc(config.URL_CACHE_TTL)}",)
+        log.info(f"Alerts will be sent to {config.INSTANCE['alerts_channel']}.")
 
     def _msg_channel(  # pylint: disable=too-many-branches,too-many-locals,too-many-statements
         self, channel: str
     ) -> None:
-        log.debug("Channel messenger for %s is starting and is waiting to be notified of channel join.", channel)
+        log.debug(f"Channel messenger for {channel} is starting and is waiting to be notified of channel join.")
         instance = config.INSTANCE
+        alerter = config.runtime.alert
         channel_queue = Bot.CHANNEL_QUEUES[channel]
-        db = self._db
         irc = self._irc
-        seconds_per_msg = config.SECONDS_PER_MESSAGE
         Bot.CHANNEL_JOIN_EVENTS[channel].wait()
         Bot.CHANNEL_JOIN_EVENTS[instance["alerts_channel"]].wait()
-        log.info("Channel messenger for %s has started.", channel)
+        log.info(f"Channel messenger for {channel} has started.")
         while True:  # pylint: disable=too-many-nested-blocks
             feed = channel_queue.get()
-            log.debug("Dequeued %s.", feed)
-            log.debug(
-                "The minimum required channel idle time for %s is %s.", feed, timedelta_desc(feed.min_channel_idle_time)
-            )
+            log.debug(f"Dequeued {feed}.")
+            min_channel_idle_time = feed.reader.min_channel_idle_time
+            log.debug(f"The minimum required channel idle time for {feed} is {timedelta_desc(min_channel_idle_time)}.")
             try:
-                if feed.postable_entries:  # Result gets cached.
+                if feed.is_postable:
                     try:
                         while True:
                             if not self._outgoing_msg_lock.acquire(blocking=False):
-                                log.info("Waiting to acquire outgoing message lock to post %s.", feed)
+                                log.info(f"Waiting to acquire outgoing message lock to post {feed}.")
                                 self._outgoing_msg_lock.acquire()
                             last_incoming_msg_time = Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel]
                             time_elapsed_since_last_ic_msg = time.monotonic() - last_incoming_msg_time
-                            sleep_time = max(0, feed.min_channel_idle_time - time_elapsed_since_last_ic_msg)
+                            sleep_time = max(0, min_channel_idle_time - time_elapsed_since_last_ic_msg)
                             if sleep_time == 0:
                                 break  # Lock will be released later after posting messages.
                             self._outgoing_msg_lock.release()  # Releasing lock before sleeping.
-                            log.info(
-                                "Will wait %s for channel inactivity to post %s.", timedelta_desc(sleep_time), feed
-                            )
+                            log.info(f"Will wait {timedelta_desc(sleep_time)} for channel inactivity to post {feed}.")
                             time.sleep(sleep_time)
 
                         log.debug("Checking IRC client connection state.")
                         if not irc.connected:  # In case of netsplit.
-                            log.warning("Will wait for IRC client to connect so as to post %s.", feed)
+                            log.warning(f"Will wait for IRC client to connect so as to post {feed}.")
                             disconnect_time = time.monotonic()
                             while not irc.connected:
                                 time.sleep(5)
                             disconnection_time = time.monotonic() - disconnect_time
-                            log.info("IRC client is connected after waiting %s.", timedelta_desc(disconnection_time))
+                            log.info(f"IRC client is connected after waiting {timedelta_desc(disconnection_time)}.")
 
-                        log.info("Posting %s entries for %s.", len(feed.postable_entries), feed)
-                        for entry in feed.postable_entries:
-                            # Send message
-                            with Throttle(seconds_per_msg):
-                                msg = entry.message
-                                irc.msg(channel, msg)
-                                log.debug("Sent message to %s: %s", channel, msg)
-
-                            # Update topic
-                            with Throttle(seconds_per_msg) as throttle:
-                                old_topic = self.CHANNEL_TOPICS.get(channel, "")
-                                new_topic = entry.topic(old_topic)
-                                if old_topic == new_topic:
-                                    raise throttle.Break()
-                                self.CHANNEL_TOPICS[channel] = new_topic
-                                irc.quote("TOPIC", channel, f":{new_topic}")
-                                log.info(f"Updated {channel} topic: {new_topic}")
+                        feed.post()
                     finally:
                         self._outgoing_msg_lock.release()
-                    log.info("Posted %s entries for %s.", len(feed.postable_entries), feed)
-
-                if feed.unposted_entries:  # Note: feed.postable_entries is intentionally not used here.
-                    db.insert_posted(channel, feed.name, [entry.long_url for entry in feed.unposted_entries])
-
+                feed.mark_posted()
             except Exception as exc:  # pylint: disable=broad-except
                 msg = f"Error processing {feed}: {exc}"
-                _alert(irc, msg)
+                alerter(msg)
             channel_queue.task_done()
 
     def _read_feed(self, channel: str, feed_name: str) -> None:  # pylint: disable=too-many-locals,too-many-statements
         log.debug(
-            "Feed reader for feed %s of %s is starting and is waiting to be notified of channel join.",
-            feed_name,
-            channel,
+            f"Feed reader for feed {feed_name} of {channel} is starting "
+            "and is waiting to be notified of channel join."
         )
         instance = config.INSTANCE
+        alerter = config.runtime.alert
         feed_config = instance["feeds"][channel][feed_name]
 
         channel_queue = Bot.CHANNEL_QUEUES[channel]
@@ -163,32 +131,29 @@ class Bot:
         feed_period_max = feed_period_avg * (1 + config.PERIOD_RANDOM_PERCENT / 100)
         num_consecutive_failures = 0
 
-        irc = self._irc
-        db = self._db
-        url_shortener = self._url_shortener
+        feed_reader = FeedReader(
+            channel=channel, name=feed_name, irc=self._irc, db=self._db, url_shortener=self._url_shortener
+        )
 
         query_time = time.monotonic() - (feed_period_avg / 2)  # Delays first read by half of feed period.
         Bot.CHANNEL_JOIN_EVENTS[channel].wait()  # Optional.
         Bot.CHANNEL_JOIN_EVENTS[instance["alerts_channel"]].wait()
-        log.debug("Feed reader for feed %s of %s has started.", feed_name, channel)
+        log.debug(f"Feed reader for feed {feed_name} of {channel} has started.")
         while True:
             feed_period = random.uniform(feed_period_min, feed_period_max)
             query_time = max(time.monotonic(), query_time + feed_period)  # "max" is used in case of wait using "put".
             sleep_time = max(0.0, query_time - time.monotonic())
             if sleep_time != 0:
-                log.debug("Will wait %s to read feed %s of %s.", timedelta_desc(sleep_time), feed_name, channel)
+                log.debug(f"Will wait {timedelta_desc(sleep_time)} to read feed {feed_name} of {channel}.")
                 time.sleep(sleep_time)
 
             try:
                 # Read feed
-                log.debug("Retrieving feed %s of %s.", feed_name, channel)
-                feed = Feed(channel=channel, name=feed_name, db=db, url_shortener=url_shortener)
+                log.debug(f"Retrieving feed {feed_name} of {channel}.")
+                feed = feed_reader.read()
                 log.info(
-                    "Retrieved in %.1fs the %s with %s approved entries after reading %s URLs.",
-                    feed.timer(),
-                    feed,
-                    len(feed.entries),
-                    feed.num_urls_read,
+                    f"Retrieved in {feed.read_time_used:.1f}s the {feed} "
+                    f"with {len(feed.entries)} approved entries after reading {feed.num_urls_read} URLs."
                 )
 
                 # Wait for other feeds in group
@@ -199,26 +164,28 @@ class Bot:
                     num_pending = num_other - group_barrier.n_waiting
                     if num_pending > 0:  # This is not thread-safe but that's okay for logging.
                         log.debug(
-                            "Will wait for %s of %s other feeds in group %s to also be read before queuing %s.",
-                            num_pending,
-                            num_other,
-                            feed_group,
-                            feed,
+                            f"Will wait for {num_pending} of {num_other} other feeds in group {feed_group} "
+                            f"to also be read before queuing {feed}."
                         )
                     group_barrier.wait()
                     log.debug(
-                        "Finished waiting for other feeds in group %s to be read before queuing %s.", feed_group, feed
+                        f"Finished waiting for other feeds in group {feed_group} to also be read "
+                        f"before queuing {feed}."
                     )
 
                 # Queue feed
+                # FIXME: This doesn't work correctly when `feed_reader.min_channel_idle_time == 0`.
                 try:
                     channel_queue.put_nowait(feed)
                 except queue.Full:
-                    msg = f"Queue for {channel} is full. The {feed} will be put in the queue in blocking mode."
-                    _alert(irc, msg, log.warning)
+                    msg = (
+                        f"The {feed} cannot currently be queued for being posted to {channel}, "
+                        f"perhaps because the channel has been too active. "
+                        f"The queue for this channel is full. The feed will be put in the queue in blocking mode."
+                    )
+                    alerter(msg, log.warning)
                     channel_queue.put(feed)
-                else:
-                    log.debug("Queued %s.", feed)
+                log.debug(f"Queued {feed}.")
             except Exception as exc:  # pylint: disable=broad-except
                 num_consecutive_failures += 1
                 msg = "Failed"
@@ -228,9 +195,8 @@ class Bot:
                 if feed_config.get("alerts", {}).get("read", True) and (
                     num_consecutive_failures >= config.MIN_CONSECUTIVE_FEED_FAILURES_FOR_ALERT
                 ):
-                    _alert(irc, msg)
-                    _alert(
-                        irc,
+                    alerter(msg)
+                    alerter(
                         "Either check the feed configuration, or wait for its next successful read, "
                         "or set `alerts/read` to `false` for it.",
                     )
@@ -238,10 +204,17 @@ class Bot:
                     log.error(msg)  # Not logging as exception.
             else:
                 if instance.get("once"):
-                    log.warning("Discontinuing reader for %s.", feed)
+                    log.warning(f"Discontinuing reader for {feed}.")
                     return
                 del feed
                 num_consecutive_failures = 0
+
+    def _setup_alerter(self) -> None:
+        def alerter(msg: str, logger: Callable[[str], None] = log.exception) -> None:
+            logger(msg)
+            self._irc.msg(config.INSTANCE["alerts_channel"], msg)
+
+        config.runtime.alert = alerter
 
     def _setup_channels(self) -> None:  # pylint: disable=too-many-locals
         instance = config.INSTANCE
@@ -306,13 +279,13 @@ class Bot:
 def _handle_loggedin(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     # Parse message
     log.debug("Handling RPL_LOGGEDIN (900): hostmask=%s, args=%s", hostmask, args)
-    config.runtime.identity = identity = args[1]
+    runtime_config = config.runtime
+    runtime_config.identity = identity = args[1]
     nick = identity.split("!", 1)[0]
-    config.runtime.nick_casefold = nick_casefold = nick.casefold()
+    runtime_config.nick_casefold = nick_casefold = nick.casefold()
     log.info("The client identity as <nick>!<user>@<host> is %s.", identity)
     if nick_casefold != config.INSTANCE["nick:casefold"]:
-        _alert(
-            irc,
+        runtime_config.alert(
             f"The client nick was configured to be {config.INSTANCE['nick']} but it is {nick}. "
             "The configured nick will be regained.",
             log.warning,
@@ -324,16 +297,17 @@ def _handle_loggedin(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: Lis
 def _handle_nick(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     log.debug("Handling nick change: hostmask=%s, args=%s", hostmask, args)
     old_nick, _ident, _hostname = hostmask
+    runtime_config = config.runtime
 
     # Ignore if not actionable
-    if old_nick.casefold() != config.runtime.nick_casefold:
+    if old_nick.casefold() != runtime_config.nick_casefold:
         return
 
     # Update identity, possibly after a nick regain
     new_nick = args[0]
-    config.runtime.identity = identity = config.runtime.identity.replace(old_nick, new_nick, 1)
-    config.runtime.nick_casefold = new_nick.casefold()
-    _alert(_irc, f"The updated client identity as <nick>!<user>@<host> is inferred to be {identity}.", log.info)
+    runtime_config.identity = identity = runtime_config.identity.replace(old_nick, new_nick, 1)
+    runtime_config.nick_casefold = new_nick.casefold()
+    runtime_config.alert(f"The updated client identity as <nick>!<user>@<host> is inferred to be {identity}.", log.info)
 
 
 @miniirc.Handler("JOIN", colon=False)
@@ -351,12 +325,12 @@ def _handle_join(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[s
 
     # Update channel last message time
     Bot.CHANNEL_JOIN_EVENTS[channel].set()
-    Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel] = time.monotonic()
-    log.debug("Set the last incoming message time for %s to %s.", channel, Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel])
+    Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel] = msg_time = time.monotonic()
+    log.debug(f"Set the last incoming message time for {channel} to {msg_time}.")
 
 
 @miniirc.Handler("PRIVMSG", colon=False)
-def _handle_privmsg(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
+def _handle_privmsg(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     # Parse message
     log.debug("Handling incoming message: hostmask=%s, args=%s", hostmask, args)
     channel = args[0]
@@ -369,18 +343,15 @@ def _handle_privmsg(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List
         if msg != "\x01VERSION\x01":
             # Ignoring private message from freenode-connect having ident frigg
             # and hostname freenode/utility-bot/frigg: VERSION
-            _alert(
-                irc,
+            config.runtime.alert(
                 f"Ignoring private message from {user} having ident {ident} and hostname {hostname}: {msg}",
                 log.warning,
             )
         return
 
     # Update channel last message time
-    Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel] = time.monotonic()
-    log.debug(
-        "Updated the last incoming message time for %s to %s.", channel, Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel]
-    )
+    Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel] = msg_time = time.monotonic()
+    log.debug("Updated the last incoming message time for %s to %s.", channel, msg_time)
 
 
 @miniirc.Handler(332, colon=False)
@@ -389,16 +360,17 @@ def _handle_notice(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List
     _nick, channel, topic = args
 
     # Store topic
-    Bot.CHANNEL_TOPICS[channel] = topic
-    log.debug("Received initial topic of %s: %s", channel, topic)
+    config.runtime.channel_topics[channel] = topic
+    log.debug(f"Received initial topic of {channel}: {topic}")
 
 
 @miniirc.Handler("TOPIC", colon=False)
 def _handle_topic(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     log.debug("Received updated topic: hostmask=%s, args=%s", hostmask, args)
     channel, topic = args
+    channel_topics = config.runtime.channel_topics
 
     # Store topic if changed
-    if topic != Bot.CHANNEL_TOPICS.get(channel):
-        Bot.CHANNEL_TOPICS[channel] = topic
-        log.debug("Received updated topic of %s: %s", channel, topic)
+    if topic != channel_topics.get(channel):
+        channel_topics[channel] = topic
+        log.debug(f"Received updated topic of {channel}: {topic}")

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Union
 from ..entry import FeedEntry
 
 if TYPE_CHECKING:
-    from ..feed import Feed  # pylint: disable=unused-import
+    from ..feed import FeedReader  # pylint: disable=unused-import
 
 
 @dataclasses.dataclass  # type: ignore
@@ -16,7 +16,7 @@ class BaseParser(abc.ABC):
     selector: Optional[str]  # Is None for feedparser.
     follower: Optional[str]
     content: bytes
-    feed: "Feed"
+    feed_reader: "FeedReader"
 
     @property
     @abc.abstractmethod
@@ -41,7 +41,7 @@ class BaseParser(abc.ABC):
                 summary=e.summary,
                 categories=e.categories,
                 data=dict(e),
-                feed=self.feed,
+                feed_reader=self.feed_reader,
             )
             for e in self._raw_entries
         ]
