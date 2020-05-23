@@ -14,7 +14,7 @@ import bitlyshortener
 
 from ircrssfeedbot import config
 from ircrssfeedbot.__main__ import load_instance_config
-from ircrssfeedbot.feed import Feed
+from ircrssfeedbot.feed import FeedReader
 
 # pylint: disable=invalid-name
 
@@ -35,15 +35,14 @@ log = logging.getLogger(__name__)
 config.runtime.alert = lambda *args: log.exception(args[0])
 config.runtime.identity = ""
 load_instance_config(log_details=False)
-# config.INSTANCE["feeds"][CHANNEL][FEED]["style"] = None
+config.INSTANCE["feeds"][CHANNEL][FEED]["style"] = None
 
-_url_shortener = bitlyshortener.Shortener(
-    tokens=[token.strip() for token in os.environ["BITLY_TOKENS"].strip().split(",")],
-    max_cache_size=config.BITLY_SHORTENER_MAX_CACHE_SIZE,
-)
+# _url_shortener = bitlyshortener.Shortener(
+#     tokens=[token.strip() for token in os.environ["BITLY_TOKENS"].strip().split(",")],
+#     max_cache_size=config.BITLY_SHORTENER_MAX_CACHE_SIZE,
+# )
 
-feed = Feed(channel=CHANNEL, name=FEED, db=None, url_shortener=_url_shortener)  # type: ignore
-# feed = Feed(channel=CHANNEL, name=FEED, db=None, url_shortener=None)  # type: ignore
+feed = FeedReader(channel=CHANNEL, name=FEED, irc=None, db=None, url_shortener=None).read()  # type: ignore
 for index, entry in enumerate(feed.entries[:100]):
     post = f"\n#{index + 1:,}: {entry.message}"
     if entry.categories:
