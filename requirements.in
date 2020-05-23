@@ -17,3 +17,4 @@ pandas
 peewee
 requests
 ruamel.yaml
+toml==0.10.0  # Pinned for dressup since dressup breaks with toml==0.10.1

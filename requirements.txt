@@ -34,7 +34,7 @@ ruamel.yaml.clib==0.2.0   # via ruamel.yaml
 ruamel.yaml==0.16.10      # via -r requirements.in
 six==1.10.0               # via html5lib, ircmessage, python-dateutil
 soupsieve==2.0.1          # via beautifulsoup4
-toml==0.10.1              # via dressup
+toml==0.10.0              # via -r requirements.in, dressup
 typer==0.1.1              # via dressup
 urllib3==1.25.9           # via requests
 webencodings==0.5.1       # via html5lib
