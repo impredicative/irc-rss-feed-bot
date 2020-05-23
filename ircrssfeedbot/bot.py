@@ -15,6 +15,7 @@ import miniirc
 from . import config
 from .db import Database
 from .feed import FeedReader
+from .url import URLReader
 from .util.datetime import timedelta_desc
 from .util.list import ensure_list
 
@@ -63,7 +64,6 @@ class Bot:
 
     @staticmethod
     def _log_config() -> None:
-        log.info(f"Duration of TTL cache of URL content is {timedelta_desc(config.URL_CACHE_TTL)}",)
         log.info(f"Alerts will be sent to {config.INSTANCE['alerts_channel']}.")
 
     def _msg_channel(  # pylint: disable=too-many-branches,too-many-locals,too-many-statements
@@ -132,7 +132,12 @@ class Bot:
         num_consecutive_failures = 0
 
         feed_reader = FeedReader(
-            channel=channel, name=feed_name, irc=self._irc, db=self._db, url_shortener=self._url_shortener
+            channel=channel,
+            name=feed_name,
+            irc=self._irc,
+            db=self._db,
+            url_reader=URLReader(max_cache_age=(feed_period_min / 2) * 3600),
+            url_shortener=self._url_shortener,
         )
 
         query_time = time.monotonic() - (feed_period_avg / 2)  # Delays first read by half of feed period.
@@ -152,8 +157,8 @@ class Bot:
                 log.debug(f"Retrieving feed {feed_name} of {channel}.")
                 feed = feed_reader.read()
                 log.info(
-                    f"Retrieved in {feed.read_time_used:.1f}s the {feed} "
-                    f"with {len(feed.entries)} approved entries after reading {feed.num_urls_read} URLs."
+                    f"Retrieved in {feed.read_time_used:.1f}s the {feed} with {len(feed.entries)} approved entries "
+                    f"via {feed.read_approach}."
                 )
 
                 # Wait for other feeds in group

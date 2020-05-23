@@ -19,13 +19,17 @@ def configure_logging() -> None:
 # Meta
 INSTANCE: Dict = {}  # Gets set from YAML config file.
 runtime = types.SimpleNamespace()  # Set at runtime.  # pylint: disable=invalid-name
-PACKAGE_NAME: Final = Path(__file__).parent.stem
+PACKAGE_PATH: Final = Path(__file__).parent
+PACKAGE_NAME: Final = PACKAGE_PATH.stem
 ENV: Final = os.getenv(f"{PACKAGE_NAME.upper()}_ENV", "prod")  # Externally set as needed: IRCRSSFEEDBOT_ENV='dev'
+GiB = 1024 ** 3  # pylint: disable=invalid-name
 
 # Main
 ALERTS_CHANNEL_FORMAT_DEFAULT: Final = "##{nick}-alerts"
-BITLY_SHORTENER_MAX_CACHE_SIZE: Final = 512
+BITLY_SHORTENER_MAX_CACHE_SIZE: Final = 2048
 DB_FILENAME: Final = "posts.v2.db"
+DISKCACHE_PATH: Final = PACKAGE_PATH.parent / f".{PACKAGE_NAME}_cache"
+DISKCACHE_SIZE_LIMIT: Final = GiB * 2
 DEDUP_STRATEGY_DEFAULT: Final = "channel"
 ETAG_CACHE_PROHIBITED_NETLOCS: Final = {
     "blog.ml.cmu.edu",
@@ -53,7 +57,7 @@ SECONDS_BETWEEN_FEED_URLS: Final = 1
 SECONDS_PER_MESSAGE: Final = 2
 TEMPDIR: Final = Path(tempfile.gettempdir())
 TITLE_MAX_BYTES = 2048  # Relevant for publishing.
-USER_AGENT_DEFAULT: Final = "Mozilla/5.0 (X11; Linux x86_64; rv:75.0) Gecko/20100101 Firefox/75.0"
+USER_AGENT_DEFAULT: Final = "Mozilla/5.0 (X11; Linux x86_64; rv:76.0) Gecko/20100101 Firefox/76.0"
 USER_AGENT_OVERRIDES: Final = {  # Site-specific overrides (without www prefix). Sites must be in lowercase.
     "medscape.com": "Googlebot-News",
     "m.youtube.com": "Mozilla/5.0",
@@ -63,8 +67,6 @@ USER_AGENT_OVERRIDES: Final = {  # Site-specific overrides (without www prefix).
 }
 
 # Calculated
-URL_CACHE_TTL: Final = PERIOD_HOURS_MIN * 3600 * ((100 - PERIOD_RANDOM_PERCENT) / 100) * 0.99
-
 LOGGING: Final = {  # Ref: https://docs.python.org/3/howto/logging.html#configuring-logging
     "version": 1,
     "formatters": {

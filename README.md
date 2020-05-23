@@ -22,11 +22,9 @@ respectively. These parsers also support configurable recursive crawling.
 * Entry titles are formatted for neatness.
 Any HTML tags and excessive whitespace are stripped, all-caps are replaced,
 and excessively long titles are sanely truncated. 
-* ETag and TTL based compressed in-memory caches of URL content are conditionally used for preventing unnecessary URL
-reads.
+* A TTL and ETag based compressed disk cache of URL content is used for preventing unnecessary URL reads.
 Any websites with a mismatched _strong_ ETag are probabilistically detected, and this caching is then disabled for them
 for the duration of the process. Note that this detection is skipped for a _weak_ ETag.
-The TTL cache is used only for URLs that are used by more than one feed each.
 * Encoded Google News and FeedBurner URLs are decoded.
 
 For more features, see the customizable [global settings](#global-settings) and
@@ -474,9 +472,11 @@ services:
 Use `docker logs -f irc-rss-feed-bot` to see and follow informational logs.
 
 ### Maintenance
+#### Config
 * If `config.yaml` is updated, the container must be restarted to use the updated file.
 * If `secrets.env` or the service definition in `docker-compose.yml` are updated, the container must be recreated
 (and not merely restarted) to use the updated file.
+#### Database
 * A `posts.v2.db` database file is written by the bot in the same directory as `config.yaml`.
 This database file must be preserved with routine backups. After restoring a backup, before starting the container,
 ensure the database file is writable by running a command such as `chmod a+w ./irc-rss-feed-bot/posts.v2.db`.
@@ -486,3 +486,6 @@ database file if it has grown unacceptably large.
 Restarting the bot after deleting the database will then create a new database file, and all configured feeds will be
 handled as new.
 This deletion is however discouraged as a routine measure.
+#### Disk cache
+* An ephemeral `.ircrssfeedbot_cache` directory is written by the bot in the container.
+Its size is limited to approximately 2 GiB. The cache is implicitly reset when the container is restarted or recreated.

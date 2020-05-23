@@ -1,4 +1,4 @@
-"""str utilities."""
+"""float utilities."""
 
 
 class Float(float):

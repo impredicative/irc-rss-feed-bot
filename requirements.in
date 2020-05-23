@@ -2,6 +2,7 @@ bitlyshortener
 bs4  # Required by pandas.read_html
 cachetools
 dickens
+diskcache
 dressup
 feedparser
 hext
@@ -17,4 +18,3 @@ pandas
 peewee
 requests
 ruamel.yaml
-toml==0.10.0  # Pinned for dressup since dressup breaks with toml==0.10.1

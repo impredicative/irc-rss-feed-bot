@@ -12,6 +12,7 @@ import logging
 from ircrssfeedbot import config
 from ircrssfeedbot.__main__ import load_instance_config
 from ircrssfeedbot.feed import FeedReader
+from ircrssfeedbot.url import URLReader
 
 # import os
 #
@@ -27,7 +28,7 @@ FEED = "stats:🇺🇸"  # USA
 # FEED = "stats:🇷🇺"  # Russia
 # FEED = "stats:🇨🇳"  # China
 # FEED = "COVID-19:stats:USA:NY"
-CHANNEL, FEED = "##us-market-news", "MarketWatch"
+CHANNEL, FEED = "##data", "UrsaLabs"
 
 config.LOGGING["loggers"][config.PACKAGE_NAME]["level"] = "DEBUG"  # type: ignore
 config.configure_logging()
@@ -44,7 +45,10 @@ config.INSTANCE["feeds"][CHANNEL][FEED]["style"] = None
 #     max_cache_size=config.BITLY_SHORTENER_MAX_CACHE_SIZE,
 # )
 
-feed = FeedReader(channel=CHANNEL, name=FEED, irc=None, db=None, url_shortener=None).read()  # type: ignore
+url_reader = URLReader(max_cache_age=3600)
+feed = FeedReader(
+    channel=CHANNEL, name=FEED, irc=None, db=None, url_reader=url_reader, url_shortener=None  # type: ignore
+).read()
 for index, entry in enumerate(feed.entries[:100]):
     post = f"\n#{index + 1:,}: {entry.message}"
     if entry.categories:

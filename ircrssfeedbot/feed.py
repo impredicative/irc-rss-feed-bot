@@ -1,4 +1,5 @@
-"""Feed."""
+"""Feed reader and feed."""
+import collections
 import dataclasses
 import logging
 import re
@@ -18,6 +19,7 @@ from .url import URLReader
 from .util.hext import html_to_text
 from .util.list import ensure_list
 from .util.set import leaves
+from .util.str import readable_list
 from .util.textwrap import shorten_to_bytes_width
 from .util.time import Throttle
 from .util.timeit import Timer
@@ -45,7 +47,7 @@ class FeedReader:
     name: str
     irc: miniirc.IRC = dataclasses.field(repr=False)
     db: Database = dataclasses.field(repr=False)
-    # url_reader: URLReader = dataclasses.field(repr=False)
+    url_reader: URLReader = dataclasses.field(repr=False)
     url_shortener: bitlyshortener.Shortener = dataclasses.field(repr=False)
 
     def __post_init__(self):
@@ -63,7 +65,7 @@ class FeedReader:
         log.debug(f"Initialized {self} having {len(self.urls)} configured URLs.")
 
     def __str__(self):
-        return f"reader of feed {self.name} of {self.channel}"
+        return f"feed {self.name} reader of {self.channel}"
 
     def _dedupe_entries(self, entries: List[FeedEntry], *, after_what: Optional[str] = None) -> List[FeedEntry]:
         """Remove duplicate entries while preserving order."""
@@ -255,17 +257,20 @@ class FeedReader:
 
         # Retrieve URL content and parse entries
         urls_pending, urls_read = self.urls.copy(), OrderedSet()
+        url_read_approach_counts: collections.Counter = collections.Counter()
         entries = []
         while urls_pending:
             # Read URL
             url = urls_pending.pop(last=False)
-            content = URLReader.url_content(url)
+            url_content = self.url_reader[url]
             url_read_finish_time = time.monotonic()
             urls_read.add(url)
-
+            url_read_approach_counts.update([url_content.approach])
             # Parse content
             log.debug(f"Parsing entries for {url} for {self} using {parser_name}.")
-            parser = Parser(selector=parser_selector, follower=parser_follower, content=content, feed_reader=self)
+            parser = Parser(
+                selector=parser_selector, follower=parser_follower, content=url_content.content, feed_reader=self
+            )
             selected_entries, follow_urls = parser.entries, parser.urls  # pylint: disable=no-member
             log_msg = (
                 f"Parsed {len(selected_entries):,} entries and {len(follow_urls):,} followable URLs for {url} for "
@@ -295,9 +300,19 @@ class FeedReader:
                     log.debug(f"Sleeping for {sleep_time:.1f}s before next URL.")
                     time.sleep(sleep_time)
 
-        log.debug(f"Read {len(entries)} entries from {len(urls_read)} URLs for {self} using {parser_name} in {timer}.")
+        url_read_approach_desc = readable_list(
+            [f"{count} URLs {approach}" for approach, count in url_read_approach_counts.items()]
+        )
+        log.debug(
+            f"Read {len(entries)} entries via {url_read_approach_desc} for {self} "
+            f"using {parser_name} parser in {timer}."
+        )
         entries = self._process_entries(entries)
-        return Feed(entries=entries, reader=self, num_urls_read=len(urls_read), read_time_used=timer())
+        log.debug(
+            f"Returning {len(entries)} processed entries via {url_read_approach_desc} for {self} "
+            f"having used {parser_name} parser in {timer}."
+        )
+        return Feed(entries=entries, reader=self, read_approach=url_read_approach_desc, read_time_used=timer())
 
 
 @dataclasses.dataclass
@@ -306,7 +321,7 @@ class Feed:
 
     entries: List[FeedEntry]
     reader: FeedReader
-    num_urls_read: int
+    read_approach: str
     read_time_used: float
 
     def __str__(self):
