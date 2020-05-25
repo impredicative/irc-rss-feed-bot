@@ -64,8 +64,8 @@ class Bot:
 
     @staticmethod
     def _log_config() -> None:
-        log.info(f"Alerts will be sent to {config.INSTANCE['alerts_channel']}.")
         log.info(f"Disk cache path is {config.DISKCACHE_PATH}.")
+        log.info(f"Alerts will be sent to {config.INSTANCE['alerts_channel']}.")
 
     def _msg_channel(  # pylint: disable=too-many-branches,too-many-locals,too-many-statements
         self, channel: str
@@ -137,7 +137,7 @@ class Bot:
             name=feed_name,
             irc=self._irc,
             db=self._db,
-            url_reader=URLReader(max_cache_age=(feed_period_min / 2) * 3600),
+            url_reader=URLReader(max_cache_age=feed_period_min / 2),
             url_shortener=self._url_shortener,
         )
 
