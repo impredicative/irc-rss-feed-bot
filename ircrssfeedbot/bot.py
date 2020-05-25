@@ -17,6 +17,7 @@ from .db import Database
 from .feed import FeedReader
 from .url import URLReader
 from .util.datetime import timedelta_desc
+from .util.humanize import humanize_bytes
 from .util.list import ensure_list
 
 log = logging.getLogger(__name__)
@@ -64,7 +65,8 @@ class Bot:
 
     @staticmethod
     def _log_config() -> None:
-        log.info(f"Disk cache path is {config.DISKCACHE_PATH}.")
+        diskcache_size = sum(f.stat().st_size for f in config.DISKCACHE_PATH.glob("**/*") if f.is_file())
+        log.info(f"Disk cache path is {config.DISKCACHE_PATH} and size is {humanize_bytes(diskcache_size)}.")
         log.info(f"Alerts will be sent to {config.INSTANCE['alerts_channel']}.")
 
     def _msg_channel(  # pylint: disable=too-many-branches,too-many-locals,too-many-statements
