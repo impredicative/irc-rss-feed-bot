@@ -135,7 +135,7 @@ class URLReader:
                 del self._cache[url]
                 cached_url_content = None
         else:
-            log.debug(f"Unable to retrieve nonexistent URL content from cache for {url}.")
+            log.debug(f"Cache does not have URL content for {url}.")
 
         # Define request headers
         netloc = url_to_netloc(url)
