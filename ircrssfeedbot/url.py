@@ -1,6 +1,7 @@
 """URL reader and content."""
 import logging
 import random
+import secrets
 import time
 import zlib
 from typing import Optional, cast
@@ -136,7 +137,15 @@ class URLReader:
 
         # Define request headers
         netloc = url_to_netloc(url)
-        request_headers = {"User-Agent": config.USER_AGENT_OVERRIDES.get(netloc, config.USER_AGENT_DEFAULT)}
+        # request_headers = {"User-Agent": config.USER_AGENT_OVERRIDES.get(netloc, config.USER_AGENT_DEFAULT)}
+        if netloc in config.USER_AGENT_OVERRIDES:
+            user_agent = config.USER_AGENT_OVERRIDES[netloc]
+        elif netloc == "news.google.com":
+            # Attempt to avoid the server's possible response cache for UA.
+            user_agent = secrets.token_urlsafe(secrets.choice(range(48, 64)))
+        else:
+            user_agent = config.USER_AGENT_DEFAULT
+        request_headers = {"User-Agent": user_agent}
         has_cached_etag = bool(cached_url_content and cached_url_content.etag)
         is_etag_cache_allowed = netloc not in config.ETAG_CACHE_PROHIBITED_NETLOCS
         test_cached_etag = bool(
@@ -160,7 +169,7 @@ class URLReader:
                 log.debug(f"Added request header If-None-Match={request_headers['If-None-Match']} for {url}.")
 
         # Request URL
-        log.debug(f"Resiliently retrieving content for {url}.")
+        log.debug(f"Resiliently retrieving content for {url} using user agent {request_headers['User-Agent']!r}.")
         assert not url.startswith("file://")
         timer = Timer()
         for num_attempt in range(1, config.READ_ATTEMPTS_MAX + 1):
@@ -189,7 +198,7 @@ class URLReader:
                 etag=cached_url_content.etag,
                 approach=URLContent.Approach.CACHE_ETAG_HIT,
             )
-            log.info(f"Returning unchanged ETag matched URL content from cache for {url}.")
+            log.debug(f"Returning unchanged ETag matched URL content from cache for {url}.")
             self._cache[url] = url_content
             return url_content
 
