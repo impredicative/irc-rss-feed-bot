@@ -66,7 +66,9 @@ class Bot:
     @staticmethod
     def _log_config() -> None:
         diskcache_size = sum(f.stat().st_size for f in config.DISKCACHE_PATH.glob("**/*") if f.is_file())
-        log.info(f"Disk cache path is {config.DISKCACHE_PATH} and size is {humanize_bytes(diskcache_size)}.")
+        log.info(
+            f"Disk cache path is {config.DISKCACHE_PATH} and its current size is {humanize_bytes(diskcache_size)}."
+        )
         log.info(f"Alerts will be sent to {config.INSTANCE['alerts_channel']}.")
 
     def _msg_channel(  # pylint: disable=too-many-branches,too-many-locals,too-many-statements
