@@ -121,9 +121,9 @@ class URLReader:
             if cached_url_content.is_version_current:
                 # Check age
                 cache_age_desc = f"{timedelta_desc(cached_url_content.age)}/{timedelta_desc(self._max_cache_age)}"
-                desc = f"URL content having age {cache_age_desc} in cache for {url}"
+                desc = f"URL content having age {cache_age_desc} from cache for {url}"
                 if cached_url_content.age <= self._max_cache_age:
-                    log.info(f"Reusing and returning {desc}.")
+                    log.info(f"Returning {desc}.")
                     cached_url_content.approach = URLContent.Approach.CACHE_HIT
                     return cached_url_content
                 log.info(f"Found expired {desc}.")  # Will still be checked for ETag.
@@ -192,10 +192,7 @@ class URLReader:
                 etag=cached_url_content.etag,
                 approach=URLContent.Approach.CACHE_ETAG_HIT,
             )
-            log.info(
-                f"Reusing, recaching, and returning unchanged ETag matched URL content of size "
-                f"{humanize_size(url_content.content)} from cache for {url}."
-            )
+            log.info(f"Returning unchanged ETag matched URL content from cache for {url}.")
             self._cache[url] = url_content
             return url_content
 
