@@ -11,7 +11,9 @@ RUN set -x && \
 COPY ircrssfeedbot ircrssfeedbot
 RUN set -x && \
     groupadd -g 999 app && \
-    useradd -r -m -u 999 -g app app
+    useradd -r -m -u 999 -g app app && \
+    mkdir -v ./.ircrssfeedbot_cache && \
+    chown -v app:app ./.ircrssfeedbot_cache
 USER app
 ENTRYPOINT ["python", "-m", "ircrssfeedbot"]
 CMD ["--config-path", "/config/config.yaml"]
