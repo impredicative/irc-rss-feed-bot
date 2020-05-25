@@ -129,7 +129,7 @@ class URLReader:
                     f"Cached URL content having version {cached_url_content.version} for {url} will be deleted "
                     f"from the cache because is not the current version {cached_url_content.CURRENT_VERSION}."
                 )
-                del self._cache[url]
+                del self[url]  # Direct delete from self._cache is unsafe and is not logged.
                 cached_url_content = None
         else:
             log.debug(f"Cache does not have URL content for {url}.")
@@ -223,6 +223,6 @@ class URLReader:
                 config.ETAG_CACHE_PROHIBITED_NETLOCS.add(netloc)
                 for cached_url in self._cache:
                     if url_to_netloc(cached_url) == netloc:
-                        del self._cache[cached_url]
+                        del self[cached_url]  # Direct delete from self._cache is unsafe and is not logged.
 
         return url_content
