@@ -6,6 +6,8 @@ import string
 import unittest
 from typing import Dict, List, Union
 
+from ..config import CACHE_MAXSIZE__INT8HASH
+
 
 def hash4(content: Union[bytes, str]) -> str:
     """Return a 4 byte hash encoded as a hex string."""
@@ -29,7 +31,7 @@ class Int8Hash:
         return {cls.as_int(text): text for text in texts}  # Intentionally Dict[int, str], not Dict[str, int].
 
     @classmethod
-    @functools.lru_cache(2048)
+    @functools.lru_cache(CACHE_MAXSIZE__INT8HASH)
     def as_int(cls, text: str) -> int:
         """Return an integer hash of a string."""
         seed = text.encode()

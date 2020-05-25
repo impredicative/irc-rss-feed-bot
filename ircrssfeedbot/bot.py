@@ -40,7 +40,7 @@ class Bot:
         self._db = Database()
         self._url_shortener = bitlyshortener.Shortener(
             tokens=[token.strip() for token in os.environ["BITLY_TOKENS"].strip().split(",")],
-            max_cache_size=config.BITLY_SHORTENER_MAX_CACHE_SIZE,
+            max_cache_size=config.CACHE_MAXSIZE__BITLY_SHORTENER,
         )
 
         # Setup miniirc

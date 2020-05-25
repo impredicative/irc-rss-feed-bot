@@ -18,16 +18,13 @@ from .util.urllib import url_to_netloc
 
 log = logging.getLogger(__name__)
 
-_COMPRESSION_CACHE_MAXSIZE = 8  # Meant for short term reuse.
-_COMPRESSION_CACHE_TTL = 60
 
-
-@cachetools.func.ttl_cache(maxsize=_COMPRESSION_CACHE_MAXSIZE, ttl=_COMPRESSION_CACHE_TTL)
+@cachetools.func.ttl_cache(maxsize=config.CACHE_MAXSIZE__URL_COMPRESSION, ttl=config.CACHE_TTL__URL_COMPRESSION)
 def _compress(content: bytes) -> bytes:
     return zlib.compress(content)
 
 
-@cachetools.func.ttl_cache(maxsize=_COMPRESSION_CACHE_MAXSIZE, ttl=_COMPRESSION_CACHE_TTL)
+@cachetools.func.ttl_cache(maxsize=config.CACHE_MAXSIZE__URL_COMPRESSION, ttl=config.CACHE_TTL__URL_COMPRESSION)
 def _decompress(content: bytes) -> bytes:
     return zlib.decompress(content)
 

@@ -2,8 +2,10 @@
 import functools
 import urllib.parse
 
+from ..config import CACHE_MAXSIZE__URL_NETLOC
 
-@functools.lru_cache(2048)
+
+@functools.lru_cache(CACHE_MAXSIZE__URL_NETLOC)
 def url_to_netloc(url: str) -> str:
     """Return the netloc for the given URL."""
     parse_result = urllib.parse.urlparse(url)
