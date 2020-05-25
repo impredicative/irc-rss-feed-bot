@@ -42,7 +42,7 @@ class URLContent:
 
         CACHE_HIT = "read from unexpired cache"
         CACHE_ETAG_HIT = "read from cache having matching etag"
-        READ = "read directly"
+        READ = "read bypassing cache"
 
     def __init__(self, content: bytes, etag: Optional[str], approach: str):
         self.time = time.time()

@@ -65,6 +65,7 @@ class Bot:
     @staticmethod
     def _log_config() -> None:
         log.info(f"Alerts will be sent to {config.INSTANCE['alerts_channel']}.")
+        log.info(f"Disk cache path is {config.DISKCACHE_PATH}.")
 
     def _msg_channel(  # pylint: disable=too-many-branches,too-many-locals,too-many-statements
         self, channel: str
