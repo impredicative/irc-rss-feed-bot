@@ -96,15 +96,16 @@ class URLContent:
 class URLReader:
     """URL reader."""
 
+    _CACHE = diskcache.Cache(
+        directory=config.DISKCACHE_PATH / "URLReader", timeout=2, size_limit=config.DISKCACHE_SIZE_LIMIT
+    )
+
     def __init__(self, max_cache_age: float):
-        diskcache_path = config.DISKCACHE_PATH / self.__class__.__name__
-        self._cache = diskcache.Cache(directory=diskcache_path, timeout=2, size_limit=config.DISKCACHE_SIZE_LIMIT)
         self._max_cache_age = max_cache_age
-        log.debug(f"Initialized disk cache having max age {timedelta_desc(max_cache_age)} in {diskcache_path}.")
 
     def __delitem__(self, url: str) -> None:
         try:
-            del self._cache[url]
+            del self._CACHE[url]
         except KeyError:
             log.debug(f"Unable to delete nonexistent URL content from cache for {url}.")
         else:
@@ -115,7 +116,7 @@ class URLReader:
     ) -> URLContent:
 
         # Reuse cache if possible
-        if cached_url_content := self._cache.get(url):
+        if cached_url_content := self._CACHE.get(url):
             if cached_url_content.is_version_current:
                 # Check age
                 cache_age_desc = f"{timedelta_desc(cached_url_content.age)}/{timedelta_desc(self._max_cache_age)}"
@@ -130,7 +131,7 @@ class URLReader:
                     f"Cached URL content having version {cached_url_content.version} for {url} will be deleted "
                     f"from the cache because is not the current version {cached_url_content.CURRENT_VERSION}."
                 )
-                del self[url]  # Direct delete from self._cache is unsafe and is not logged.
+                del self[url]  # Direct delete from self._CACHE is unsafe and is not logged.
                 cached_url_content = None
         else:
             log.debug(f"Cache does not have URL content for {url}.")
@@ -199,14 +200,14 @@ class URLReader:
                 approach=URLContent.Approach.CACHE_ETAG_HIT,
             )
             log.debug(f"Returning unchanged ETag matched URL content from cache for {url}.")
-            self._cache[url] = url_content
+            self._CACHE[url] = url_content
             return url_content
 
         # Cache content
         url_content = URLContent(
             content=response.content, etag=response.headers.get("ETag"), approach=URLContent.Approach.READ
         )
-        self._cache[url] = url_content
+        self._CACHE[url] = url_content
         log.debug(f"Cached URL content of size {humanize_size(url_content.content)} for {url}.")
 
         # Test ETag
@@ -230,8 +231,8 @@ class URLReader:
                 )
                 # Disable and delete cache for netloc
                 config.ETAG_CACHE_PROHIBITED_NETLOCS.add(netloc)
-                for cached_url in self._cache:
+                for cached_url in self._CACHE:
                     if url_to_netloc(cached_url) == netloc:
-                        del self[cached_url]  # Direct delete from self._cache is unsafe and is not logged.
+                        del self[cached_url]  # Direct delete from self._CACHE is unsafe and is not logged.
 
         return url_content
