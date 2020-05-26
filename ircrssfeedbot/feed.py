@@ -4,12 +4,11 @@ import dataclasses
 import logging
 import re
 import time
-from functools import lru_cache
+from functools import cached_property, lru_cache
 from typing import Callable, Dict, List, Optional, Pattern
 
 import bitlyshortener
 import miniirc
-from descriptors import cachedproperty
 from orderedset import OrderedSet
 
 from . import config, parsers
@@ -327,7 +326,7 @@ class Feed:
     def __str__(self):
         return f"feed {self.name} of {self.channel}"
 
-    @cachedproperty
+    @cached_property
     def _postable_entries(self) -> List[FeedEntry]:
         """Return the subset of postable entries."""
         log.debug(f"Retrieving postable entries for {self}.")
@@ -357,7 +356,7 @@ class Feed:
         log.debug(f"Returning {len(postable_entries)} postable entries for {self}.")
         return postable_entries
 
-    @cachedproperty
+    @cached_property
     def _unposted_entries(self) -> List[FeedEntry]:
         """Return the subset of unposted entries."""
         log.debug(f"Retrieving unposted entries for {self}.")
@@ -375,17 +374,17 @@ class Feed:
         log.debug(f"Returning {len(unposted_entries)} unposted entries out of {len(entries)} for {self}.")
         return unposted_entries
 
-    @cachedproperty
+    @cached_property
     def channel(self) -> str:
         """Return the feed channel."""
         return self.reader.channel
 
-    @cachedproperty
+    @cached_property
     def name(self) -> str:
         """Return the feed name."""
         return self.reader.name
 
-    @cachedproperty
+    @cached_property
     def is_postable(self) -> bool:
         """Return whether the feed is postable."""
         return len(self._postable_entries) > 0

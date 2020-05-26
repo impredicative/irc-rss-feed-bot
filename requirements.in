@@ -1,7 +1,6 @@
 bitlyshortener
 bs4  # Required by pandas.read_html
 cachetools
-dickens
 diskcache
 dressup
 feedparser
