@@ -4,13 +4,13 @@ from typing import List
 
 import feedparser
 
-from ..entry import BaseRawEntry
+from ..entry import RawFeedEntry as BaseRawFeedEntry
 from ..gnews import decode_google_news_url
 from ..util.lxml import sanitize_xml
 from .base import BaseParser
 
 
-class RawEntry(BaseRawEntry):
+class RawFeedEntry(BaseRawFeedEntry):
     """Raw feed entry."""
 
     @property
@@ -32,7 +32,7 @@ class Parser(BaseParser):
     """Parse entries using `feedparser`."""
 
     @property
-    def _raw_entries(self) -> List[RawEntry]:
+    def entries(self) -> List[RawFeedEntry]:
         """Return a list of parsed raw entries."""
         content = sanitize_xml(self.content)  # e.g. for unescaped "&" char in https://deepmind.com/blog/feed/basic/
-        return [RawEntry(e) for e in feedparser.parse(content.lstrip())["entries"]]
+        return [RawFeedEntry(e) for e in feedparser.parse(content.lstrip())["entries"]]

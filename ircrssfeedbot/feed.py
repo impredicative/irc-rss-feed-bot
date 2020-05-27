@@ -2,20 +2,21 @@
 import collections
 import dataclasses
 import logging
+import multiprocessing
 import re
 import time
 from functools import cached_property, lru_cache
-from typing import Callable, Dict, List, Optional, Pattern
+from typing import Callable, Dict, List, Optional, Pattern, Tuple
 
 import bitlyshortener
 import miniirc
 from orderedset import OrderedSet
 
-from . import config, parsers
+from . import config
 from .db import Database
-from .entry import FeedEntry
+from .entry import FeedEntry, RawFeedEntry
 from .url import URLReader
-from .util.hext import html_to_text
+from .util.bs4 import html_to_text
 from .util.list import ensure_list
 from .util.set import leaves
 from .util.str import readable_list
@@ -24,6 +25,16 @@ from .util.time import Throttle
 from .util.timeit import Timer
 
 log = logging.getLogger(__name__)
+
+
+def _parse_entries(
+    parser_name: str, selector: Optional[str], follower: Optional[str], url_content: bytes
+) -> Tuple[List[RawFeedEntry], List[str]]:
+    from . import parsers  # pylint: disable=import-outside-toplevel
+
+    Parser = getattr(parsers, parser_name).Parser  # pylint: disable=invalid-name
+    parser = Parser(selector=selector, follower=follower, content=url_content)
+    return parser.entries, parser.urls  # pylint: disable=no-member
 
 
 @lru_cache(maxsize=None)  # maxsize is bounded by a multiple of the number of feeds.
@@ -61,6 +72,23 @@ class FeedReader:
         self.blacklist = _patterns(self.channel, self.name, "blacklist")
         self.whitelist = _patterns(self.channel, self.name, "whitelist")
         self.max_posts_if_new = config.NEW_FEED_POSTS_MAX[self.config["new"]]
+
+        # Configure parser
+        for parser_name in ("hext", "jmes", "jmespath", "pandas"):  # Searched in alphabetical order.
+            if parser_config := self.config.get(parser_name):
+                if parser_name == "jmes":  # Deprecated name.
+                    parser_name = "jmespath"
+
+                if isinstance(parser_config, str):
+                    parser_config = {"select": parser_config, "follow": None}
+                parser_selector, parser_follower = parser_config["select"], parser_config.get("follow")
+
+                break
+        else:
+            parser_name = "feedparser"
+            parser_selector, parser_follower = None, None
+        self.parser_name, self.parser_selector, self.parser_follower = parser_name, parser_selector, parser_follower
+
         log.debug(f"Initialized {self} having {len(self.urls)} configured URLs.")
 
     def __str__(self):
@@ -233,26 +261,29 @@ class FeedReader:
 
         return entries
 
+    def _parse_entries(self, url_content: bytes) -> Tuple[List[FeedEntry], List[str]]:
+        with multiprocessing.Pool(1) as pool:
+            # Note: Using a separate temporary process is a workaround for memory leaks of hext, feedparser, etc.
+            raw_entries, urls = pool.apply(
+                _parse_entries, (self.parser_name, self.parser_selector, self.parser_follower, url_content)
+            )
+        entries = [
+            FeedEntry(
+                title=e.title,
+                long_url=e.link,
+                summary=e.summary,
+                categories=e.categories,
+                data=dict(e),
+                feed_reader=self,
+            )
+            for e in raw_entries
+        ]
+        return entries, urls
+
     def read(self) -> "Feed":  # pylint: disable=too-many-locals
         """Read feed with entries."""
         timer = Timer()
         feed_config = self.config
-
-        # Select entry parser
-        for parser_name in ("hext", "jmes", "jmespath", "pandas"):  # Searched in alphabetical order.
-            if parser_config := feed_config.get(parser_name):
-                if parser_name == "jmes":  # Deprecated name.
-                    parser_name = "jmespath"
-
-                if isinstance(parser_config, str):
-                    parser_config = {"select": parser_config, "follow": None}
-                parser_selector, parser_follower = parser_config["select"], parser_config.get("follow")
-
-                break
-        else:
-            parser_name = "feedparser"
-            parser_selector, parser_follower = None, None
-        Parser = getattr(parsers, parser_name).Parser
 
         # Retrieve URL content and parse entries
         urls_pending, urls_read = self.urls.copy(), OrderedSet()
@@ -266,14 +297,11 @@ class FeedReader:
             urls_read.add(url)
             url_read_approach_counts.update([url_content.approach])
             # Parse content
-            log.debug(f"Parsing entries for {url} for {self} using {parser_name}.")
-            parser = Parser(
-                selector=parser_selector, follower=parser_follower, content=url_content.content, feed_reader=self
-            )
-            selected_entries, follow_urls = parser.entries, parser.urls  # pylint: disable=no-member
+            log.debug(f"Parsing entries for {url} for {self} using {self.parser_name}.")
+            selected_entries, follow_urls = self._parse_entries(url_content.content)
             log_msg = (
                 f"Parsed {len(selected_entries):,} entries and {len(follow_urls):,} followable URLs for {url} for "
-                f"{self} using {parser_name}."
+                f"{self} using {self.parser_name}."
             )
             entries.extend(selected_entries)
             urls_pending.update(follow_urls - urls_read)
@@ -304,12 +332,12 @@ class FeedReader:
         )
         log.debug(
             f"Read {len(entries)} entries via {url_read_approach_desc} for {self} "
-            f"using {parser_name} parser in {timer}."
+            f"using {self.parser_name} parser in {timer}."
         )
         entries = self._process_entries(entries)
         log.debug(
             f"Returning {len(entries)} processed entries via {url_read_approach_desc} for {self} "
-            f"having used {parser_name} parser in {timer}."
+            f"having used {self.parser_name} parser in {timer}."
         )
         return Feed(entries=entries, reader=self, read_approach=url_read_approach_desc, read_time_used=timer())
 

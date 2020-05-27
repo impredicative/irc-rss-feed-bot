@@ -12,10 +12,12 @@ from .util.textwrap import shorten_to_bytes_width
 log = logging.getLogger(__name__)
 
 
-class BaseRawEntry(dict):
-    """Base class of raw feed entry.
+class RawFeedEntry(dict):
+    """Raw feed entry.
 
-    This is used for creating a `FeedEntry`.
+    This class and its subclasses are intended to be safe for pickling for use with multiprocessing.
+
+    Its instance is used for creating an instance of `FeedEntry`.
     """
 
     @property
