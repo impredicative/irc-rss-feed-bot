@@ -1,9 +1,9 @@
 """URL reader and content."""
+import gzip
 import logging
 import random
 import secrets
 import time
-import zlib
 from typing import Optional, cast
 
 import cachetools.func
@@ -22,12 +22,12 @@ log = logging.getLogger(__name__)
 
 @cachetools.func.ttl_cache(maxsize=config.CACHE_MAXSIZE__URL_COMPRESSION, ttl=config.CACHE_TTL__URL_COMPRESSION)
 def _compress(content: bytes) -> bytes:
-    return zlib.compress(content)
+    return gzip.compress(content)
 
 
 @cachetools.func.ttl_cache(maxsize=config.CACHE_MAXSIZE__URL_COMPRESSION, ttl=config.CACHE_TTL__URL_COMPRESSION)
 def _decompress(content: bytes) -> bytes:
-    return zlib.decompress(content)
+    return gzip.decompress(content)
 
 
 class URLContent:
