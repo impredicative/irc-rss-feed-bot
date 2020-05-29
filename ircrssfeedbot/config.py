@@ -17,6 +17,7 @@ def configure_logging() -> None:
 
 
 # Meta
+CACHE_MAXSIZE_DEFAULT: Final = 512
 INSTANCE: Dict = {}  # Gets set from YAML config file.
 runtime = types.SimpleNamespace()  # Set at runtime.  # pylint: disable=invalid-name
 PACKAGE_PATH: Final = Path(__file__).parent
@@ -26,11 +27,11 @@ GiB = 1024 ** 3  # pylint: disable=invalid-name
 
 # Main
 ALERTS_CHANNEL_FORMAT_DEFAULT: Final = "##{nick}-alerts"
-CACHE_MAXSIZE__BITLY_SHORTENER: Final = 2048
-CACHE_MAXSIZE__INT8HASH: Final = 2048
+CACHE_MAXSIZE__BITLY_SHORTENER: Final = CACHE_MAXSIZE_DEFAULT
+CACHE_MAXSIZE__INT8HASH: Final = CACHE_MAXSIZE_DEFAULT
 CACHE_MAXSIZE__URL_COMPRESSION: Final = 4
-CACHE_MAXSIZE__URL_GOOGLE_NEWS: Final = 2048
-CACHE_MAXSIZE__URL_NETLOC: Final = 2048
+CACHE_MAXSIZE__URL_GOOGLE_NEWS: Final = CACHE_MAXSIZE_DEFAULT
+CACHE_MAXSIZE__URL_NETLOC: Final = CACHE_MAXSIZE_DEFAULT
 CACHE_TTL__URL_COMPRESSION: Final = 60
 DB_FILENAME: Final = "posts.v2.db"
 DISKCACHE_PATH: Final = PACKAGE_PATH.parent / f".{PACKAGE_NAME}_cache"
