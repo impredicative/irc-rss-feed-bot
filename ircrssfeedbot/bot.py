@@ -288,7 +288,7 @@ class Bot:
 
 
 @miniirc.Handler(900, colon=False)
-def _handle_loggedin(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
+def _handle_900_loggedin(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     # Parse message
     log.debug("Handling RPL_LOGGEDIN (900): hostmask=%s, args=%s", hostmask, args)
     runtime_config = config.runtime
@@ -367,7 +367,7 @@ def _handle_privmsg(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: Lis
 
 
 @miniirc.Handler(332, colon=False)
-def _handle_notice(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
+def _handle_332_notice(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     log.debug("Received initial topic: hostmask=%s args=%s", hostmask, args)
     _nick, channel, topic = args
 
