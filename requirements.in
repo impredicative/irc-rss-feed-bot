@@ -15,5 +15,6 @@ numpy
 orderedset
 pandas
 peewee
+psutil
 requests
 ruamel.yaml
