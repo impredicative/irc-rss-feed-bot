@@ -19,7 +19,6 @@ from .url import URLReader
 from .util.datetime import timedelta_desc
 from .util.humanize import humanize_bytes
 from .util.list import ensure_list
-from .util.tracemalloc import TraceMalloc
 
 log = logging.getLogger(__name__)
 
@@ -63,7 +62,6 @@ class Bot:
         self._setup_alerter()
         self._setup_channels()
         self._log_config()
-        TraceMalloc().start()
 
     @staticmethod
     def _log_config() -> None:

@@ -9,6 +9,7 @@ from ruamel.yaml import YAML
 
 from ircrssfeedbot import Bot, config
 from ircrssfeedbot.util.list import ensure_list
+from ircrssfeedbot.util.tracemalloc import TraceMalloc
 
 log = logging.getLogger(__name__)
 
@@ -27,6 +28,9 @@ def load_instance_config(log_details: bool = True) -> None:  # pylint: disable=t
     log.info("Read user configuration file %s", instance_config_path)
     if "taxonomies" in instance_config:
         del instance_config["taxonomies"]
+
+    if instance_config.get("tracemalloc"):
+        TraceMalloc().start()
 
     url_counter = collections.Counter(
         feed_url
