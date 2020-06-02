@@ -122,7 +122,7 @@ class Bot:
             channel_queue.task_done()
 
     def _read_feed(self, channel: str, feed_name: str) -> None:  # pylint: disable=too-many-locals,too-many-statements
-        log.debug(
+        log.info(  # DEBUG
             f"Feed reader for feed {feed_name} of {channel} is starting "
             "and is waiting to be notified of channel join."
         )
@@ -144,11 +144,15 @@ class Bot:
             url_reader=URLReader(max_cache_age=feed_period_min / 2),
             url_shortener=self._url_shortener,
         )
+        log.info(  # DEBUG
+            f"Feed reader for feed {feed_name} of {channel} has initialized "
+            "and is waiting to be notified of channel join."
+        )
 
         query_time = time.monotonic() - (feed_period_avg / 2)  # Delays first read by half of feed period.
-        Bot.CHANNEL_JOIN_EVENTS[channel].wait()  # Optional.
+        Bot.CHANNEL_JOIN_EVENTS[channel].wait()
         Bot.CHANNEL_JOIN_EVENTS[instance["alerts_channel"]].wait()
-        log.debug(f"Feed reader for feed {feed_name} of {channel} has started.")
+        log.info(f"Feed reader for feed {feed_name} of {channel} has started.")  # DEBUG
         while True:
             feed_period = random.uniform(feed_period_min, feed_period_max)
             query_time = max(time.monotonic(), query_time + feed_period)  # "max" is used in case of wait using "put".
