@@ -3,7 +3,7 @@ import logging
 import threading
 import time
 import tracemalloc
-from typing import List, Union
+from typing import Final, List, Union
 
 import psutil
 
@@ -11,13 +11,13 @@ from .humanize import humanize_bytes
 
 log = logging.getLogger(__name__)
 
-_INTERVAL = 3600
-_NUM_FRAMES = 25
-_NUM_STATS = 8
+_INTERVAL: Final = 3600
+_NUM_FRAMES: Final = 25
+_NUM_STATS: Final = 20
 
 
 def _printable_stats(stats: Union[List[tracemalloc.Statistic], List[tracemalloc.StatisticDiff]]) -> str:
-    return "\n".join(f" #{i}: {s}" for i, s in enumerate(stats[:_NUM_STATS], start=1))
+    return "\n".join(f" #{i:0{len(str(_NUM_STATS))}}: {s}" for i, s in enumerate(stats[:_NUM_STATS], start=1))
 
 
 class TraceMalloc(threading.Thread):
