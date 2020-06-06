@@ -152,18 +152,18 @@ class Bot:
         query_time = time.monotonic() - (feed_period_avg / 2)  # Delays first read by half of feed period.
         Bot.CHANNEL_JOIN_EVENTS[channel].wait()
         Bot.CHANNEL_JOIN_EVENTS[instance["alerts_channel"]].wait()
-        log.info(f"Feed reader for feed {feed_name} of {channel} has started.")  # DEBUG
+        log.debug(f"Feed reader for feed {feed_name} of {channel} has started.")
         while True:
             feed_period = random.uniform(feed_period_min, feed_period_max)
             query_time = max(time.monotonic(), query_time + feed_period)  # "max" is used in case of wait using "put".
             sleep_time = max(0.0, query_time - time.monotonic())
             if sleep_time != 0:
-                log.info(f"Will wait {timedelta_desc(sleep_time)} to read feed {feed_name} of {channel}.")  # DEBUG
+                log.debug(f"Will wait {timedelta_desc(sleep_time)} to read feed {feed_name} of {channel}.")
                 time.sleep(sleep_time)
 
             try:
                 # Read feed
-                log.info(f"Retrieving feed {feed_name} of {channel}.")  # DEBUG
+                log.debug(f"Retrieving feed {feed_name} of {channel}.")
                 feed = feed_reader.read()
                 log.info(
                     f"Retrieved in {feed.read_time_used:.1f}s the {feed} with {len(feed.entries)} approved entries "

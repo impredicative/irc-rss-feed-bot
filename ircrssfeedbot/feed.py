@@ -297,7 +297,7 @@ class FeedReader:
             urls_read.add(url)
             url_read_approach_counts.update([url_content.approach])
             # Parse content
-            log.debug(f"Parsing entries for {url} for {self} using {self.parser_name}.")
+            log.info(f"Parsing entries for {url} for {self} using {self.parser_name}.")  # DEBUG
             selected_entries, follow_urls = self._parse_entries(url_content.content)
             log_msg = (
                 f"Parsed {len(selected_entries):,} entries and {len(follow_urls):,} followable URLs for {url} for "
@@ -308,7 +308,7 @@ class FeedReader:
 
             # Raise alert if no entries for URL
             if selected_entries:
-                log.debug(log_msg)
+                log.info(log_msg)  # DEBUG
             else:
                 if feed_config.get("alerts", {}).get("empty", True):
                     log_msg += (
@@ -330,12 +330,12 @@ class FeedReader:
         url_read_approach_desc = readable_list(
             [f"{count} URLs {approach}" for approach, count in url_read_approach_counts.items()]
         )
-        log.debug(
+        log.info(  # DEBUG
             f"Read {len(entries)} entries via {url_read_approach_desc} for {self} "
             f"using {self.parser_name} parser in {timer}."
         )
         entries = self._process_entries(entries)
-        log.debug(
+        log.info(  # DEBUG
             f"Returning {len(entries)} processed entries via {url_read_approach_desc} for {self} "
             f"having used {self.parser_name} parser in {timer}."
         )
