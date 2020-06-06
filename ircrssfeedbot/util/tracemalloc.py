@@ -38,9 +38,7 @@ class TraceMalloc(threading.Thread):
             traced_current, _traced_peak = tracemalloc.get_traced_memory()
             stats_by_filename = _printable_stats(snapshot.statistics(key_type="filename"))
             # stats_by_lineno = _printable_stats(snapshot.statistics(key_type="lineno"))
-            stats_diff_by_filename = _printable_stats(
-                [d for d in snapshot.compare_to(snapshot_prev, key_type="filename") if d.size_diff > 0]
-            )
+            stats_diff_by_filename = _printable_stats([d for d in snapshot.compare_to(snapshot_prev, key_type="filename") if d.size_diff > 0])
             # stats_diff_by_lineno = _printable_stats(snapshot.compare_to(snapshot_prev, key_type="filename"))
             del snapshot_prev
             log.info(

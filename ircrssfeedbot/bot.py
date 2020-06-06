@@ -32,15 +32,12 @@ class Bot:
     FEED_GROUP_BARRIERS: Dict[str, threading.Barrier] = {}
 
     def __init__(self) -> None:
-        log.info(
-            f"Initializing bot as: {subprocess.check_output('id', text=True).rstrip()}"
-        )  # pylint: disable=unexpected-keyword-arg
+        log.info(f"Initializing bot as: {subprocess.check_output('id', text=True).rstrip()}")  # pylint: disable=unexpected-keyword-arg
         instance = config.INSTANCE
         self._outgoing_msg_lock = threading.Lock()  # Used for rate limiting across multiple channels.
         self._db = Database()
         self._url_shortener = bitlyshortener.Shortener(
-            tokens=[token.strip() for token in os.environ["BITLY_TOKENS"].strip().split(",")],
-            max_cache_size=config.CACHE_MAXSIZE__BITLY_SHORTENER,
+            tokens=[token.strip() for token in os.environ["BITLY_TOKENS"].strip().split(",")], max_cache_size=config.CACHE_MAXSIZE__BITLY_SHORTENER,
         )
 
         # Setup miniirc
@@ -66,14 +63,10 @@ class Bot:
     @staticmethod
     def _log_config() -> None:
         diskcache_size = sum(f.stat().st_size for f in config.DISKCACHE_PATH.glob("**/*") if f.is_file())
-        log.info(
-            f"Disk cache path is {config.DISKCACHE_PATH} and its current size is {humanize_bytes(diskcache_size)}."
-        )
+        log.info(f"Disk cache path is {config.DISKCACHE_PATH} and its current size is {humanize_bytes(diskcache_size)}.")
         log.info(f"Alerts will be sent to {config.INSTANCE['alerts_channel']}.")
 
-    def _msg_channel(  # pylint: disable=too-many-branches,too-many-locals,too-many-statements
-        self, channel: str
-    ) -> None:
+    def _msg_channel(self, channel: str) -> None:  # pylint: disable=too-many-branches,too-many-locals,too-many-statements
         log.debug(f"Channel messenger for {channel} is starting and is waiting to be notified of channel join.")
         instance = config.INSTANCE
         alerter = config.runtime.alert
@@ -122,10 +115,7 @@ class Bot:
             channel_queue.task_done()
 
     def _read_feed(self, channel: str, feed_name: str) -> None:  # pylint: disable=too-many-locals,too-many-statements
-        log.debug(
-            f"Feed reader for feed {feed_name} of {channel} is starting "
-            "and is waiting to be notified of channel join."
-        )
+        log.debug(f"Feed reader for feed {feed_name} of {channel} is starting and is waiting to be notified of channel join.")
         instance = config.INSTANCE
         alerter = config.runtime.alert
         feed_config = instance["feeds"][channel][feed_name]
@@ -137,17 +127,9 @@ class Bot:
         num_consecutive_failures = 0
 
         feed_reader = FeedReader(
-            channel=channel,
-            name=feed_name,
-            irc=self._irc,
-            db=self._db,
-            url_reader=URLReader(max_cache_age=feed_period_min / 2),
-            url_shortener=self._url_shortener,
+            channel=channel, name=feed_name, irc=self._irc, db=self._db, url_reader=URLReader(max_cache_age=feed_period_min / 2), url_shortener=self._url_shortener,
         )
-        log.debug(
-            f"Feed reader for feed {feed_name} of {channel} has initialized "
-            "and is waiting to be notified of channel join."
-        )
+        log.debug(f"Feed reader for feed {feed_name} of {channel} has initialized and is waiting to be notified of channel join.")
 
         query_time = time.monotonic() - (feed_period_avg / 2)  # Delays first read by half of feed period.
         Bot.CHANNEL_JOIN_EVENTS[channel].wait()
@@ -165,10 +147,7 @@ class Bot:
                 # Read feed
                 log.debug(f"Retrieving feed {feed_name} of {channel}.")
                 feed = feed_reader.read()
-                log.info(
-                    f"Retrieved in {feed.read_time_used:.1f}s the {feed} with {len(feed.entries)} approved entries "
-                    f"via {feed.read_approach}."
-                )
+                log.info(f"Retrieved in {feed.read_time_used:.1f}s the {feed} with {len(feed.entries)} approved entries via {feed.read_approach}.")
 
                 # Wait for other feeds in group
                 if feed_config.get("group"):
@@ -177,15 +156,9 @@ class Bot:
                     num_other = group_barrier.parties - 1
                     num_pending = num_other - group_barrier.n_waiting
                     if num_pending > 0:  # This is not thread-safe but that's okay for logging.
-                        log.debug(
-                            f"Will wait for {num_pending} of {num_other} other feeds in group {feed_group} "
-                            f"to also be read before queuing {feed}."
-                        )
+                        log.debug(f"Will wait for {num_pending} of {num_other} other feeds in group {feed_group} to also be read before queuing {feed}.")
                     group_barrier.wait()
-                    log.debug(
-                        f"Finished waiting for other feeds in group {feed_group} to also be read "
-                        f"before queuing {feed}."
-                    )
+                    log.debug(f"Finished waiting for other feeds in group {feed_group} to also be read before queuing {feed}.")
 
                 # Queue feed
                 # FIXME: This doesn't work correctly when `feed_reader.min_channel_idle_time == 0`.
@@ -206,14 +179,9 @@ class Bot:
                 if num_consecutive_failures > 1:
                     msg += f" {num_consecutive_failures} consecutive times"
                 msg += f" while reading or processing feed {feed_name} of {channel}: {exc}"
-                if feed_config.get("alerts", {}).get("read", True) and (
-                    num_consecutive_failures >= config.MIN_CONSECUTIVE_FEED_FAILURES_FOR_ALERT
-                ):
+                if feed_config.get("alerts", {}).get("read", True) and (num_consecutive_failures >= config.MIN_CONSECUTIVE_FEED_FAILURES_FOR_ALERT):
                     alerter(msg)
-                    alerter(
-                        "Either check the feed configuration, or wait for its next successful read, "
-                        "or set `alerts/read` to `false` for it.",
-                    )
+                    alerter("Either check the feed configuration, or wait for its next successful read, or set `alerts/read` to `false` for it.")
                 else:
                     log.error(msg)  # Not logging as exception.
             else:
@@ -235,10 +203,7 @@ class Bot:
         channels = instance["feeds"]
         channels_str = ", ".join(channels)
         log.debug(
-            "Setting up threads and queues for %s channels (%s) and their feeds with %s currently active " "threads.",
-            len(channels),
-            channels_str,
-            threading.active_count(),
+            "Setting up threads and queues for %s channels (%s) and their feeds with %s currently active " "threads.", len(channels), channels_str, threading.active_count(),
         )
         num_feeds_setup = 0
         num_urls = 0
@@ -251,9 +216,7 @@ class Bot:
             self.CHANNEL_QUEUES[channel] = queue.Queue(maxsize=num_channel_feeds * 2)
             threading.Thread(target=self._msg_channel, name=f"ChannelMessenger-{channel}", args=(channel,)).start()
             for feed, feed_config in channel_config.items():
-                threading.Thread(
-                    target=self._read_feed, name=f"FeedReader-{channel}-{feed}", args=(channel, feed)
-                ).start()
+                threading.Thread(target=self._read_feed, name=f"FeedReader-{channel}-{feed}", args=(channel, feed)).start()
                 num_feed_urls = len(ensure_list(feed_config["url"]))
                 num_urls += num_feed_urls
                 feed_period = max(config.PERIOD_HOURS_MIN, feed_config.get("period", config.PERIOD_HOURS_DEFAULT))
@@ -264,10 +227,7 @@ class Bot:
                     barriers_parties[group] = barriers_parties.get(group, 0) + 1
                 num_feeds_setup += 1
             log.debug(
-                "Finished setting up threads and queue for %s and its %s feeds with %s currently active threads.",
-                channel,
-                num_channel_feeds,
-                threading.active_count(),
+                "Finished setting up threads and queue for %s and its %s feeds with %s currently active threads.", channel, num_channel_feeds, threading.active_count(),
             )
         for barrier, parties in barriers_parties.items():
             self.FEED_GROUP_BARRIERS[barrier] = threading.Barrier(parties)
@@ -300,9 +260,7 @@ def _handle_900_loggedin(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args:
     log.info("The client identity as <nick>!<user>@<host> is %s.", identity)
     if nick_casefold != config.INSTANCE["nick:casefold"]:
         runtime_config.alert(
-            f"The client nick was configured to be {config.INSTANCE['nick']} but it is {nick}. "
-            "The configured nick will be regained.",
-            log.warning,
+            f"The client nick was configured to be {config.INSTANCE['nick']} but it is {nick}. " "The configured nick will be regained.", log.warning,
         )
         irc.msg("nickserv", "REGAIN", config.INSTANCE["nick"], os.environ["IRC_PASSWORD"])
 
@@ -332,9 +290,7 @@ def _handle_join(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[s
     channel = args[0]
 
     # Ignore if not actionable
-    if (user.casefold() != config.runtime.nick_casefold) or (
-        channel.casefold() not in config.INSTANCE["channels:casefold"]
-    ):
+    if (user.casefold() != config.runtime.nick_casefold) or (channel.casefold() not in config.INSTANCE["channels:casefold"]):
         return
 
     # Update channel last message time
@@ -358,8 +314,7 @@ def _handle_privmsg(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: Lis
             # Ignoring private message from freenode-connect having ident frigg
             # and hostname freenode/utility-bot/frigg: VERSION
             config.runtime.alert(
-                f"Ignoring private message from {user} having ident {ident} and hostname {hostname}: {msg}",
-                log.warning,
+                f"Ignoring private message from {user} having ident {ident} and hostname {hostname}: {msg}", log.warning,
             )
         return
 

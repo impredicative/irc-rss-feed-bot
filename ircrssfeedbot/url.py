@@ -96,9 +96,7 @@ class URLContent:
 class URLReader:
     """URL reader."""
 
-    _CACHE = diskcache.Cache(
-        directory=config.DISKCACHE_PATH / "URLReader", timeout=2, size_limit=config.DISKCACHE_SIZE_LIMIT
-    )
+    _CACHE = diskcache.Cache(directory=config.DISKCACHE_PATH / "URLReader", timeout=2, size_limit=config.DISKCACHE_SIZE_LIMIT)
 
     def __init__(self, max_cache_age: float):
         self._max_cache_age = max_cache_age
@@ -111,9 +109,7 @@ class URLReader:
         else:
             log.info(f"Deleted cached URL content for {url}.")
 
-    def __getitem__(  # pylint: disable=too-many-branches,too-many-locals,too-many-statements
-        self, url: str
-    ) -> URLContent:
+    def __getitem__(self, url: str) -> URLContent:  # pylint: disable=too-many-branches,too-many-locals,too-many-statements
 
         # Reuse cache if possible
         if cached_url_content := self._CACHE.get(url):
@@ -149,22 +145,11 @@ class URLReader:
         request_headers = {"User-Agent": user_agent}
         has_cached_etag = bool(cached_url_content and cached_url_content.etag)
         is_etag_cache_allowed = netloc not in config.ETAG_CACHE_PROHIBITED_NETLOCS
-        test_cached_etag = bool(
-            has_cached_etag
-            and cached_url_content.is_etag_strong
-            and is_etag_cache_allowed
-            and (random.random() <= config.ETAG_TEST_PROBABILITY)
-        )
+        test_cached_etag = bool(has_cached_etag and cached_url_content.is_etag_strong and is_etag_cache_allowed and (random.random() <= config.ETAG_TEST_PROBABILITY))
         if has_cached_etag:
-            log.debug(
-                f"Expired URL content from cache for {url} has {cached_url_content.etag_type} ETag "
-                f"{cached_url_content.etag}."
-            )
+            log.debug(f"Expired URL content from cache for {url} has {cached_url_content.etag_type} ETag " f"{cached_url_content.etag}.")
             if test_cached_etag:
-                log.debug(
-                    f"The cached {cached_url_content.etag_type} ETag {cached_url_content.etag} for {url} will "
-                    f"be tested for a mismatch."
-                )
+                log.debug(f"The cached {cached_url_content.etag_type} ETag {cached_url_content.etag} for {url} will be tested for a mismatch.")
             elif is_etag_cache_allowed:
                 request_headers["If-None-Match"] = cached_url_content.etag
                 log.debug(f"Added request header If-None-Match={request_headers['If-None-Match']} for {url}.")
@@ -184,10 +169,7 @@ class URLReader:
                     raise exc from None
                 time.sleep(2 ** num_attempt)
             else:
-                log.debug(
-                    f"Received response having status code {response.status_code} in attempt {num_attempt} for "
-                    f"{url} in {timer}."
-                )
+                log.debug(f"Received response having status code {response.status_code} in attempt {num_attempt} for {url} in {timer}.")
                 break
 
         # Reuse ETag cache if possible
@@ -195,18 +177,14 @@ class URLReader:
             # Note: 304 = Not Modified.
             assert all((cached_url_content, has_cached_etag, not test_cached_etag, request_headers["If-None-Match"]))
             url_content = URLContent(
-                content=cached_url_content.content,  # Sets updated time attribute too.
-                etag=cached_url_content.etag,
-                approach=URLContent.Approach.CACHE_ETAG_HIT,
+                content=cached_url_content.content, etag=cached_url_content.etag, approach=URLContent.Approach.CACHE_ETAG_HIT,  # Sets updated time attribute too.
             )
             log.debug(f"Returning unchanged ETag matched URL content from cache for {url}.")
             self._CACHE[url] = url_content
             return url_content
 
         # Cache content
-        url_content = URLContent(
-            content=response.content, etag=response.headers.get("ETag"), approach=URLContent.Approach.READ
-        )
+        url_content = URLContent(content=response.content, etag=response.headers.get("ETag"), approach=URLContent.Approach.READ)
         self._CACHE[url] = url_content
         log.debug(f"Cached URL content of size {humanize_size(url_content.content)} for {url}.")
 

@@ -40,13 +40,7 @@ def main() -> None:
 
 def investigate_etags() -> None:
     instance = config.INSTANCE
-    netlocs = sorted(
-        {
-            url_to_netloc(feed_config["url"])
-            for channel_config in instance["feeds"].values()
-            for feed_config in channel_config.values()
-        }
-    )
+    netlocs = sorted({url_to_netloc(feed_config["url"]) for channel_config in instance["feeds"].values() for feed_config in channel_config.values()})
     log.info("The unique netlocs are: %s", ", ".join(netlocs))
     log.info("Number of unique netlocs is %s.", len(netlocs))
 

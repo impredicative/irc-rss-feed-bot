@@ -51,9 +51,7 @@ class Database:
         post_vacuum_size = db_path.stat().st_size
         vacuum_size_diff = pre_vacuum_size - post_vacuum_size
         log.info(
-            "Vacuumed database having post-vacuum size %s, saving %s.",
-            humanize_bytes(post_vacuum_size),
-            humanize_bytes(vacuum_size_diff),
+            "Vacuumed database having post-vacuum size %s, saving %s.", humanize_bytes(post_vacuum_size), humanize_bytes(vacuum_size_diff),
         )
 
         # Analyze db
@@ -83,42 +81,26 @@ class Database:
     def select_unposted_for_channel(self, channel: str, feed: str, urls: List[str]) -> List[str]:
         """Return unposted URLs for the given channel."""
         log.debug(
-            "Retrieving unposted URLs from the database for channel %s having ignored feed %s out of %s URLs.",
-            channel,
-            feed,
-            len(urls),
+            "Retrieving unposted URLs from the database for channel %s having ignored feed %s out of %s URLs.", channel, feed, len(urls),
         )
         conditions = Post.channel == Int8Hash.as_int(channel)
         unposted_urls = self._select_unposted(conditions, urls)
         loglevel = logging.INFO if len(unposted_urls) > 0 else logging.DEBUG
         log.log(
-            loglevel,
-            "Returning %s unposted URLs from the database for channel %s having ignored feed %s out of %s URLs.",
-            len(unposted_urls),
-            channel,
-            feed,
-            len(urls),
+            loglevel, "Returning %s unposted URLs from the database for channel %s having ignored feed %s out of %s URLs.", len(unposted_urls), channel, feed, len(urls),
         )
         return unposted_urls
 
     def select_unposted_for_channel_feed(self, channel: str, feed: str, urls: List[str]) -> List[str]:
         """Return unposted URLs for the given channel and feed."""
         log.debug(
-            "Retrieving unposted URLs from the database for channel %s having feed %s out of %s URLs.",
-            channel,
-            feed,
-            len(urls),
+            "Retrieving unposted URLs from the database for channel %s having feed %s out of %s URLs.", channel, feed, len(urls),
         )
         conditions = (Post.channel == Int8Hash.as_int(channel)) & (Post.feed == Int8Hash.as_int(feed))
         unposted_urls = self._select_unposted(conditions, urls)
         loglevel = logging.INFO if len(unposted_urls) > 0 else logging.DEBUG
         log.log(
-            loglevel,
-            "Returning %s unposted URLs from the database for channel %s having feed %s out of %s URLs.",
-            len(unposted_urls),
-            channel,
-            feed,
-            len(urls),
+            loglevel, "Returning %s unposted URLs from the database for channel %s having feed %s out of %s URLs.", len(unposted_urls), channel, feed, len(urls),
         )
         return unposted_urls
 

@@ -21,13 +21,13 @@ from ircrssfeedbot.url import URLReader
 
 # pylint: disable=invalid-name
 
-CHANNEL = "##CoV"  # CUSTOMIZE
+CHANNEL = "##servicebot"  # CUSTOMIZE
 # FEED = "stats:🌎"  # World
-FEED = "stats:🇺🇸"  # USA
+# FEED = "stats:🇺🇸"  # USA
 # FEED = "stats:🇮🇹"  # Italy
 # FEED = "stats:🇷🇺"  # Russia
 # FEED = "stats:🇨🇳"  # China
-# FEED = "COVID-19:stats:USA:NY"
+FEED = "COVID-19:stats:USA:NY"
 CHANNEL, FEED = "##data", "UrsaLabs"
 
 config.LOGGING["loggers"][config.PACKAGE_NAME]["level"] = "DEBUG"  # type: ignore

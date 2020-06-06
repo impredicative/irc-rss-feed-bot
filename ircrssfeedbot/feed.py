@@ -27,9 +27,7 @@ from .util.timeit import Timer
 log = logging.getLogger(__name__)
 
 
-def _parse_entries(
-    parser_name: str, selector: Optional[str], follower: Optional[str], url_content: bytes
-) -> Tuple[List[RawFeedEntry], List[str]]:
+def _parse_entries(parser_name: str, selector: Optional[str], follower: Optional[str], url_content: bytes) -> Tuple[List[RawFeedEntry], List[str]]:
     from . import parsers  # pylint: disable=import-outside-toplevel
 
     Parser = getattr(parsers, parser_name).Parser  # pylint: disable=invalid-name
@@ -64,11 +62,7 @@ class FeedReader:
         log.debug(f"Initializing {self}.")
         self.config: Dict = {**config.INSTANCE["defaults"], **config.INSTANCE["feeds"][self.channel][self.name]}
         self.urls = OrderedSet(ensure_list(self.config["url"]))
-        self.min_channel_idle_time = (
-            config.MIN_CHANNEL_IDLE_TIME_DEFAULT
-            if (self.config.get("period", config.PERIOD_HOURS_DEFAULT) > config.PERIOD_HOURS_MIN)
-            else 0
-        )
+        self.min_channel_idle_time = config.MIN_CHANNEL_IDLE_TIME_DEFAULT if (self.config.get("period", config.PERIOD_HOURS_DEFAULT) > config.PERIOD_HOURS_MIN) else 0
         self.blacklist = _patterns(self.channel, self.name, "blacklist")
         self.whitelist = _patterns(self.channel, self.name, "whitelist")
         self.max_posts_if_new = config.NEW_FEED_POSTS_MAX[self.config["new"]]
@@ -103,18 +97,11 @@ class FeedReader:
         num_removed = len(entries) - len(entries_deduped)
         action = f"After {after_what}, removed" if after_what else "Removed"
         log.debug(
-            "%s %s duplicate entry URLs out of %s, leaving %s, for %s.",
-            action,
-            num_removed,
-            len(entries),
-            len(entries_deduped),
-            self,
+            "%s %s duplicate entry URLs out of %s, leaving %s, for %s.", action, num_removed, len(entries), len(entries_deduped), self,
         )
         return entries_deduped
 
-    def _process_entries(  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
-        self, entries: List[FeedEntry]
-    ) -> List[FeedEntry]:
+    def _process_entries(self, entries: List[FeedEntry]) -> List[FeedEntry]:  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
         feed_config = self.config
 
         # Remove blacklisted entries
@@ -192,19 +179,13 @@ class FeedReader:
                 try:
                     entry.title = title_format_str.format_map(params)
                 except Exception as exc:  # pylint: disable=broad-except
-                    log.warning(
-                        f"Unable to format entry title for {entry} by {self} due to exception {exc!r} using "
-                        f"format string {title_format_str!r}."
-                    )
+                    log.warning(f"Unable to format entry title for {entry} by {self} due to exception {exc!r} using format string {title_format_str!r}.")
                 # Format URL:
                 url_format_str = format_str.get("url", "{url}")
                 try:
                     entry.long_url = url_format_str.format_map(params)
                 except Exception as exc:  # pylint: disable=broad-except
-                    log.warning(
-                        f"Unable to format entry URL for {entry} by {self} due to exception {exc!r} using "
-                        f"format string {url_format_str!r}."
-                    )
+                    log.warning(f"Unable to format entry URL for {entry} by {self} due to exception {exc!r} using format string {url_format_str!r}.")
             log.debug("Formatted entries for %s.", self)
 
         # Escape spaces in URLs
@@ -265,25 +246,10 @@ class FeedReader:
         with multiprocessing.Pool(1) as pool:
             log.info(f"Created process worker to parse entries for {self} using {self.parser_name}.")  # DEBUG
             # Note: Using a separate temporary process is a workaround for memory leaks of hext, feedparser, etc.
-            raw_entries, urls = pool.apply(
-                _parse_entries, (self.parser_name, self.parser_selector, self.parser_follower, url_content)
-            )
-            log.info(
-                f"Used process worker to parse {len(raw_entries):,} raw entries and {len(urls):,} URLs "
-                f"for {self} using {self.parser_name}."
-            )  # DEBUG
+            raw_entries, urls = pool.apply(_parse_entries, (self.parser_name, self.parser_selector, self.parser_follower, url_content))
+            log.info(f"Used process worker to parse {len(raw_entries):,} raw entries and {len(urls):,} URLs for {self} using {self.parser_name}.")  # DEBUG
         log.info(f"Ended process worker to parse entries for {self} using {self.parser_name}.")  # DEBUG
-        entries = [
-            FeedEntry(
-                title=e.title,
-                long_url=e.link,
-                summary=e.summary,
-                categories=e.categories,
-                data=dict(e),
-                feed_reader=self,
-            )
-            for e in raw_entries
-        ]
+        entries = [FeedEntry(title=e.title, long_url=e.link, summary=e.summary, categories=e.categories, data=dict(e), feed_reader=self,) for e in raw_entries]
         log.info(f"Converted {len(raw_entries):,} raw entries to actual entries for {self}.")  # DEBUG
         return entries, urls
 
@@ -306,10 +272,7 @@ class FeedReader:
             # Parse content
             log.info(f"Parsing entries for {url} for {self} using {self.parser_name}.")  # DEBUG
             selected_entries, follow_urls = self._parse_entries(url_content.content)
-            log_msg = (
-                f"Parsed {len(selected_entries):,} entries and {len(follow_urls):,} followable URLs for {url} for "
-                f"{self} using {self.parser_name}."
-            )
+            log_msg = f"Parsed {len(selected_entries):,} entries and {len(follow_urls):,} followable URLs for {url} for {self} using {self.parser_name}."
             entries.extend(selected_entries)
             urls_pending.update(follow_urls - urls_read)
 
@@ -318,10 +281,7 @@ class FeedReader:
                 log.debug(log_msg)
             else:
                 if feed_config.get("alerts", {}).get("empty", True):
-                    log_msg += (
-                        " Either check the feed configuration, or wait for its next read, "
-                        "or set `alerts/empty` to `false` for it."
-                    )
+                    log_msg += " Either check the feed configuration, or wait for its next read, or set `alerts/empty` to `false` for it."
                     config.runtime.alert(log_msg)
                 else:
                     log.warning(log_msg)
@@ -334,18 +294,10 @@ class FeedReader:
                     log.debug(f"Sleeping for {sleep_time:.1f}s before next URL.")
                     time.sleep(sleep_time)
 
-        url_read_approach_desc = readable_list(
-            [f"{count} URLs {approach}" for approach, count in url_read_approach_counts.items()]
-        )
-        log.debug(
-            f"Read {len(entries)} entries via {url_read_approach_desc} for {self} "
-            f"using {self.parser_name} parser in {timer}."
-        )
+        url_read_approach_desc = readable_list([f"{count} URLs {approach}" for approach, count in url_read_approach_counts.items()])
+        log.debug(f"Read {len(entries)} entries via {url_read_approach_desc} for {self} using {self.parser_name} parser in {timer}.")
         entries = self._process_entries(entries)
-        log.debug(
-            f"Returning {len(entries)} processed entries via {url_read_approach_desc} for {self} "
-            f"having used {self.parser_name} parser in {timer}."
-        )
+        log.debug(f"Returning {len(entries)} processed entries via {url_read_approach_desc} for {self} having used {self.parser_name} parser in {timer}.")
         return Feed(entries=entries, reader=self, read_approach=url_read_approach_desc, read_time_used=timer())
 
 
@@ -372,10 +324,7 @@ class Feed:
             log.debug(f"Filtering new {self} having {len(unposted_entries)} unposted entries for postable entries.")
             max_posts = self.reader.max_posts_if_new
             postable_entries = unposted_entries[:max_posts]
-            log.debug(
-                f"Filtered new {self} from {len(unposted_entries)} unposted entries to {len(postable_entries)} "
-                f"postable entries given a limit of {max_posts} entries."
-            )
+            log.debug(f"Filtered new {self} from {len(unposted_entries)} unposted entries to {len(postable_entries)} postable entries given a limit of {max_posts} entries.")
         else:
             postable_entries = unposted_entries
 

@@ -70,11 +70,7 @@ class FeedEntry:
             for category in self.categories:  # This loop is only for categories.
                 if pattern.search(category):
                     log.log(
-                        5,
-                        "%s having category %s matches category pattern %s.",
-                        self,
-                        repr(category),
-                        repr(pattern.pattern),
+                        5, "%s having category %s matches category pattern %s.", self, repr(category), repr(pattern.pattern),
                     )
                     return "category", pattern
 
@@ -107,21 +103,12 @@ class FeedEntry:
             return style(text, styler="irc" if style_config else "unicode", **kwargs)
 
         # Define post params
-        format_map = dict(
-            identity=config.runtime.identity,
-            channel=self.feed_reader.channel,
-            feed=_style_name(self.feed_reader.name),
-            url=self.short_url or self.long_url,
-        )
+        format_map = dict(identity=config.runtime.identity, channel=self.feed_reader.channel, feed=_style_name(self.feed_reader.name), url=self.short_url or self.long_url,)
 
         # Define post caption
         format_map["caption"] = ""
         if msg_config.get("title", True) and (title := self.title):
-            if (
-                explain
-                and (pattern := self.matching_title_search_pattern)
-                and (match := pattern.search(title))  # pylint: disable=used-before-assignment
-            ):
+            if explain and (pattern := self.matching_title_search_pattern) and (match := pattern.search(title)):  # pylint: disable=used-before-assignment
                 # Note: A match is not always guaranteed to exist due to sub, format, etc.
                 span0, span1 = match.span()
                 title_pre, title_mid, title_post = title[:span0], title[span0:span1], title[span1:]

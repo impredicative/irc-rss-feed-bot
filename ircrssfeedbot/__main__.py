@@ -33,10 +33,7 @@ def load_instance_config(log_details: bool = True) -> None:  # pylint: disable=t
         TraceMalloc().start()
 
     url_counter = collections.Counter(
-        feed_url
-        for channel_cfg in instance_config["feeds"].values()
-        for feed_cfg in channel_cfg.values()
-        for feed_url in ensure_list(feed_cfg["url"])
+        feed_url for channel_cfg in instance_config["feeds"].values() for feed_cfg in channel_cfg.values() for feed_url in ensure_list(feed_cfg["url"])
     )
 
     if log_details:
@@ -63,21 +60,13 @@ def load_instance_config(log_details: bool = True) -> None:  # pylint: disable=t
         unclear_colors = {"white", "black", "grey", "silver"}
         clear_colors = config.IRC_COLORS - unclear_colors
         for channel, channel_config in instance_config["feeds"].items():
-            if not (
-                used_colors := {
-                    fg_color
-                    for feed_config in channel_config.values()
-                    if (fg_color := feed_config.get("style", {}).get("name", {}).get("fg")) is not None
-                }
-            ):
+            if not (used_colors := {fg_color for feed_config in channel_config.values() if (fg_color := feed_config.get("style", {}).get("name", {}).get("fg")) is not None}):
                 log.info("%s has no foreground colors in use.", channel)
                 continue
             if not (unused_colors := clear_colors - used_colors):  # pylint: disable=superfluous-parens
                 log.info("%s has all foreground colors in use.", channel)
                 continue
-            log.info(
-                "%s has %s unused foreground colors: %s", channel, len(unused_colors), ", ".join(sorted(unused_colors))
-            )
+            log.info("%s has %s unused foreground colors: %s", channel, len(unused_colors), ", ".join(sorted(unused_colors)))
 
     # Set alerts channel
     alerts_channel_format = instance_config.get("alerts_channel") or config.ALERTS_CHANNEL_FORMAT_DEFAULT
@@ -91,9 +80,7 @@ def load_instance_config(log_details: bool = True) -> None:  # pylint: disable=t
     instance_config["channels:casefold"] = [channel.casefold() for channel in instance_config["feeds"]]
     # instance_config["repeated_urls"] = {url for url, count in url_counter.items() if count > 1}
 
-    instance_config["defaults"] = {
-        k: instance_config.get("defaults", {}).get(k, v) for k, v in config.FEED_DEFAULTS.items()
-    }
+    instance_config["defaults"] = {k: instance_config.get("defaults", {}).get(k, v) for k, v in config.FEED_DEFAULTS.items()}
 
     config.INSTANCE = instance_config
 
