@@ -263,10 +263,16 @@ class FeedReader:
 
     def _parse_entries(self, url_content: bytes) -> Tuple[List[FeedEntry], List[str]]:
         with multiprocessing.Pool(1) as pool:
+            log.info(f"Created process worker to parse entries for {self} using {self.parser_name}.")  # DEBUG
             # Note: Using a separate temporary process is a workaround for memory leaks of hext, feedparser, etc.
             raw_entries, urls = pool.apply(
                 _parse_entries, (self.parser_name, self.parser_selector, self.parser_follower, url_content)
             )
+            log.info(
+                f"Used process worker to parse {len(raw_entries):,} raw entries and {len(urls):,} URLs "
+                f"for {self} using {self.parser_name}."
+            )  # DEBUG
+        log.info(f"Ended process worker to parse entries for {self} using {self.parser_name}.")  # DEBUG
         entries = [
             FeedEntry(
                 title=e.title,
@@ -278,6 +284,7 @@ class FeedReader:
             )
             for e in raw_entries
         ]
+        log.info(f"Converted {len(raw_entries):,} raw entries to actual entries for {self}.")  # DEBUG
         return entries, urls
 
     def read(self) -> "Feed":  # pylint: disable=too-many-locals
@@ -308,7 +315,7 @@ class FeedReader:
 
             # Raise alert if no entries for URL
             if selected_entries:
-                log.info(log_msg)  # DEBUG
+                log.debug(log_msg)
             else:
                 if feed_config.get("alerts", {}).get("empty", True):
                     log_msg += (
@@ -330,12 +337,12 @@ class FeedReader:
         url_read_approach_desc = readable_list(
             [f"{count} URLs {approach}" for approach, count in url_read_approach_counts.items()]
         )
-        log.info(  # DEBUG
+        log.debug(
             f"Read {len(entries)} entries via {url_read_approach_desc} for {self} "
             f"using {self.parser_name} parser in {timer}."
         )
         entries = self._process_entries(entries)
-        log.info(  # DEBUG
+        log.debug(
             f"Returning {len(entries)} processed entries via {url_read_approach_desc} for {self} "
             f"having used {self.parser_name} parser in {timer}."
         )
