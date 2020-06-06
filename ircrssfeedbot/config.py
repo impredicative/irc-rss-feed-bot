@@ -1,6 +1,5 @@
 """Package configuration."""
 import logging.config
-import multiprocessing
 import os
 import tempfile
 import types
@@ -50,8 +49,6 @@ ETAG_CACHE_PROHIBITED_NETLOCS: Final = {
 }
 ETAG_TEST_PROBABILITY: Final = 0.1
 FEED_DEFAULTS: Final = {"new": "some", "shorten": True}
-FEED_READER_POOL_SIZE: Final = int(multiprocessing.cpu_count() * 1.5)
-FEED_READER_POOL_MAX_TASKS_PER_CHILD: Final = 8
 IRC_COLORS: Final = set(ircmessage.colors.idToName.values())
 MIN_CHANNEL_IDLE_TIME_DEFAULT: Final = {"dev": 1}.get(ENV, 15 * 60)
 MIN_CONSECUTIVE_FEED_FAILURES_FOR_ALERT: Final = 3

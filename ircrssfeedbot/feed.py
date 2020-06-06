@@ -245,9 +245,9 @@ class FeedReader:
     def _parse_entries(self, url_content: bytes) -> Tuple[List[FeedEntry], List[str]]:
         # Note: Using a separate temporary process is a workaround for memory leaks of hext, feedparser, etc.
         with mp.Pool(1) as pool:
-            log.info(f"Using process worker from pool to parse entries for {self} using {self.parser_name}.")  # DEBUG
+            log.debug(f"Using process worker from pool to parse entries for {self} using {self.parser_name}.")
             raw_entries, urls = pool.apply(_parse_entries, (self.parser_name, self.parser_selector, self.parser_follower, url_content))
-        log.info(f"Used process worker from pool to parse {len(raw_entries):,} raw entries and {len(urls):,} URLs for {self} using {self.parser_name}.")  # DEBUG
+        log.debug(f"Used process worker from pool to parse {len(raw_entries):,} raw entries and {len(urls):,} URLs for {self} using {self.parser_name}.")
         entries = [FeedEntry(title=e.title, long_url=e.link, summary=e.summary, categories=e.categories, data=dict(e), feed_reader=self,) for e in raw_entries]
         log.debug(f"Converted {len(raw_entries):,} raw entries to actual entries for {self}.")
         return entries, urls

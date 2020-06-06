@@ -64,10 +64,6 @@ class Bot:
     def _log_config() -> None:
         diskcache_size = sum(f.stat().st_size for f in config.DISKCACHE_PATH.glob("**/*") if f.is_file())
         log.info(f"Disk cache path is {config.DISKCACHE_PATH} and its current size is {humanize_bytes(diskcache_size)}.")
-        log.info(
-            f"The shared process worker pool of feed reader has a size of {config.FEED_READER_POOL_SIZE} "
-            f"and a max of {config.FEED_READER_POOL_MAX_TASKS_PER_CHILD} tasks per child."
-        )
         log.info(f"Alerts will be sent to {config.INSTANCE['alerts_channel']}.")
 
     def _msg_channel(self, channel: str) -> None:  # pylint: disable=too-many-branches,too-many-locals,too-many-statements
