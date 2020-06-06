@@ -2,7 +2,7 @@
 import collections
 import dataclasses
 import logging
-import multiprocessing
+import multiprocessing as mp
 import re
 import time
 from functools import cached_property, lru_cache
@@ -57,7 +57,7 @@ class FeedReader:
     db: Database = dataclasses.field(repr=False)
     url_reader: URLReader = dataclasses.field(repr=False)
     url_shortener: bitlyshortener.Shortener = dataclasses.field(repr=False)
-    worker_pool: ClassVar[multiprocessing.pool.Pool] = multiprocessing.Pool(processes=config.FEED_READER_POOL_SIZE, maxtasksperchild=config.FEED_READER_POOL_MAX_TASKS_PER_CHILD)
+    worker_pool: ClassVar[mp.pool.Pool] = mp.Pool(processes=config.FEED_READER_POOL_SIZE, maxtasksperchild=config.FEED_READER_POOL_MAX_TASKS_PER_CHILD)
 
     def __post_init__(self):
         log.debug(f"Initializing {self}.")
