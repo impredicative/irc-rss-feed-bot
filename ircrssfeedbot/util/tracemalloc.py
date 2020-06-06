@@ -7,7 +7,7 @@ from typing import List, Union
 
 import psutil
 
-from ircrssfeedbot.util.humanize import humanize_bytes
+from .humanize import humanize_bytes
 
 log = logging.getLogger(__name__)
 
