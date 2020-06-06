@@ -10,15 +10,12 @@ method-rgx=([a-z_][a-z0-9_]{2,60}|test_[a-z0-9_]{2,90})$
 [MESSAGES CONTROL]
 disable=
     bad-continuation,
-    cyclic-import, # for Docker Hub
-    import-error, # for Docker Hub
     locally-disabled,
     locally-enabled,
     logging-format-interpolation,
     logging-fstring-interpolation,
     missing-function-docstring, # for Docker Hub
     no-init,
-    reimported, # for Docker Hub
     relative-beyond-top-level,
     too-few-public-methods,
     too-many-instance-attributes,
