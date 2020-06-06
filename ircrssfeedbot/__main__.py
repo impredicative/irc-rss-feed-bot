@@ -3,6 +3,7 @@ import argparse
 import collections
 import json
 import logging
+import multiprocessing
 from pathlib import Path
 
 from ruamel.yaml import YAML
@@ -87,6 +88,7 @@ def load_instance_config(log_details: bool = True) -> None:  # pylint: disable=t
 
 def main() -> None:
     """Start the bot."""
+    multiprocessing.set_start_method("spawn")  # Attempt to prevent feed.FeedReader._parse_entries freezing.
     load_instance_config()
     Bot()
 
