@@ -6,7 +6,7 @@ import multiprocessing
 import re
 import time
 from functools import cached_property, lru_cache
-from typing import Callable, Dict, List, Optional, Pattern, Tuple
+from typing import Callable, ClassVar, Dict, List, Optional, Pattern, Tuple
 
 import bitlyshortener
 import miniirc
@@ -57,6 +57,7 @@ class FeedReader:
     db: Database = dataclasses.field(repr=False)
     url_reader: URLReader = dataclasses.field(repr=False)
     url_shortener: bitlyshortener.Shortener = dataclasses.field(repr=False)
+    worker_pool: ClassVar[multiprocessing.pool.Pool] = multiprocessing.Pool(processes=config.FEED_READER_POOL_SIZE, maxtasksperchild=config.FEED_READER_POOL_MAX_TASKS_PER_CHILD)
 
     def __post_init__(self):
         log.debug(f"Initializing {self}.")
@@ -243,12 +244,10 @@ class FeedReader:
         return entries
 
     def _parse_entries(self, url_content: bytes) -> Tuple[List[FeedEntry], List[str]]:
-        with multiprocessing.Pool(1) as pool:
-            log.debug(f"Created process worker to parse entries for {self} using {self.parser_name}.")
-            # Note: Using a separate temporary process is a workaround for memory leaks of hext, feedparser, etc.
-            raw_entries, urls = pool.apply(_parse_entries, (self.parser_name, self.parser_selector, self.parser_follower, url_content))
-            log.debug(f"Used process worker to parse {len(raw_entries):,} raw entries and {len(urls):,} URLs for {self} using {self.parser_name}.")
-        log.debug(f"Ended process worker to parse entries for {self} using {self.parser_name}.")
+        # Note: Using a separate temporary process is a workaround for memory leaks of hext, feedparser, etc.
+        log.info(f"Using process worker from pool to parse entries for {self} using {self.parser_name}.")  # DEBUG
+        raw_entries, urls = self.worker_pool.apply(_parse_entries, (self.parser_name, self.parser_selector, self.parser_follower, url_content))
+        log.info(f"Used process worker from pool to parse {len(raw_entries):,} raw entries and {len(urls):,} URLs for {self} using {self.parser_name}.")  # DEBUG
         entries = [FeedEntry(title=e.title, long_url=e.link, summary=e.summary, categories=e.categories, data=dict(e), feed_reader=self,) for e in raw_entries]
         log.debug(f"Converted {len(raw_entries):,} raw entries to actual entries for {self}.")
         return entries, urls
