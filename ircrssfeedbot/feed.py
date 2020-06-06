@@ -248,9 +248,9 @@ class FeedReader:
             # Note: Using a separate temporary process is a workaround for memory leaks of hext, feedparser, etc.
             raw_entries, urls = pool.apply(_parse_entries, (self.parser_name, self.parser_selector, self.parser_follower, url_content))
             log.info(f"Used process worker to parse {len(raw_entries):,} raw entries and {len(urls):,} URLs for {self} using {self.parser_name}.")  # DEBUG
-        log.info(f"Ended process worker to parse entries for {self} using {self.parser_name}.")  # DEBUG
+        log.debug(f"Ended process worker to parse entries for {self} using {self.parser_name}.")
         entries = [FeedEntry(title=e.title, long_url=e.link, summary=e.summary, categories=e.categories, data=dict(e), feed_reader=self,) for e in raw_entries]
-        log.info(f"Converted {len(raw_entries):,} raw entries to actual entries for {self}.")  # DEBUG
+        log.debug(f"Converted {len(raw_entries):,} raw entries to actual entries for {self}.")
         return entries, urls
 
     def read(self) -> "Feed":  # pylint: disable=too-many-locals
@@ -270,7 +270,7 @@ class FeedReader:
             urls_read.add(url)
             url_read_approach_counts.update([url_content.approach])
             # Parse content
-            log.info(f"Parsing entries for {url} for {self} using {self.parser_name}.")  # DEBUG
+            log.debug(f"Parsing entries for {url} for {self} using {self.parser_name}.")
             selected_entries, follow_urls = self._parse_entries(url_content.content)
             log_msg = f"Parsed {len(selected_entries):,} entries and {len(follow_urls):,} followable URLs for {url} for {self} using {self.parser_name}."
             entries.extend(selected_entries)
