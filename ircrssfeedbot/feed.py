@@ -223,7 +223,7 @@ class FeedReader:
         log.debug("Stripped HTML tags from titles and summaries for %s.", self)
 
         # Strip unicode quotes around titles
-        quote_begin, quote_end = "“”"
+        quote_begin, quote_end = tuple("“”")
         # e.g. for https://www.sciencedirect.com/science/article/abs/pii/S0899900718307883
         log.debug("Stripping unicode quotes around titles for %s.", self)
         for entry in entries:
