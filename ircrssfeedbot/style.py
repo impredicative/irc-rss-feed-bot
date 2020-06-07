@@ -6,7 +6,7 @@ import logging
 from typing import Any, Callable, Dict, Union
 
 import dressup
-import ircmessage
+import ircstyle
 
 log = logging.getLogger(__name__)
 
@@ -36,14 +36,14 @@ def _dressup_style(text: str, bold: bool = False, italics: bool = False) -> str:
     return text
 
 
-def _ircmessage_style(text: str, **style_config: Union[bool, str]) -> str:
-    """Style the given text with the given options using `ircmessage`."""
-    return ircmessage.style(text, **style_config, reset=True) if (style_config and any(style_config.values())) else text
+def _ircstyle_style(text: str, **style_config: Union[bool, str]) -> str:
+    """Style the given text with the given options using `ircstyle`."""
+    return ircstyle.style(text, **style_config, reset=True) if (style_config and any(style_config.values())) else text
 
 
 _STYLERS: Dict[str, Callable[..., str]] = {
     "asterisk": _asterisk_style,
-    "irc": _ircmessage_style,
+    "irc": _ircstyle_style,
     "unicode": _dressup_style,
 }
 

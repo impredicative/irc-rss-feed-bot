@@ -6,7 +6,7 @@ import types
 from pathlib import Path
 from typing import Dict, Final
 
-import ircmessage
+import ircstyle
 
 
 def configure_logging() -> None:
@@ -49,7 +49,7 @@ ETAG_CACHE_PROHIBITED_NETLOCS: Final = {
 }
 ETAG_TEST_PROBABILITY: Final = 0.1
 FEED_DEFAULTS: Final = {"new": "some", "shorten": True}
-IRC_COLORS: Final = set(ircmessage.colors.idToName.values())
+IRC_COLORS: Final = set(ircstyle.colors.idToName.values())
 MIN_CHANNEL_IDLE_TIME_DEFAULT: Final = {"dev": 1}.get(ENV, 15 * 60)
 MIN_CONSECUTIVE_FEED_FAILURES_FOR_ALERT: Final = 3
 NEW_FEED_POSTS_MAX: Final = {"none": 0, "some": 3, "all": None}

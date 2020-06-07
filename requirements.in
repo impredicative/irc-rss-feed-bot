@@ -7,7 +7,7 @@ feedparser
 hext
 html5lib  # Required by pandas.read_html
 humanize
-ircmessage
+ircstyle
 jmespath
 lxml
 miniirc
