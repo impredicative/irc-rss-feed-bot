@@ -3,6 +3,7 @@ import collections
 import dataclasses
 import logging
 import multiprocessing as mp
+import multiprocessing.pool
 import re
 import time
 from functools import cached_property, lru_cache
@@ -244,9 +245,9 @@ class FeedReader:
 
     def _parse_entries(self, url_content: bytes) -> Tuple[List[FeedEntry], List[str]]:
         # Note: Using a separate temporary process is a workaround for memory leaks of hext, feedparser, etc.
-        with mp.Pool(1) as pool:
-            log.debug(f"Using process worker from pool to parse entries for {self} using {self.parser_name}.")
-            raw_entries, urls = pool.apply(_parse_entries, (self.parser_name, self.parser_selector, self.parser_follower, url_content))
+        # with mp.Pool(1) as pool:
+        log.debug(f"Using process worker from pool to parse entries for {self} using {self.parser_name}.")
+        raw_entries, urls = self.worker_pool.apply(_parse_entries, (self.parser_name, self.parser_selector, self.parser_follower, url_content))
         log.debug(f"Used process worker from pool to parse {len(raw_entries):,} raw entries and {len(urls):,} URLs for {self} using {self.parser_name}.")
         entries = [FeedEntry(title=e.title, long_url=e.link, summary=e.summary, categories=e.categories, data=dict(e), feed_reader=self,) for e in raw_entries]
         log.debug(f"Converted {len(raw_entries):,} raw entries to actual entries for {self}.")
@@ -298,6 +299,19 @@ class FeedReader:
         entries = self._process_entries(entries)
         log.debug(f"Returning {len(entries)} processed entries via {url_read_approach_desc} for {self} having used {self.parser_name} parser in {timer}.")
         return Feed(entries=entries, reader=self, read_approach=url_read_approach_desc, read_time_used=timer())
+
+    @property
+    def worker_pool(self) -> multiprocessing.pool.Pool:  # Can't use return type "mp.pool.Pool".
+        try:
+            return self._worker_pool  # type: ignore
+        except AttributeError:
+            processes = min(16, mp.cpu_count() * 2)
+            maxtasksperchild = 16
+            log.info(f"Creating the {self.__class__.__name__} worker pool with {processes} processes and {maxtasksperchild} tasks per child.")
+            # pylint: disable=protected-access
+            self.__class__._worker_pool = mp.Pool(processes=processes, maxtasksperchild=maxtasksperchild)  # type: ignore
+            return self.__class__._worker_pool  # type: ignore
+            # pylint: enable=protected-access
 
 
 @dataclasses.dataclass
