@@ -10,8 +10,8 @@ Customize CHANNEL and FEED.
 import logging
 
 from ircrssfeedbot import config
-from ircrssfeedbot.__main__ import load_instance_config
 from ircrssfeedbot.feed import FeedReader
+from ircrssfeedbot.main import load_instance_config
 from ircrssfeedbot.url import URLReader
 
 # import os
@@ -29,6 +29,7 @@ CHANNEL = "##servicebot"  # CUSTOMIZE
 # FEED = "stats:🇨🇳"  # China
 FEED = "COVID-19:stats:USA:NY"
 CHANNEL, FEED = "##data", "UrsaLabs"
+# CHANNEL, FEED = "##us-market-news", "Benzinga"
 
 config.LOGGING["loggers"][config.PACKAGE_NAME]["level"] = "DEBUG"  # type: ignore
 config.configure_logging()
