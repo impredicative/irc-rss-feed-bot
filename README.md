@@ -253,7 +253,8 @@ Its default value is `##{nick}-alerts`. The key `{nick}`, if present in the valu
 For example, if the nick is `MyFeed[bot]`, alerts will by default be sent to `##MyFeed[bot]-alerts`.
 Since a channel name starts with #, the name if provided **must be quoted**.
 It is recommended that the alerts channel be registered and monitored.
-* **`mode`**: This can for example be `+igR` for [Freenode](https://freenode.net/kb/answer/usermodes).
+* **`mode`**: This can for example be `+igR` for [Freenode](https://freenode.net/kb/answer/usermodes) 
+and `+igpR` for [Rizon](https://wiki.rizon.net/index.php?title=User_Modes).
 Setting it is recommended.
 * **`once`**: If `true`, each feed is queued only once. It is for testing purposes. Its default is `false`.
 * **`tracemalloc`**: If `true`, memory allocation tracing is enabled. The top usage and positive-diff statistics are then logged hourly.
