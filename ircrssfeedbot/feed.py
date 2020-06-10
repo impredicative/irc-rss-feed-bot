@@ -307,7 +307,7 @@ class FeedReader:
             return self._worker_pool  # type: ignore
         except AttributeError:
             processes = min(16, mp.cpu_count() * 2)
-            maxtasksperchild = 16
+            maxtasksperchild = 8
             log.info(f"Creating the {self.__class__.__name__} worker pool with {processes} processes and {maxtasksperchild} tasks per child.")
             # pylint: disable=protected-access
             self.__class__._worker_pool = mp.Pool(processes=processes, maxtasksperchild=maxtasksperchild)  # type: ignore
