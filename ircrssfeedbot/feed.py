@@ -1,5 +1,6 @@
 """Feed reader and feed."""
 import collections
+import concurrent.futures
 import dataclasses
 import logging
 import multiprocessing as mp
@@ -18,6 +19,7 @@ from .db import Database
 from .entry import FeedEntry, RawFeedEntry
 from .url import URLReader
 from .util.bs4 import html_to_text
+from .util.dict import dict_str
 from .util.list import ensure_list
 from .util.set import leaves
 from .util.str import readable_list
@@ -58,6 +60,7 @@ class FeedReader:
     db: Database = dataclasses.field(repr=False)
     url_reader: URLReader = dataclasses.field(repr=False)
     url_shortener: bitlyshortener.Shortener = dataclasses.field(repr=False)
+    publishers: List = dataclasses.field(repr=False)
 
     def __post_init__(self):
         log.debug(f"Initializing {self}.")
@@ -423,3 +426,23 @@ class Feed:
                 log.info(f"Updated {channel} topic: {new_topic}")
 
         log.info(f"Posted {len(postable_entries)} entries for {self}.")
+
+    def publish(self) -> None:
+        """Publish the posted entries as relevant."""
+        publishers = self.reader.publishers
+        num_publishers = len(publishers)
+        postable_entries = self._postable_entries
+
+        def _publish(publisher) -> None:  # type: ignore
+            timer = Timer()
+            log.debug(f"Publishing {len(postable_entries)} entries for {self} to {publisher.name}.")
+            result = publisher.publish(channel=self.channel, entries=postable_entries)
+            log.info(f"Published {len(postable_entries)} entries for {self} to {publisher.name} in {timer} with result: {dict_str(result)}")
+
+        if num_publishers == 1:
+            _publish(publisher=publishers[0])
+        elif num_publishers > 1:
+            max_workers = min(config.PUBLISH_THREADS_MAX, num_publishers)
+            with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="Publisher") as executor:
+                for _ in executor.map(_publish, publishers):
+                    pass

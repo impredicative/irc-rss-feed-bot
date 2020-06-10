@@ -16,5 +16,6 @@ orderedset
 pandas
 peewee
 psutil
+pygithub
 requests
 ruamel.yaml

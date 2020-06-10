@@ -13,7 +13,7 @@ from typing import Callable, Dict, List, Tuple
 import bitlyshortener
 import miniirc
 
-from . import config
+from . import config, publishers
 from .db import Database
 from .feed import FeedReader
 from .url import URLReader
@@ -42,6 +42,7 @@ class Bot:
         self._url_shortener = bitlyshortener.Shortener(
             tokens=[token.strip() for token in os.environ["BITLY_TOKENS"].strip().split(",")], max_cache_size=config.CACHE_MAXSIZE__BITLY_SHORTENER,
         )
+        self._publishers = [getattr(getattr(publishers, p), "Publisher")() for p in dir(publishers) if ((not p.startswith("_")) and (p in (instance.get("publish") or {})))]
 
         # Setup miniirc
         log.debug("Initializing IRC client.")
@@ -136,6 +137,7 @@ class Bot:
                         with channel_busy_lock:
                             feed.post()
                             feed.mark_posted()
+                            feed.publish()
                     finally:
                         outgoing_msg_lock.release()
             except Exception as exc:  # pylint: disable=broad-except
@@ -157,7 +159,13 @@ class Bot:
         num_consecutive_failures = 0
 
         feed_reader = FeedReader(
-            channel=channel, name=feed_name, irc=self._irc, db=self._db, url_reader=URLReader(max_cache_age=feed_period_min / 2), url_shortener=self._url_shortener,
+            channel=channel,
+            name=feed_name,
+            irc=self._irc,
+            db=self._db,
+            url_reader=URLReader(max_cache_age=feed_period_min / 2),
+            url_shortener=self._url_shortener,
+            publishers=self._publishers,
         )
         log.debug(f"Feed reader for feed {feed_name} of {channel} has initialized and is waiting to be notified of channel join.")
 

@@ -46,7 +46,6 @@ class BaseChannelPublisher(abc.ABC):
         feed.description(f'{self.channel} on {config.INSTANCE["host"]}')
         return feed
 
-    @property
     def add_entries(self, entries: List[Union[FeedEntry, ShortenedFeedEntry]]) -> None:
         old_entries = feedparser.parse(self.content.lstrip())["entries"]
         feed = self.default_feed()
