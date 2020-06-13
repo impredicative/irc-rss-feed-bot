@@ -33,6 +33,9 @@ def load_instance_config(log_details: bool = True) -> None:  # pylint: disable=t
     if instance_config.get("tracemalloc"):
         TraceMalloc().start()
 
+    if not instance_config["feeds"]:
+        instance_config["feeds"] = {}
+
     url_counter = collections.Counter(
         feed_url for channel_cfg in instance_config["feeds"].values() for feed_cfg in channel_cfg.values() for feed_url in ensure_list(feed_cfg["url"])
     )

@@ -1,5 +1,6 @@
 """Bot."""
 import datetime
+import fnmatch
 import logging
 import os
 import queue
@@ -26,6 +27,8 @@ log = logging.getLogger(__name__)
 class Bot:
     """Bot."""
 
+    ACTIVE: bool = True
+    CHANNEL_BUSY_LOCKS: Dict[str, threading.Lock] = {}
     CHANNEL_JOIN_EVENTS: Dict[str, threading.Event] = {}
     CHANNEL_LAST_INCOMING_MSG_TIMES: Dict[str, float] = {}
     CHANNEL_QUEUES: Dict[str, queue.Queue] = {}
@@ -60,39 +63,63 @@ class Bot:
         self._setup_channels()
         self._log_config()
 
+    @classmethod
+    def exit(cls, irc: miniirc.IRC, code: int = 0) -> None:
+        log.info(f"Initiated graceful exit with code {code}.")
+        alerter = config.runtime.alert
+        cls.ACTIVE = False
+
+        # Acquire all channel busy locks
+        for channel in config.INSTANCE["feeds"]:
+            channel_lock = cls.CHANNEL_BUSY_LOCKS[channel]
+            if not channel_lock.acquire(blocking=False):
+                alerter(f"Draining {channel}.", log.info)
+                channel_lock.acquire()
+
+        # Exit
+        log.info(f"Gracefully exiting with code {code}.")
+        irc.disconnect(auto_reconnect=False)
+        os._exit(code)  # pylint: disable=protected-access
+
     @staticmethod
     def _log_config() -> None:
         diskcache_size = sum(f.stat().st_size for f in config.DISKCACHE_PATH.glob("**/*") if f.is_file())
         log.info(f"Disk cache path is {config.DISKCACHE_PATH} and its current size is {humanize_bytes(diskcache_size)}.")
         log.info(f"Alerts will be sent to {config.INSTANCE['alerts_channel']}.")
+        if admin := config.INSTANCE.get("admin"):
+            log.info(f"Administrative commands will be accepted as private messages or directed public messages from {admin}.")
 
     def _msg_channel(self, channel: str) -> None:  # pylint: disable=too-many-branches,too-many-locals,too-many-statements
         log.debug(f"Channel messenger for {channel} is starting and is waiting to be notified of channel join.")
         instance = config.INSTANCE
         alerter = config.runtime.alert
-        channel_queue = Bot.CHANNEL_QUEUES[channel]
+        outgoing_msg_lock = self._outgoing_msg_lock
+        channel_busy_lock = self.CHANNEL_BUSY_LOCKS[channel]
+        channel_queue = self.CHANNEL_QUEUES[channel]
         irc = self._irc
-        Bot.CHANNEL_JOIN_EVENTS[channel].wait()
-        Bot.CHANNEL_JOIN_EVENTS[instance["alerts_channel"]].wait()
+        self.CHANNEL_JOIN_EVENTS[channel].wait()
+        self.CHANNEL_JOIN_EVENTS[instance["alerts_channel"]].wait()
         log.info(f"Channel messenger for {channel} has started.")
-        while True:  # pylint: disable=too-many-nested-blocks
+        while self.ACTIVE:  # pylint: disable=too-many-nested-blocks
             feed = channel_queue.get()
             log.debug(f"Dequeued {feed}.")
             min_channel_idle_time = feed.reader.min_channel_idle_time
             log.debug(f"The minimum required channel idle time for {feed} is {timedelta_desc(min_channel_idle_time)}.")
             try:
-                if feed.is_postable:
+                if not feed.is_postable:
+                    feed.mark_posted()  # channel_busy_lock is not acquired here because there are no posts.
+                else:
                     try:
                         while True:
-                            if not self._outgoing_msg_lock.acquire(blocking=False):
+                            if not outgoing_msg_lock.acquire(blocking=False):
                                 log.info(f"Waiting to acquire outgoing message lock to post {feed}.")
-                                self._outgoing_msg_lock.acquire()
+                                outgoing_msg_lock.acquire()
                             last_incoming_msg_time = Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel]
                             time_elapsed_since_last_ic_msg = time.monotonic() - last_incoming_msg_time
                             sleep_time = max(0, min_channel_idle_time - time_elapsed_since_last_ic_msg)
                             if sleep_time == 0:
                                 break  # Lock will be released later after posting messages.
-                            self._outgoing_msg_lock.release()  # Releasing lock before sleeping.
+                            outgoing_msg_lock.release()  # Releasing lock before sleeping.
                             log.info(f"Will wait {timedelta_desc(sleep_time)} for channel inactivity to post {feed}.")
                             time.sleep(sleep_time)
 
@@ -105,14 +132,16 @@ class Bot:
                             disconnection_time = time.monotonic() - disconnect_time
                             log.info(f"IRC client is connected after waiting {timedelta_desc(disconnection_time)}.")
 
-                        feed.post()
+                        with channel_busy_lock:
+                            feed.post()
+                            feed.mark_posted()
                     finally:
-                        self._outgoing_msg_lock.release()
-                feed.mark_posted()
+                        outgoing_msg_lock.release()
             except Exception as exc:  # pylint: disable=broad-except
                 msg = f"Error processing {feed}: {exc}"
                 alerter(msg)
             channel_queue.task_done()
+        log.debug(f"Channel messenger for {channel} has stopped.")
 
     def _read_feed(self, channel: str, feed_name: str) -> None:  # pylint: disable=too-many-locals,too-many-statements
         log.debug(f"Feed reader for feed {feed_name} of {channel} is starting and is waiting to be notified of channel join.")
@@ -135,7 +164,7 @@ class Bot:
         Bot.CHANNEL_JOIN_EVENTS[channel].wait()
         Bot.CHANNEL_JOIN_EVENTS[instance["alerts_channel"]].wait()
         log.debug(f"Feed reader for feed {feed_name} of {channel} has started.")
-        while True:
+        while self.ACTIVE:
             feed_period = random.uniform(feed_period_min, feed_period_max)
             query_time = max(time.monotonic(), query_time + feed_period)  # "max" is used in case of wait using "put".
             sleep_time = max(0.0, query_time - time.monotonic())
@@ -190,6 +219,7 @@ class Bot:
                     return
                 del feed
                 num_consecutive_failures = 0
+        log.debug(f"Feed reader for feed {feed_name} of {channel} has stopped.")
 
     def _setup_alerter(self) -> None:
         def alerter(msg: str, logger: Callable[[str], None] = log.exception) -> None:
@@ -212,6 +242,7 @@ class Bot:
         for channel, channel_config in channels.items():
             log.debug("Setting up threads and queue for %s.", channel)
             num_channel_feeds = len(channel_config)
+            self.CHANNEL_BUSY_LOCKS[channel] = threading.Lock()
             self.CHANNEL_JOIN_EVENTS[channel] = threading.Event()
             self.CHANNEL_QUEUES[channel] = queue.Queue(maxsize=num_channel_feeds * 2)
             threading.Thread(target=self._msg_channel, name=f"ChannelMessenger-{channel}", args=(channel,)).start()
@@ -231,6 +262,8 @@ class Bot:
             )
         for barrier, parties in barriers_parties.items():
             self.FEED_GROUP_BARRIERS[barrier] = threading.Barrier(parties)
+
+        # Log counts
         log.info(
             "Finished setting up %s channels (%s) and their %s feeds having %s URLs with %s currently active threads.",
             len(channels),
@@ -239,11 +272,11 @@ class Bot:
             num_urls,
             threading.active_count(),
         )
-        log.info(
-            "Ignoring any caches and crawls, %s URL reads are expected daily, i.e. once every %s on an average.",
-            f"{round(num_reads_daily):,}",
-            timedelta_desc(datetime.timedelta(days=1) / num_reads_daily),
-        )
+        read_period_msg = f"Ignoring any caches and crawls, {round(num_reads_daily):,} URL reads are expected daily."
+        if num_reads_daily:
+            avg_read_period = timedelta_desc(datetime.timedelta(days=1) / num_reads_daily)
+            read_period_msg += f" That's once every {avg_read_period} on an average."
+        log.info(read_period_msg)
 
 
 # Refs: https://tools.ietf.org/html/rfc1459 https://modern.ircdocs.horse
@@ -300,27 +333,41 @@ def _handle_join(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[s
 
 
 @miniirc.Handler("PRIVMSG", colon=False)
-def _handle_privmsg(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
+def _handle_privmsg(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     # Parse message
     log.debug("Handling incoming message: hostmask=%s, args=%s", hostmask, args)
     channel = args[0]
+    user, ident, hostname = hostmask
+    msg = args[-1]
+    is_channel_msg = channel.casefold() in config.INSTANCE["channels:casefold"]
+    is_private_msg = channel.casefold() == config.runtime.nick_casefold
+    sender = f"{user}!{ident}@{hostname}"
+    is_command = (
+        (admin := config.INSTANCE.get("admin"))
+        and fnmatch.fnmatch(sender, admin)  # pylint: disable=used-before-assignment
+        and (is_private_msg or (is_channel_msg and msg.strip().casefold().startswith(f"{config.runtime.nick_casefold}:")))
+    )
 
-    # Ignore if not actionable
-    if channel.casefold() not in config.INSTANCE["channels:casefold"]:
-        assert channel.casefold() == config.runtime.nick_casefold
-        user, ident, hostname = hostmask
-        msg = args[-1]
-        if msg != "\x01VERSION\x01":
-            # Ignoring private message from freenode-connect having ident frigg
-            # and hostname freenode/utility-bot/frigg: VERSION
-            config.runtime.alert(
-                f"Ignoring private message from {user} having ident {ident} and hostname {hostname}: {msg}", log.warning,
-            )
-        return
+    # Check assumptions for safety
+    assert is_channel_msg != is_private_msg  # Ref: https://stackoverflow.com/a/433161/
 
     # Update channel last message time
-    Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel] = msg_time = time.monotonic()
-    log.debug("Updated the last incoming message time for %s to %s.", channel, msg_time)
+    if is_channel_msg:
+        Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel] = msg_time = time.monotonic()
+        log.debug("Updated the last incoming message time for %s to %s.", channel, msg_time)
+
+    # Alert if non-command PM
+    if is_private_msg and (not is_command) and (msg != "\x01VERSION\x01"):
+        # Ignoring private message from freenode-connect having ident frigg and hostname freenode/utility-bot/frigg: VERSION
+        config.runtime.alert(f"Ignoring private message from {sender}: {msg}", log.warning)
+
+    # Execute if command
+    if is_command and (command := (msg.strip() if is_private_msg else msg.split(":", 1)[1].strip())):
+        log.info(f"Received command from {sender}: {command}")
+        if command == "exit":
+            Bot.exit(irc, code=0)
+        elif command == "fail":
+            Bot.exit(irc, code=1)
 
 
 @miniirc.Handler(332, colon=False)
