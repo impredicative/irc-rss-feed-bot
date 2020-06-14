@@ -71,6 +71,7 @@ A full-fledged real-world example is also
 host: chat.freenode.net
 ssl_port: 6697
 nick: MyFeed[bot]
+admin: mynick!myident@myhost
 alerts_channel: '##mybot-alerts'
 mode:
 defaults:
@@ -248,6 +249,9 @@ feeds:
 * **`nick`**: This is a registered IRC nick. If the nick is in use, it will be regained.
 
 ##### Optional
+* **`admin`**: Administrative commands by this user pattern are accepted and executed.
+Its format is `nick!ident@host`. An example is `JDoe11!sid654321@gateway/web/irccloud.com/x-abcdefgh`.
+A case-insensitive pattern match is tested for using [`fnmatch`](https://docs.python.org/3/library/fnmatch.html).
 * **`alerts_channel`**: Some but not all warning and error alerts are sent to the this channel.
 Its default value is `##{nick}-alerts`. The key `{nick}`, if present in the value, is formatted with the actual nick.
 For example, if the nick is `MyFeed[bot]`, alerts will by default be sent to `##MyFeed[bot]-alerts`.
@@ -436,7 +440,19 @@ Refer to the embedded sample configuration for a usage example.
 
 Note that even if a default of `shorten: false` is set, the `BITLY_TOKENS` environment variable is still required.
 
-### Deployment
+### Commands
+Administrative commands can be sent by the configured `admin` to the bot either as a private message or as a directed public message.
+If `admin` is not configured, the commands are not processed.
+Private messages may however be prohibited for security purposes using the `mode` configuration.
+Public messages to the bot must be directed as `MyBotNick: my_command`.
+It is expected but not required that public messages to the bot will typically be sent in the `alerts_channel`.
+The supported commands are:
+* **`exit`**: Gracefully exit with code 0. The exit is delayed until any feeds that are currently being posted finish posting and being written to the database.
+If running the bot as a Docker Compose service, using this command with `restart: on-failure` will (due to code 0) prevent the bot from automatically restarting.
+* **`fail`**: Similar to `exit` but with code 1.
+If running the bot as a Docker Compose service, using this command with `restart: on-failure` will (due to a nonzero code) cause the bot to automatically be restarted.
+
+## Deployment
 * As a reminder, it is recommended that the alerts channel be registered and monitored.
 
 * It is recommended that the bot be auto-voiced (+V) in each channel.
@@ -452,7 +468,7 @@ services:
   irc-rss-feed-bot:
     container_name: irc-rss-feed-bot
     image: ascensive/irc-rss-feed-bot:<VERSION>
-    restart: always
+    restart: on-failure:3
     logging:
       options:
         max-size: 2m
@@ -474,12 +490,14 @@ services:
 * From the directory containing `docker-compose.yml`, run `docker-compose up -d irc-rss-feed-bot`.
 Use `docker logs -f irc-rss-feed-bot` to see and follow informational logs.
 
-### Maintenance
-#### Config
+## Maintenance
+### Service
+It is recommended that the supported administrative commands be used together with Docker Compose or a comparable container service manager to shutdown or restart the service.
+### Config
 * If `config.yaml` is updated, the container must be restarted to use the updated file.
 * If `secrets.env` or the service definition in `docker-compose.yml` are updated, the container must be recreated
 (and not merely restarted) to use the updated file.
-#### Database
+### Database
 * A `posts.v2.db` database file is written by the bot in the same directory as `config.yaml`.
 This database file must be preserved with routine backups. After restoring a backup, before starting the container,
 ensure the database file is writable by running a command such as `chmod a+w ./irc-rss-feed-bot/posts.v2.db`.
@@ -489,7 +507,7 @@ database file if it has grown unacceptably large.
 Restarting the bot after deleting the database will then create a new database file, and all configured feeds will be
 handled as new.
 This deletion is however discouraged as a routine measure.
-#### Disk cache
+### Disk cache
 * An ephemeral directory `/app/.ircrssfeedbot_cache` is written by the bot in the container.
 Its size is limited to approximately 2 GiB.
 If needed, this directory can optionally be mounted as an external volume.
