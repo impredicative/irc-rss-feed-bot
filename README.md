@@ -27,8 +27,7 @@ Any websites with a mismatched _strong_ ETag are probabilistically detected, and
 for the duration of the process. Note that this detection is skipped for a _weak_ ETag.
 * Encoded Google News and FeedBurner URLs are decoded.
 
-For more features, see the customizable [global settings](#global-settings) and
-[feed-specific settings](#feed-specific-settings).
+For several more features, see the customizable [global](#global-settings) and [feed-specific](#feed-specific-settings) settings, and [commands](#commands).
 
 ## Links
 * Code: https://github.com/impredicative/irc-rss-feed-bot
