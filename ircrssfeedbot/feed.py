@@ -437,7 +437,7 @@ class Feed:
             timer = Timer()
             log.debug(f"Publishing {len(postable_entries)} entries for {self} to {publisher.name}.")
             result = publisher.publish(channel=self.channel, entries=postable_entries)
-            log.info(f"Published {len(postable_entries)} entries for {self} to {publisher.name} in {timer} with result: {dict_str(result)}")
+            log.info(f"Published {len(postable_entries)} entries for {self} to {publisher.name} in {timer():.1f}s with result: {dict_str(result)}")
 
         if num_publishers == 1:
             _publish(publisher=publishers[0])
