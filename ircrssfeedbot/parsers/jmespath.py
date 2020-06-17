@@ -6,7 +6,7 @@ from typing import Dict, List, cast
 import jmespath
 
 from ..entry import RawFeedEntry
-from .base import BaseParser
+from ._base import BaseParser
 
 
 @dataclasses.dataclass

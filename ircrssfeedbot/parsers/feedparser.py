@@ -7,7 +7,7 @@ import feedparser
 from ..entry import RawFeedEntry as BaseRawFeedEntry
 from ..gnews import decode_google_news_url
 from ..util.lxml import sanitize_xml
-from .base import BaseParser
+from ._base import BaseParser
 
 
 class RawFeedEntry(BaseRawFeedEntry):

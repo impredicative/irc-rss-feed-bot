@@ -1,4 +1,4 @@
-"""Base class with helper attributes and methods for parsers."""
+"""Base parser class with helper attributes and methods for parsers."""
 import abc
 import dataclasses
 from typing import Dict, List, Optional, Union
@@ -6,7 +6,7 @@ from typing import Dict, List, Optional, Union
 
 @dataclasses.dataclass  # type: ignore
 class BaseParser(abc.ABC):
-    """Base class with helper attributes and methods for parsers."""
+    """Base parser class with helper attributes and methods for parsers."""
 
     selector: Optional[str]  # Is None for feedparser.
     follower: Optional[str]

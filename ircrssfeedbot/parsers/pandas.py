@@ -9,7 +9,7 @@ import pandas as pd
 
 from .. import util
 from ..entry import RawFeedEntry
-from .base import BaseParser
+from ._base import BaseParser
 
 
 @dataclasses.dataclass

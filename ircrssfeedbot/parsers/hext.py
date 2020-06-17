@@ -6,7 +6,7 @@ from typing import Dict, List, cast
 import hext
 
 from ..entry import RawFeedEntry as BaseRawFeedEntry
-from .base import BaseParser
+from ._base import BaseParser
 
 
 class RawFeedEntry(BaseRawFeedEntry):
