@@ -79,7 +79,7 @@ class Bot:
         # Exit
         log.info(f"Gracefully exiting with code {code}.")
         irc.disconnect(auto_reconnect=False)
-        # Note: sys.exit doesn't exit all threads.
+        # Note: sys.exit doesn't exit the application as it doesn't exit all threads.
         os._exit(code)  # pylint: disable=protected-access
 
     @staticmethod
