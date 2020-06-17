@@ -249,7 +249,7 @@ feeds:
 
 ##### Optional
 * **`admin`**: Administrative commands by this user pattern are accepted and executed.
-Its format is `nick!ident@host`. An example is `JDoe11!sid654321@gateway/web/irccloud.com/x-abcdefgh`.
+Its format is `nick!ident@host`. An example is `JDoe11!sid654321@gateway/web/irccloud.com/x-*`.
 A case-insensitive pattern match is tested for using [`fnmatch`](https://docs.python.org/3/library/fnmatch.html).
 * **`alerts_channel`**: Some but not all warning and error alerts are sent to the this channel.
 Its default value is `##{nick}-alerts`. The key `{nick}`, if present in the value, is formatted with the actual nick.
