@@ -82,7 +82,7 @@ class Bot:
         # Drain all publishers
         for publisher in self._publishers:
             if not publisher.drain(blocking=False):
-                alerter(f"Draining {publisher}. If the publisher is not operational, this will complete only when it is operational.", log.info)
+                alerter(f"Draining {publisher}. If the publisher is not operational, this will retry until it is operational.", log.info)
                 publisher.drain()
 
         # Exit

@@ -32,7 +32,7 @@ class BasePublisher(abc.ABC):
 
         This method is expected to be called only after external calls to `publish` have ended and stopped.
         """
-        if blocking:
+        if not blocking:
             return not self._publish_queue
         while self._publish_queue:
             channel = next(iter(self._publish_queue))
