@@ -20,6 +20,7 @@ class BasePublisher(abc.ABC):
         self.name = name
         self.config = config.INSTANCE["publish"][self.name]
         self._publish_lock = threading.Lock()  # May not be necessary, but used anyway for safety.
+        self._publish_queue: Dict[str, pd.DataFrame] = {}  # Only for retries of failed publishes.
         log.info(f"Initalizing {self.name} publisher.")
 
     @staticmethod
@@ -35,17 +36,22 @@ class BasePublisher(abc.ABC):
     def publish(self, channel: str, entries: List[FeedEntry]) -> Dict[str, Any]:  # type: ignore
         """Return the result after resiliently publishing the given entries for the given channel."""
         assert entries
-        num_entries = len(entries)
         df_entries = self.entries_df(entries)
         max_attempts = config.PUBLISH_ATTEMPTS_MAX
         with self._publish_lock:
+            df_entries = pd.concat((self._publish_queue.pop(channel, None), df_entries))  # Requires channel-level or broader lock.
+            num_entries = len(entries)
             for num_attempt in range(1, max_attempts + 1):
-                desc = f"{num_entries} entries of {channel} to {self.name} in attempt {num_attempt} of {max_attempts}"
+                desc_minimal = f"{num_entries:,} entries of {channel} to {self.name}"
+                desc = f"{desc_minimal} in attempt {num_attempt} of {max_attempts}"
                 try:
-                    return self._publish(channel, df_entries)
+                    return {**self._publish(channel, df_entries), **{"num_entries": num_entries}}
                 except Exception as exc:  # pylint: disable=broad-except
-                    log.info(f"Error publishing {desc}: {exc}")
-                    if num_attempt == max_attempts:
-                        # TODO: Consider saving unpublished entries in memory until a future retry is successful.
+                    if num_attempt < max_attempts:
+                        log.info(f"Error publishing {desc}: {exc}")
+                    else:
+                        assert num_attempt == max_attempts
+                        self._publish_queue[channel] = df_entries
+                        config.runtime.alert(f"Failed to publish {desc_minimal}. The entries are queued. The error was: {exc}")
                         raise exc from None
                     time.sleep(2 ** num_attempt)
