@@ -27,16 +27,17 @@ log = logging.getLogger(__name__)
 class Bot:
     """Bot."""
 
-    ACTIVE: bool = True
     CHANNEL_BUSY_LOCKS: Dict[str, threading.Lock] = {}
     CHANNEL_JOIN_EVENTS: Dict[str, threading.Event] = {}
     CHANNEL_LAST_INCOMING_MSG_TIMES: Dict[str, float] = {}
     CHANNEL_QUEUES: Dict[str, queue.Queue] = {}
+    EXITCODE_QUEUE: queue.SimpleQueue = queue.SimpleQueue()
     FEED_GROUP_BARRIERS: Dict[str, threading.Barrier] = {}
 
     def __init__(self) -> None:
         log.info(f"Initializing bot as: {subprocess.check_output('id', text=True).rstrip()}")  # pylint: disable=unexpected-keyword-arg
         instance = config.INSTANCE
+        self._active = True
         self._outgoing_msg_lock = threading.Lock()  # Used for rate limiting across multiple channels.
         self._db = Database()
         self._url_shortener = bitlyshortener.Shortener(
@@ -63,23 +64,24 @@ class Bot:
         self._setup_alerter()
         self._setup_channels()
         self._log_config()
+        self._exit()  # Blocks.
 
-    @classmethod
-    def exit(cls, irc: miniirc.IRC, code: int = 0) -> None:
+    def _exit(self) -> None:
+        code = self.EXITCODE_QUEUE.get()
+        self._active = False
         log.info(f"Initiated graceful exit with code {code}.")
         alerter = config.runtime.alert
-        cls.ACTIVE = False
 
         # Acquire all channel busy locks
         for channel in config.INSTANCE["feeds"]:
-            channel_lock = cls.CHANNEL_BUSY_LOCKS[channel]
+            channel_lock = self.CHANNEL_BUSY_LOCKS[channel]
             if not channel_lock.acquire(blocking=False):
                 alerter(f"Draining {channel}.", log.info)
                 channel_lock.acquire()
 
         # Exit
         log.info(f"Gracefully exiting with code {code}.")
-        irc.disconnect(auto_reconnect=False)
+        self._irc.disconnect(auto_reconnect=False)
         # Note: sys.exit doesn't exit the application as it doesn't exit all threads.
         os._exit(code)  # pylint: disable=protected-access
 
@@ -102,7 +104,7 @@ class Bot:
         self.CHANNEL_JOIN_EVENTS[channel].wait()
         self.CHANNEL_JOIN_EVENTS[instance["alerts_channel"]].wait()
         log.info(f"Channel messenger for {channel} has started.")
-        while self.ACTIVE:  # pylint: disable=too-many-nested-blocks
+        while self._active:  # pylint: disable=too-many-nested-blocks
             feed = channel_queue.get()
             log.debug(f"Dequeued {feed}.")
             min_channel_idle_time = feed.reader.min_channel_idle_time
@@ -170,10 +172,10 @@ class Bot:
         log.debug(f"Feed reader for feed {feed_name} of {channel} has initialized and is waiting to be notified of channel join.")
 
         query_time = time.monotonic() - (feed_period_avg / 2)  # Delays first read by half of feed period.
-        Bot.CHANNEL_JOIN_EVENTS[channel].wait()
-        Bot.CHANNEL_JOIN_EVENTS[instance["alerts_channel"]].wait()
+        self.CHANNEL_JOIN_EVENTS[channel].wait()
+        self.CHANNEL_JOIN_EVENTS[instance["alerts_channel"]].wait()
         log.debug(f"Feed reader for feed {feed_name} of {channel} has started.")
-        while self.ACTIVE:
+        while self._active:
             feed_period = random.uniform(feed_period_min, feed_period_max)
             query_time = max(time.monotonic(), query_time + feed_period)  # "max" is used in case of wait using "put".
             sleep_time = max(0.0, query_time - time.monotonic())
@@ -342,7 +344,7 @@ def _handle_join(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[s
 
 
 @miniirc.Handler("PRIVMSG", colon=False)
-def _handle_privmsg(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
+def _handle_privmsg(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     # Parse message
     log.debug("Handling incoming message: hostmask=%s, args=%s", hostmask, args)
     channel = args[0]
@@ -374,9 +376,9 @@ def _handle_privmsg(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List
     if is_command and (command := (msg.strip() if is_private_msg else msg.split(":", 1)[1].strip())):
         log.info(f"Received command from {sender}: {command}")
         if command == "exit":
-            Bot.exit(irc, code=0)
+            Bot.EXITCODE_QUEUE.put(0)
         elif command == "fail":
-            Bot.exit(irc, code=1)
+            Bot.EXITCODE_QUEUE.put(1)
 
 
 @miniirc.Handler(332, colon=False)
