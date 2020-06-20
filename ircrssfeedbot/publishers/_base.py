@@ -1,9 +1,10 @@
 """Base publisher class with helper attributes and methods for publishers."""
 import abc
+import itertools
 import logging
 import threading
 import time
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 import pandas as pd
 
@@ -23,35 +24,51 @@ class BasePublisher(abc.ABC):
         self._publish_queue: Dict[str, pd.DataFrame] = {}  # Only for retries of failed publishes.
         log.info(f"Initalizing {self.name} publisher.")
 
+    def __str__(self) -> str:
+        return f"{self.name} publisher"
+
+    def drain(self, blocking: bool = True) -> bool:
+        """Return a success indicator after draining the queue.
+
+        This method is expected to be called only after external calls to `publish` have ended and stopped.
+        """
+        if blocking:
+            return not self._publish_queue
+        while self._publish_queue:
+            channel = next(iter(self._publish_queue))
+            log.info(f"Draining channel {channel} of {self}.")
+            self.publish(channel, entries=[], max_attempts=float("inf"))
+        return True
+
     @staticmethod
     def entries_df(entries: List[FeedEntry]) -> pd.DataFrame:
         """Return a dataframe corresponding to the given entries."""
+        columns = ["channel", "feed", "title", "long_url", "short_url"]  # Ensures columns in dataframe if `entries` is empty.
         entries = ({"channel": e.feed_reader.channel, "feed": e.feed_reader.name, "title": e.title, "long_url": e.long_url, "short_url": e.short_url} for e in entries)
-        return pd.DataFrame(entries, dtype="string")
+        return pd.DataFrame(entries, columns=columns, dtype="string")
 
     @abc.abstractmethod
     def _publish(self, channel: str, df_entries: pd.DataFrame) -> Dict[str, Any]:
         """Return the result after publishing the given entries for the given channel."""
 
-    def publish(self, channel: str, entries: List[FeedEntry]) -> Dict[str, Any]:  # type: ignore
-        """Return the result after resiliently publishing the given entries for the given channel."""
-        assert entries
+    def publish(self, channel: str, entries: List[FeedEntry], max_attempts: Union[int, float] = config.PUBLISH_ATTEMPTS_MAX) -> Dict[str, Any]:  # type: ignore
+        """Return the result after publishing the given entries along with any previously queued entries for the given channel."""
         df_entries = self.entries_df(entries)
-        max_attempts = config.PUBLISH_ATTEMPTS_MAX
         with self._publish_lock:
             df_entries = pd.concat((self._publish_queue.pop(channel, None), df_entries))  # Requires channel-level or broader lock.
+            assert not df_entries.empty
             num_entries = len(entries)
-            for num_attempt in range(1, max_attempts + 1):
+            for num_attempt in itertools.count(start=1):
                 desc_minimal = f"{num_entries:,} entries of {channel} to {self.name}"
                 desc = f"{desc_minimal} in attempt {num_attempt} of {max_attempts}"
                 try:
                     return {**self._publish(channel, df_entries), **{"num_entries": num_entries}}
                 except Exception as exc:  # pylint: disable=broad-except
-                    if num_attempt < max_attempts:
-                        log.info(f"Error publishing {desc}: {exc}")
-                    else:
-                        assert num_attempt == max_attempts
+                    if num_attempt == max_attempts:
                         self._publish_queue[channel] = df_entries
                         config.runtime.alert(f"Failed to publish {desc_minimal}. The entries are queued. The error was: {exc}")
                         raise exc from None
-                    time.sleep(2 ** num_attempt)
+                    assert num_attempt < max_attempts
+                    sleep_time = min(config.PUBLISH_RETRY_SLEEP_MAX, 2 ** num_attempt)
+                    log.warning(f"Failed to publish {desc}. A reattempt will be made in {sleep_time}s. The error was: {exc}")
+                    time.sleep(sleep_time)

@@ -79,6 +79,12 @@ class Bot:
                 alerter(f"Draining {channel}.", log.info)
                 channel_lock.acquire()
 
+        # Drain all publishers
+        for publisher in self._publishers:
+            if not publisher.drain(blocking=False):
+                alerter(f"Draining {publisher}. If the publisher is not operational, this will complete only when it is operational.", log.info)
+                publisher.drain()
+
         # Exit
         log.info(f"Gracefully exiting with code {code}.")
         self._irc.disconnect(auto_reconnect=False)
