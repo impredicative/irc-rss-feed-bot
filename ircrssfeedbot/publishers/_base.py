@@ -10,6 +10,7 @@ import pandas as pd
 
 from .. import config
 from ..feed import FeedEntry
+from ..util.dict import dict_str
 
 log = logging.getLogger(__name__)
 
@@ -37,7 +38,8 @@ class BasePublisher(abc.ABC):
         while self._publish_queue:
             channel = next(iter(self._publish_queue))
             log.info(f"Draining channel {channel} of {self}.")
-            self.publish(channel, entries=[], max_attempts=float("inf"))
+            result = self.publish(channel, entries=[], max_attempts=float("inf"))
+            log.info(f"Drained channel {channel} of {self} with result: {dict_str(result)}")
         return True
 
     @staticmethod

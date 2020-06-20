@@ -78,12 +78,14 @@ class Bot:
             if not channel_lock.acquire(blocking=False):
                 alerter(f"Draining {channel}.", log.info)
                 channel_lock.acquire()
+                alerter(f"Drained {channel}.", log.info)
 
         # Drain all publishers
         for publisher in self._publishers:
             if not publisher.drain(blocking=False):
                 alerter(f"Draining {publisher}. If the publisher is not operational, this will retry until it is operational.", log.info)
                 publisher.drain()
+                alerter(f"Drained {publisher}.", log.info)
 
         # Exit
         log.info(f"Gracefully exiting with code {code}.")
