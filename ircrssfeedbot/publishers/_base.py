@@ -43,9 +43,10 @@ class BasePublisher(abc.ABC):
     @staticmethod
     def entries_df(entries: List[FeedEntry]) -> pd.DataFrame:
         """Return a dataframe corresponding to the given entries."""
-        columns = ["channel", "feed", "title", "long_url", "short_url"]  # Ensures columns in dataframe if `entries` is empty.
-        entries = ({"channel": e.feed_reader.channel, "feed": e.feed_reader.name, "title": e.title, "long_url": e.long_url, "short_url": e.short_url} for e in entries)
-        return pd.DataFrame(entries, columns=columns, dtype="string")
+        if entries:
+            entries_gen = ({"channel": e.feed_reader.channel, "feed": e.feed_reader.name, "title": e.title, "long_url": e.long_url, "short_url": e.short_url} for e in entries)
+            return pd.DataFrame(entries_gen, dtype="string")
+        return pd.DataFrame([{}], columns=["channel", "feed", "title", "long_url", "short_url"], dtype="string").drop(labels=0)  # Workaround for https://git.io/Jfbjd
 
     @abc.abstractmethod
     def _publish(self, channel: str, df_entries: pd.DataFrame) -> Dict[str, Any]:
