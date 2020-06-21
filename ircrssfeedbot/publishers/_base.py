@@ -65,7 +65,7 @@ class BasePublisher(abc.ABC):
                 desc_minimal = f"{num_entries:,} entries of {channel} to {self.name}"
                 desc = f"{desc_minimal} in attempt {num_attempt} of {max_attempts}"
                 try:
-                    return {**self._publish(channel, df_entries), **{"num_entries": num_entries}}
+                    return {**self._publish(channel, df_entries), "num_entries": num_entries}
                 except Exception as exc:  # pylint: disable=broad-except
                     if num_attempt == max_attempts:
                         self._publish_queue[channel] = df_entries
