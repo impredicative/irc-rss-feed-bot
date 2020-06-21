@@ -60,7 +60,7 @@ class BasePublisher(abc.ABC):
         with self._publish_lock:
             df_entries = pd.concat((self._publish_queue.pop(channel, None), df_entries))  # Requires channel-level or broader lock.
             assert not df_entries.empty
-            num_entries = len(entries)
+            num_entries = len(df_entries)
             for num_attempt in itertools.count(start=1):
                 desc_minimal = f"{num_entries:,} entries of {channel} to {self.name}"
                 desc = f"{desc_minimal} in attempt {num_attempt} of {max_attempts}"
