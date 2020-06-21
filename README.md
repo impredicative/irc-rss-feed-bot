@@ -448,6 +448,7 @@ It is expected but not required that public messages to the bot will typically b
 The supported commands are:
 * **`exit`**: Gracefully exit with code 0. The exit is delayed until any feeds that are currently being posted finish posting and being written to the database.
 If running the bot as a Docker Compose service, using this command with `restart: on-failure` will (due to code 0) prevent the bot from automatically restarting.
+Note that a repeated invocation of this command has no effect.
 * **`fail`**: Similar to `exit` but with code 1.
 If running the bot as a Docker Compose service, using this command with `restart: on-failure` will (due to a nonzero code) cause the bot to automatically be restarted.
 
