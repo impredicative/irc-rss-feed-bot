@@ -484,7 +484,7 @@ services:
   [versioned tag](https://hub.docker.com/r/ascensive/irc-rss-feed-bot/tags?ordering=last_updated), e.g. `0.9.16`.
   * `volumes`: Customize the relative path to the previously created `config.yaml` file, e.g. `./irc-rss-feed-bot`.
   This volume source directory must be writable by the container using the UID defined in the Dockerfile; it is 999.
-  A simple way to ensure it is writable is to run a command such as `chmod a+w ./irc-rss-feed-bot` once on the host.
+  A simple way to ensure it is writable is to run a command such as `chmod -R a+w ./irc-rss-feed-bot` once on the host.
   * `env_file`: Customize the relative path to `secrets.env`.
 
 * From the directory containing `docker-compose.yml`, run `docker-compose up -d irc-rss-feed-bot`.
