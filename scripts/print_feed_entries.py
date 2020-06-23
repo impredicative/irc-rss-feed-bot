@@ -7,6 +7,8 @@ CLI arg example: --config-path ~/irc-rss-feed-bot/config.yaml
 Customize CHANNEL and FEED.
 """
 
+# pylint: disable=import-error,invalid-name
+
 import logging
 
 from ircrssfeedbot import config
@@ -17,9 +19,6 @@ from ircrssfeedbot.url import URLReader
 # import os
 #
 # import bitlyshortener
-
-
-# pylint: disable=invalid-name
 
 CHANNEL = "##servicebot"  # CUSTOMIZE
 # FEED = "stats:🌎"  # World
