@@ -477,6 +477,8 @@ services:
       - ./irc-rss-feed-bot:/config
     env_file:
       - ./irc-rss-feed-bot/secrets.env
+    environment:
+      TZ: America/New_York
 ```
 
 * In the above service definition in `docker-compose.yml`:
@@ -486,6 +488,9 @@ services:
   This volume source directory must be writable by the container using the UID defined in the Dockerfile; it is 999.
   A simple way to ensure it is writable is to run a command such as `chmod -R a+w ./irc-rss-feed-bot` once on the host.
   * `env_file`: Customize the relative path to `secrets.env`.
+  * `environment`: Optionally customize the environment variable `TZ` to the preferred time zone 
+  as represented by a [TZ database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List).
+  Note that the date and time are prefixed in each log message.
 
 * From the directory containing `docker-compose.yml`, run `docker-compose up -d irc-rss-feed-bot`.
 Use `docker logs -f irc-rss-feed-bot` to see and follow informational logs.
