@@ -47,6 +47,7 @@ class Bot:
 
         # Setup miniirc
         log.debug("Initializing IRC client.")
+        config.runtime.nick_casefold = instance["nick"].casefold()  # Prevents AttributeError if RPL_LOGGEDIN (900) is not sent by server, but is not always an accurate value.
         config.runtime.channel_topics = {}
         self._irc = miniirc.IRC(
             ip=instance["host"],
