@@ -305,7 +305,7 @@ class Bot:
 @miniirc.Handler(900, colon=False)
 def _handle_900_loggedin(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     # Parse message
-    log.debug("Handling RPL_LOGGEDIN (900): hostmask=%s, args=%s", hostmask, args)
+    log.info("Handling RPL_LOGGEDIN (900): hostmask=%s, args=%s", hostmask, args)
     runtime_config = config.runtime
     runtime_config.identity = identity = args[1]
     nick = identity.split("!", 1)[0]
