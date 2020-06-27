@@ -18,7 +18,7 @@ diskcache==4.1.0          # via -r requirements.in
 dressup==0.1.1            # via -r requirements.in
 feedparser==5.2.1         # via -r requirements.in
 hext==0.2.5               # via -r requirements.in
-html5lib==1.0.1           # via -r requirements.in
+html5lib==1.1             # via -r requirements.in
 humanize==2.4.0           # via -r requirements.in
 idna==2.9                 # via requests
 ircstyle==0.1.1           # via -r requirements.in
