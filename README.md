@@ -516,5 +516,6 @@ handled as new.
 This deletion is however discouraged as a routine measure.
 ### Disk cache
 * An ephemeral directory `/app/.ircrssfeedbot_cache` is written by the bot in the container.
-Its size is limited to approximately 2 GiB.
+It contains one or more independent disk caches.
+The size of each independent disk cache in this directory is limited to approximately 2 GiB.
 If needed, this directory can optionally be mounted as an external volume.
