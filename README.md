@@ -485,7 +485,7 @@ services:
 
 * In the above service definition in `docker-compose.yml`:
   * `image`: Use a specific
-  [versioned tag](https://hub.docker.com/r/ascensive/irc-rss-feed-bot/tags?ordering=last_updated), e.g. `0.9.16`.
+  [versioned tag](https://hub.docker.com/r/ascensive/irc-rss-feed-bot/tags?ordering=last_updated), e.g. `0.9.27`.
   * `volumes`: Customize the relative path to the previously created `config.yaml` file, e.g. `./irc-rss-feed-bot`.
   This volume source directory must be writable by the container using the UID defined in the Dockerfile; it is 999.
   A simple way to ensure it is writable is to run a command such as `chmod -R a+w ./irc-rss-feed-bot` once on the host.
