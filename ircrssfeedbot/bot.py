@@ -230,7 +230,7 @@ class Bot:
                 msg += f" while reading or processing feed {feed_name} of {channel}: {exc}"
                 if feed_config.get("alerts", {}).get("read", True) and (num_consecutive_failures >= config.MIN_CONSECUTIVE_FEED_FAILURES_FOR_ALERT):
                     alerter(msg)
-                    alerter("Either check the feed configuration, or wait for its next successful read, or set `alerts/read` to `false` for it.")
+                    alerter("Either check the feed configuration, or wait for its next successful read, or set `alerts.read` to `false` for it.")
                 else:
                     log.error(msg)  # Not logging as exception.
             else:
