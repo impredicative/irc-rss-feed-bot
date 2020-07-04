@@ -367,11 +367,6 @@ def _handle_nick(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[s
     runtime_config.alert(f"The updated client identity as <nick>!<user>@<host> is inferred to be {identity}.", log.info)
 
 
-@miniirc.Handler("NOTICE", colon=False)  # For investigative purposes.
-def _handle_notice(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
-    log.info("Received notice: hostmask=%s args=%s", hostmask, args)
-
-
 @miniirc.Handler("PRIVMSG", colon=False)
 def _handle_privmsg(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     # Parse message
