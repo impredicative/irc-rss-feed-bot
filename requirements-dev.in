@@ -8,9 +8,9 @@ pycodestyle
 pydocstyle
 pylint
 pytest
-pytest-pycodestyle
-pytest-pydocstyle
 pytest-isort
 pytest-mypy
+pytest-pycodestyle
+pytest-pydocstyle
 pytest-pylint
 wheel
