@@ -1,6 +1,6 @@
 autopep8
 black
-isort
+isort==4.*
 mypy
 pip
 pip-tools
