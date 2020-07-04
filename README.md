@@ -249,7 +249,7 @@ feeds:
 Ensure that the email verification of the registered nick, as applicable to many IRC servers, is complete.
 Without this email verification, the bot can fail to receive the required event 900 and therefore fail to function.
 
-##### Optional
+##### Recommended
 * **`admin`**: Administrative commands by this user pattern are accepted and executed.
 Its format is `nick!ident@host`. An example is `JDoe11!sid654321@gateway/web/irccloud.com/x-*`.
 A case-insensitive pattern match is tested for using [`fnmatch`](https://docs.python.org/3/library/fnmatch.html).
@@ -261,6 +261,9 @@ It is recommended that the alerts channel be registered and monitored.
 * **`mode`**: This can for example be `+igR` for [Freenode](https://freenode.net/kb/answer/usermodes) 
 and `+igpR` for [Rizon](https://wiki.rizon.net/index.php?title=User_Modes).
 Setting it is recommended.
+
+##### Developer
+* **`log.irc`**: If `true`, low level IRC events are logged by `miniirc`. These are quite noisy. Its default is `false`.
 * **`once`**: If `true`, each feed is queued only once. It is for testing purposes. Its default is `false`.
 * **`tracemalloc`**: If `true`, memory allocation tracing is enabled. The top usage and positive-diff statistics are then logged hourly.
 It is for diagnostic purposes. Its default is `false`.
