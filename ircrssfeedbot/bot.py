@@ -345,6 +345,11 @@ def _handle_join(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[s
     log.debug(f"Set the last incoming message time for {channel} to {msg_time}.")
 
 
+@miniirc.Handler("MODE", colon=False)  # For investigative purposes.
+def _handle_mode(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
+    log.info("Received mode: hostmask=%s args=%s", hostmask, args)
+
+
 @miniirc.Handler("NICK", colon=False)
 def _handle_nick(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     log.debug("Handling nick change: hostmask=%s, args=%s", hostmask, args)
@@ -362,7 +367,7 @@ def _handle_nick(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[s
     runtime_config.alert(f"The updated client identity as <nick>!<user>@<host> is inferred to be {identity}.", log.info)
 
 
-@miniirc.Handler("NOTICE", colon=False)
+@miniirc.Handler("NOTICE", colon=False)  # For investigative purposes.
 def _handle_notice(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     log.info("Received notice: hostmask=%s args=%s", hostmask, args)
 
