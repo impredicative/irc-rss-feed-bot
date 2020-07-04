@@ -3,7 +3,7 @@ bs4  # Required by pandas.read_html
 cachetools
 diskcache
 dressup
-feedparser
+feedparser==6.0.0b3
 hext
 html5lib  # Required by pandas.read_html
 humanize
