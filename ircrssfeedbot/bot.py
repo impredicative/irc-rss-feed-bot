@@ -302,6 +302,16 @@ class Bot:
 # Refs: https://tools.ietf.org/html/rfc1459 https://modern.ircdocs.horse
 
 
+@miniirc.Handler(332, colon=False)
+def _handle_332_notice(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
+    log.debug("Received initial topic: hostmask=%s args=%s", hostmask, args)
+    _nick, channel, topic = args
+
+    # Store topic
+    config.runtime.channel_topics[channel] = topic
+    log.debug(f"Received initial topic of {channel}: {topic}")
+
+
 @miniirc.Handler(900, colon=False)
 def _handle_900_loggedin(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     # Parse message
@@ -316,23 +326,6 @@ def _handle_900_loggedin(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args:
             f"The client nick was configured to be {config.INSTANCE['nick']} but it is {nick}. " "The configured nick will be regained.", log.warning,
         )
         irc.msg("nickserv", "REGAIN", config.INSTANCE["nick"], os.environ["IRC_PASSWORD"])
-
-
-@miniirc.Handler("NICK", colon=False)
-def _handle_nick(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
-    log.debug("Handling nick change: hostmask=%s, args=%s", hostmask, args)
-    old_nick, _ident, _hostname = hostmask
-    runtime_config = config.runtime
-
-    # Ignore if not actionable
-    if old_nick.casefold() != runtime_config.nick_casefold:
-        return
-
-    # Update identity, possibly after a nick regain
-    new_nick = args[0]
-    runtime_config.identity = identity = runtime_config.identity.replace(old_nick, new_nick, 1)
-    runtime_config.nick_casefold = new_nick.casefold()
-    runtime_config.alert(f"The updated client identity as <nick>!<user>@<host> is inferred to be {identity}.", log.info)
 
 
 @miniirc.Handler("JOIN", colon=False)
@@ -350,6 +343,23 @@ def _handle_join(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[s
     Bot.CHANNEL_JOIN_EVENTS[channel].set()
     Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel] = msg_time = time.monotonic()
     log.debug(f"Set the last incoming message time for {channel} to {msg_time}.")
+
+
+@miniirc.Handler("NICK", colon=False)
+def _handle_nick(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
+    log.debug("Handling nick change: hostmask=%s, args=%s", hostmask, args)
+    old_nick, _ident, _hostname = hostmask
+    runtime_config = config.runtime
+
+    # Ignore if not actionable
+    if old_nick.casefold() != runtime_config.nick_casefold:
+        return
+
+    # Update identity, possibly after a nick regain
+    new_nick = args[0]
+    runtime_config.identity = identity = runtime_config.identity.replace(old_nick, new_nick, 1)
+    runtime_config.nick_casefold = new_nick.casefold()
+    runtime_config.alert(f"The updated client identity as <nick>!<user>@<host> is inferred to be {identity}.", log.info)
 
 
 @miniirc.Handler("PRIVMSG", colon=False)
@@ -388,16 +398,6 @@ def _handle_privmsg(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: Lis
             Bot.EXITCODE_QUEUE.put(0)
         elif command == "fail":
             Bot.EXITCODE_QUEUE.put(1)
-
-
-@miniirc.Handler(332, colon=False)
-def _handle_332_notice(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
-    log.debug("Received initial topic: hostmask=%s args=%s", hostmask, args)
-    _nick, channel, topic = args
-
-    # Store topic
-    config.runtime.channel_topics[channel] = topic
-    log.debug(f"Received initial topic of {channel}: {topic}")
 
 
 @miniirc.Handler("TOPIC", colon=False)
