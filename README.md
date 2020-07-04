@@ -6,6 +6,31 @@ More specifically, it posts the titles and shortened URLs of entries.
 If viewing this readme on Docker Hub, note that it may be misformatted.
 In this case, it can be viewed correctly on [GitHub](https://github.com/impredicative/irc-rss-feed-bot).
 
+## Contents
+- [Features](#features)
+- [Links](#links)
+- [Examples](#examples)
+- [Usage](#usage)
+  * [Configuration: secret](#configuration--secret)
+  * [Configuration: non-secret](#configuration--non-secret)
+    + [Global settings](#global-settings)
+      - [Mandatory](#mandatory)
+      - [Recommended](#recommended)
+      - [Developer](#developer)
+    + [Feed-specific settings](#feed-specific-settings)
+      - [Mandatory](#mandatory-1)
+      - [Optional](#optional)
+      - [Parser](#parser)
+      - [Conditional](#conditional)
+    + [Feed default settings](#feed-default-settings)
+  * [Commands](#commands)
+- [Deployment](#deployment)
+- [Maintenance](#maintenance)
+  * [Service](#service)
+  * [Config](#config)
+  * [Database](#database)
+  * [Disk cache](#disk-cache)
+
 ## Features
 * Multiple channels on an IRC server are supported, with each channel having its own set of feeds.
 For use with multiple servers, a separate instance of the bot process can be run for each server.
