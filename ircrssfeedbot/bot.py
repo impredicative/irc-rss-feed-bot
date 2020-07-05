@@ -20,6 +20,7 @@ from .url import URLReader
 from .util.datetime import timedelta_desc
 from .util.humanize import humanize_bytes
 from .util.list import ensure_list
+from .util.str import list_irc_modes
 
 log = logging.getLogger(__name__)
 
@@ -305,7 +306,7 @@ class Bot:
 @miniirc.Handler(332, colon=False)
 def _handle_332_notice(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     log.debug("Received initial topic: hostmask=%s args=%s", hostmask, args)
-    _nick, channel, topic = args
+    _nick, channel, topic, *_ = args
 
     # Store topic
     config.runtime.channel_topics[channel] = topic
@@ -345,9 +346,32 @@ def _handle_join(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[s
     log.debug(f"Set the last incoming message time for {channel} to {msg_time}.")
 
 
-@miniirc.Handler("MODE", colon=False)  # For investigative purposes.
+@miniirc.Handler("MODE", colon=False)
 def _handle_mode(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
-    log.info("Received mode: hostmask=%s args=%s", hostmask, args)
+    log.debug("Received mode: hostmask=%s args=%s", hostmask, args)
+
+    if len(args) < 2:
+        return
+
+    target, mode, *_ = args
+    runtime_config = config.runtime
+    if target.casefold() != runtime_config.nick_casefold:
+        return
+
+    modes = list_irc_modes(mode)
+    if "+x" not in modes:  # Upon cloak as per https://wiki.rizon.net/index.php?title=User_Modes
+        return
+
+    nick, user, host = hostmask
+    if nick == host:
+        return
+
+    identity = f"{nick}!{user}@{host}"
+    if identity == runtime_config.identity:
+        return
+
+    runtime_config.identity = identity
+    log.info(f"The updated client identity as <nick>!<user>@<host> is inferred to be {identity}.")
 
 
 @miniirc.Handler("NICK", colon=False)
@@ -408,7 +432,7 @@ def _handle_privmsg(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: Lis
 @miniirc.Handler("TOPIC", colon=False)
 def _handle_topic(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     log.debug("Received updated topic: hostmask=%s, args=%s", hostmask, args)
-    channel, topic = args
+    channel, topic, *_ = args
     channel_topics = config.runtime.channel_topics
 
     # Store topic if changed
