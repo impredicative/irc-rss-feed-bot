@@ -498,7 +498,7 @@ services:
   irc-rss-feed-bot:
     container_name: irc-rss-feed-bot
     image: ascensive/irc-rss-feed-bot:<VERSION>
-    restart: on-failure:3
+    restart: on-failure
     logging:
       options:
         max-size: 2m
