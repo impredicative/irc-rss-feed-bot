@@ -67,7 +67,7 @@ SECONDS_BETWEEN_FEED_URLS: Final = 1
 SECONDS_PER_MESSAGE: Final = 2
 TEMPDIR: Final = Path(tempfile.gettempdir())
 TITLE_MAX_BYTES: Final = 2048  # Relevant for publishing.
-USER_AGENT_DEFAULT: Final = "Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0"
+USER_AGENT_DEFAULT: Final = "Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0"
 USER_AGENT_OVERRIDES: Final = {  # Site-specific overrides (without www prefix). Sites must be in lowercase.
     "medscape.com": "Googlebot-News",
     "m.youtube.com": "Mozilla/5.0",
