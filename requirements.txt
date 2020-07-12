@@ -19,11 +19,11 @@ dressup==0.1.1            # via -r requirements.in
 feedparser==6.0.0b3       # via -r requirements.in
 hext==0.2.5               # via -r requirements.in
 html5lib==1.1             # via -r requirements.in
-humanize==2.4.1           # via -r requirements.in
+humanize==2.5.0           # via -r requirements.in
 idna==2.10                # via requests
 ircstyle==0.1.1           # via -r requirements.in
 jmespath==0.10.0          # via -r requirements.in
-lxml==4.5.1               # via -r requirements.in
+lxml==4.5.2               # via -r requirements.in
 miniirc==1.6.2            # via -r requirements.in
 numpy==1.19.0             # via -r requirements.in, pandas
 orderedset==2.0.3         # via -r requirements.in
