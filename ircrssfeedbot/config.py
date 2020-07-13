@@ -69,10 +69,10 @@ TEMPDIR: Final = Path(tempfile.gettempdir())
 TITLE_MAX_BYTES: Final = 2048  # Relevant for publishing.
 USER_AGENT_DEFAULT: Final = "Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0"
 USER_AGENT_OVERRIDES: Final = {  # Site-specific overrides (without www prefix). Sites must be in lowercase.
+    "barrons.com": "(entropy)",
     "medscape.com": "Googlebot-News",
-    "m.youtube.com": "Mozilla/5.0",
+    "news.google.com": "(entropy)",
     "swansonvitamins.com": "FeedFetcher-Google; (+http://www.google.com/feedfetcher.html)",
-    "youtu.be": "Mozilla/5.0",
     "youtube.com": "Mozilla/5.0",
 }
 

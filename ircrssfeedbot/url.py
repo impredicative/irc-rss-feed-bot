@@ -142,16 +142,17 @@ class URLReader:
         else:
             log.debug(f"Cache does not have URL content for {url}.")
 
-        # Define request headers
+        # Define netloc overrides
         netloc = url_to_netloc(url)
         # request_headers = {"User-Agent": config.USER_AGENT_OVERRIDES.get(netloc, config.USER_AGENT_DEFAULT)}
         if netloc in config.USER_AGENT_OVERRIDES:
             user_agent = config.USER_AGENT_OVERRIDES[netloc]
-        elif netloc == "news.google.com":
-            # Attempt to avoid the server's possible response cache for UA.
-            user_agent = secrets.token_urlsafe(secrets.choice(range(48, 64)))
+            if user_agent == "(entropy)":
+                user_agent = secrets.token_urlsafe(secrets.choice(range(48, 64)))
         else:
             user_agent = config.USER_AGENT_DEFAULT
+
+        # Define request headers
         request_headers = {"User-Agent": user_agent}
         has_cached_etag = bool(cached_url_content and cached_url_content.etag)
         is_etag_cache_allowed = netloc not in config.ETAG_CACHE_PROHIBITED_NETLOCS
