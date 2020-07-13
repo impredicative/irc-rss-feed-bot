@@ -290,7 +290,7 @@ class FeedReader:
                     log.warning(log_msg)
 
             # Sleep between URLs
-            if urls_pending:
+            if urls_pending and url_content.is_cache_miss:
                 time_elapsed_since_url_read = time.monotonic() - url_read_finish_time
                 sleep_time = max(0, config.SECONDS_BETWEEN_FEED_URLS - time_elapsed_since_url_read)
                 if sleep_time > 0:

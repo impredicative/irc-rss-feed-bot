@@ -69,6 +69,16 @@ class URLContent:
         return "weak"
 
     @property
+    def is_cache_hit(self) -> bool:
+        """Return whether the URL read was a cache hit."""
+        return self.approach == self.Approach.CACHE_HIT
+
+    @property
+    def is_cache_miss(self) -> bool:
+        """Return whether the URL read was a cache miss."""
+        return not self.is_cache_hit
+
+    @property
     def is_etag_strong(self) -> bool:
         """Return whether the ETag is a strong ETag.
 
