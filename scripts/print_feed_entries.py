@@ -27,8 +27,9 @@ CHANNEL = "##servicebot"  # CUSTOMIZE
 # FEED = "stats:🇷🇺"  # Russia
 # FEED = "stats:🇨🇳"  # China
 FEED = "COVID-19:stats:USA:NY"
-CHANNEL, FEED = "##data", "UrsaLabs"
-CHANNEL, FEED = "##us-market-news", "WSoP"
+# CHANNEL, FEED = "##trading", "blog:FiveThirtyEight"
+# # CHANNEL, FEED = "##data", "TDS"
+# CHANNEL, FEED = "##us-market-news", "Investors"
 
 config.LOGGING["loggers"][config.PACKAGE_NAME]["level"] = "DEBUG"  # type: ignore
 config.configure_logging()
