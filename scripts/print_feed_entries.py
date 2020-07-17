@@ -28,7 +28,7 @@ CHANNEL = "##servicebot"  # CUSTOMIZE
 # FEED = "stats:🇨🇳"  # China
 FEED = "COVID-19:stats:USA:NY"
 # CHANNEL, FEED = "##trading", "blog:FiveThirtyEight"
-# # CHANNEL, FEED = "##data", "TDS"
+CHANNEL, FEED = "##CoV", "PubMed"
 # CHANNEL, FEED = "##us-market-news", "Investors"
 
 config.LOGGING["loggers"][config.PACKAGE_NAME]["level"] = "DEBUG"  # type: ignore
@@ -50,7 +50,7 @@ url_reader = URLReader(max_cache_age=3600)
 feed = FeedReader(
     channel=CHANNEL, name=FEED, irc=None, db=None, url_reader=url_reader, url_shortener=None, publishers=None,  # type: ignore
 ).read()
-for index, entry in enumerate(feed.entries[:100]):
+for index, entry in enumerate(feed.entries):
     post = f"\n#{index + 1:,}: {entry.message}"
     if entry.categories:
         post += "\nCategories: " + "; ".join(entry.categories)
