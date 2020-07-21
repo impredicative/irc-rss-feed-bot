@@ -35,7 +35,10 @@ def _parse_entries(parser_name: str, selector: Optional[str], follower: Optional
 
     Parser = getattr(parsers, parser_name).Parser  # pylint: disable=invalid-name
     parser = Parser(selector=selector, follower=follower, content=url_content)
-    return parser.entries, parser.urls  # pylint: disable=no-member
+    try:
+        return parser.entries, parser.urls  # pylint: disable=no-member
+    except Exception as exception:
+        raise ChildProcessError(f"{exception.__class__.__module__}.{exception.__class__.__qualname__}: {exception}")  # Prevents possible pickle error of original exception.
 
 
 @lru_cache(maxsize=None)  # maxsize is bounded by a multiple of the number of feeds.
