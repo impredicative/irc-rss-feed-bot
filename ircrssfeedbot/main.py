@@ -3,6 +3,7 @@ import argparse
 import collections
 import json
 import logging
+import os
 from pathlib import Path
 
 from ruamel.yaml import YAML
@@ -29,9 +30,6 @@ def load_instance_config(log_details: bool = True) -> None:  # pylint: disable=t
     log.info("Read user configuration file %s", instance_config_path)
     if "taxonomies" in instance_config:
         del instance_config["taxonomies"]
-
-    if instance_config.get("tracemalloc"):
-        TraceMalloc().start()
 
     if not instance_config["feeds"]:
         instance_config["feeds"] = {}
@@ -91,5 +89,7 @@ def load_instance_config(log_details: bool = True) -> None:  # pylint: disable=t
 
 def main() -> None:
     """Start the bot."""
+    if os.getenv("IRCRSSFEEDBOT_TRACEMALLOC"):
+        TraceMalloc().start()
     load_instance_config()
     Bot()
