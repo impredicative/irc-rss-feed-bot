@@ -45,6 +45,7 @@ ETAG_CACHE_PROHIBITED_NETLOCS: Final = {
     "devblogs.nvidia.com",
     "export.arxiv.org",
     "news.developer.nvidia.com",
+    "protonmail.com",
     "rise.cs.berkeley.edu",
     "siliconangle.com",
 }
