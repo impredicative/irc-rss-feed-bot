@@ -27,7 +27,7 @@ lxml==4.5.2               # via -r requirements.in
 miniirc==1.6.2            # via -r requirements.in
 numpy==1.19.1             # via -r requirements.in, pandas
 orderedset==2.0.3         # via -r requirements.in
-pandas==1.0.5             # via -r requirements.in
+pandas==1.1.0             # via -r requirements.in
 peewee==3.13.3            # via -r requirements.in
 pprintpp==0.4.0           # via rich
 psutil==5.7.2             # via -r requirements.in
