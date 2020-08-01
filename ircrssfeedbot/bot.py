@@ -168,7 +168,9 @@ class Bot:
         feed_period_avg = max(config.PERIOD_HOURS_MIN, feed_config.get("period", config.PERIOD_HOURS_DEFAULT)) * 3600
         feed_period_min = feed_period_avg * (1 - config.PERIOD_RANDOM_PERCENT / 100)
         feed_period_max = feed_period_avg * (1 + config.PERIOD_RANDOM_PERCENT / 100)
+
         num_consecutive_failures = 0
+        last_failure_alert_time = float("-inf")
 
         feed_reader = FeedReader(
             channel=channel,
@@ -229,9 +231,14 @@ class Bot:
                 if num_consecutive_failures > 1:
                     msg += f" {num_consecutive_failures} consecutive times"
                 msg += f" while reading or processing feed {feed_name} of {channel}: {exc}"
-                if feed_config.get("alerts", {}).get("read", True) and (num_consecutive_failures >= config.MIN_CONSECUTIVE_FEED_FAILURES_FOR_ALERT):
+                if (
+                    feed_config.get("alerts", {}).get("read", True)
+                    and (num_consecutive_failures >= config.MIN_CONSECUTIVE_FEED_FAILURES_FOR_ALERT)
+                    and ((failure_time := time.monotonic()) >= (last_failure_alert_time + config.MIN_FEED_INTERVAL_FOR_REPEATED_ALERT))
+                ):
                     alerter(msg)
                     alerter("Either check the feed configuration, or wait for its next successful read, or set `alerts.read` to `false` for it.")
+                    last_failure_alert_time = failure_time
                 else:
                     log.error(msg)  # Not logging as exception.
             else:

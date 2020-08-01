@@ -312,7 +312,8 @@ These are optional and are independent of each other:
 * **`<feed>.alerts.empty`**: If `true`, an alert is sent if the feed has no entries. If `false`, such an alert
 is not sent. Its default value is `true`.
 * **`<feed>.alerts.read`**: If `true`, an alert is sent if an error occurs three or more consecutive times 
-when reading or processing the feed. If `false`, such an alert is not sent. Its default value is `true`.
+when reading or processing the feed, but no more than once every 15 minutes.
+If `false`, such an alert is not sent. Its default value is `true`.
 * **`<feed>.blacklist.category`**: This is an arbitrarily nested dictionary or list or their mix of regular 
 expression patterns that result in an entry being skipped if a 
 [search](https://docs.python.org/3/library/re.html#re.search) finds any of the patterns in any of the categories of the 

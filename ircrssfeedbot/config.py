@@ -53,6 +53,7 @@ FEED_DEFAULTS: Final = {"new": "some", "shorten": True}
 IRC_COLORS: Final = set(ircstyle.colors.idToName.values())
 MIN_CHANNEL_IDLE_TIME_DEFAULT: Final = {"dev": 1}.get(ENV, 15 * 60)
 MIN_CONSECUTIVE_FEED_FAILURES_FOR_ALERT: Final = 3
+MIN_FEED_INTERVAL_FOR_REPEATED_ALERT: Final = 15 * 60
 NEW_FEED_POSTS_MAX: Final = {"none": 0, "some": 3, "all": None}
 PERIOD_HOURS_DEFAULT: Final = 1
 PERIOD_HOURS_MIN: Final = {"dev": 0.0001}.get(ENV, 0.2)
