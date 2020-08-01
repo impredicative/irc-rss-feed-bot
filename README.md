@@ -290,6 +290,8 @@ Setting it is recommended.
 ##### Developer
 * **`log.irc`**: If `true`, low level IRC events are logged by `miniirc`. These are quite noisy. Its default is `false`.
 * **`once`**: If `true`, each feed is queued only once. It is for testing purposes. Its default is `false`.
+* **`tracemalloc`**: If `true`, memory allocation tracing is enabled. The top usage and positive-diff statistics are then logged hourly.
+It is for diagnostic purposes. Its default is `false`.
 
 #### Feed-specific settings
 A feed is defined under a channel as in the sample configuration. The feed's key represents its name.
