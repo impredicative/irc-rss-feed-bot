@@ -441,7 +441,7 @@ match if there is one.
 * **`<feed>.format.re.url`**: Similar to `<feed>.format.re.title`.
 * **`<feed>.format.str.title`**: The key-value pairs collected using `<feed>.format.re.title` and 
 `<feed>.format.re.url`, 
-both of which are optional, are combined along with the default additions of `title`, `url`, and `categories` as keys.
+both of which are optional, are combined along with the default additions of `title`, `url`, `categories`, and `feed.url` as keys.
 Any additional keys returned by the parser are also available.
 The key-value pairs are used to [format](https://docs.python.org/3/library/stdtypes.html#str.format_map) the provided
 quoted title string.

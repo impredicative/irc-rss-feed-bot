@@ -7,6 +7,7 @@ import multiprocessing as mp
 import multiprocessing.pool
 import re
 import time
+import types
 from functools import cached_property, lru_cache
 from typing import Callable, Dict, List, Optional, Pattern, Tuple
 
@@ -38,7 +39,8 @@ def _parse_entries(parser_name: str, selector: Optional[str], follower: Optional
     try:
         return parser.entries, parser.urls  # pylint: disable=no-member
     except Exception as exception:
-        raise ChildProcessError(f"{exception.__class__.__module__}.{exception.__class__.__qualname__}: {exception}")  # Prevents possible pickle error of original exception.
+        raise ChildProcessError(f"{exception.__class__.__module__}.{exception.__class__.__qualname__}: {exception}")  # pylint: disable=raise-missing-from
+        # Note: This prevents possible pickle error of original exception.
 
 
 @lru_cache(maxsize=None)  # maxsize is bounded by a multiple of the number of feeds.
@@ -169,6 +171,7 @@ class FeedReader:
             log.debug("Formatting entries for %s.", self)
             format_re = format_config.get("re") or {}
             format_str = format_config.get("str") or {}
+            feed_params = types.SimpleNamespace(url=feed_config["url"])
             for entry in entries:
                 # Collect:
                 params = {
@@ -177,6 +180,7 @@ class FeedReader:
                     "url": entry.long_url,
                     "summary": entry.summary,
                     "categories": entry.categories,
+                    "feed": feed_params,
                 }
                 for re_key, re_val in format_re.items():
                     if match := re.search(re_val, params[re_key]):
