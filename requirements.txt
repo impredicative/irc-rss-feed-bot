@@ -19,7 +19,7 @@ dressup==0.1.1            # via -r requirements.in
 feedparser==6.0.0b3       # via -r requirements.in
 hext==0.2.5               # via -r requirements.in
 html5lib==1.1             # via -r requirements.in
-humanize==2.5.0           # via -r requirements.in
+humanize==2.6.0           # via -r requirements.in
 idna==2.10                # via requests
 ircstyle==0.1.1           # via -r requirements.in
 jmespath==0.10.0          # via -r requirements.in
@@ -27,11 +27,11 @@ lxml==4.5.2               # via -r requirements.in
 miniirc==1.6.2            # via -r requirements.in
 numpy==1.19.1             # via -r requirements.in, pandas
 orderedset==2.0.3         # via -r requirements.in
-pandas==1.1.0             # via -r requirements.in
+pandas==1.1.1             # via -r requirements.in
 peewee==3.13.3            # via -r requirements.in
 pprintpp==0.4.0           # via rich
 psutil==5.7.2             # via -r requirements.in
-pygithub==1.51            # via -r requirements.in
+pygithub==1.53            # via -r requirements.in
 pygments==2.6.1           # via rich
 pyjwt==1.7.1              # via pygithub
 python-dateutil==2.8.1    # via pandas
