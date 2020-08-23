@@ -75,17 +75,22 @@ For several more features, see the customizable [global](#global-settings) and [
 Prepare a private `secrets.env` environment file using the sample below.
 ```ini
 IRC_PASSWORD=YourActualPassword
-BITLY_TOKENS=5e71a58b19582f48edcb0235637ac3536dd3b6dc,bd90119a7b617e81b293ddebbbfed3e955eac5af,42f309642a018e6b4d7cfba6854080719dccf0cc,0819552eb8b42e52dbc8b4c3e1654f5cd96c0dcc,430a002fe9d4e8f94097f7a5cd974ffce85eb605,71f9856bc96c6a8eabeac4f763daaec16896e183,81f6d477cfcef006a6dd35c4b947d1c1fdcbf445,06441b445c75d2251f0a56ae87506c69dc468af5,1e71089487fb70f42fff51b7ad49f192ffcb00f2
+BITLY_TOKENS=5e71a58b19582f48edcb0235637ac3536dd3b6dc,bd90119a7b617e81b293ddebbbfed3e955eac5af,42f309642a018e6b4d7cfba6854080719dccf0cc,0819552eb8b42e52dbc8b4c3e1654f5cd96c0dcc
+GITHUB_TOKEN=c81a62ca23caa140715bbfc175997c02d0fdd768
 ```
 
+#### BITLY_TOKENS
 Bitly tokens are required for shortening URLs.
 URL shortening is enabled for all feeds by default but can be disabled selectively per feed.
 The sample tokens above are for illustration only and are invalid.
 To obtain tokens, refer to [these instructions](https://github.com/impredicative/bitlyshortener#usage).
-Providing multiple comma-separated tokens, perhaps as many as 30 free ones or sufficient commercial ones, is required.
+Providing multiple comma-separated tokens, perhaps as many as 40 free ones or sufficient commercial ones, is required.
 Failing this, Bitly imposed rate limits for shortening URLs will lead to errors.
 If there are errors, the batched new entries in a feed may get reprocessed the next time the feed is read.
 It is safer to provide more tokens than are necessary.
+
+#### GITHUB_TOKEN
+Refer to the optional `publish.github` feature.
 
 ### Configuration: non-secret
 Prepare a version-controlled `config.yaml` file using the sample below.
@@ -98,6 +103,8 @@ nick: MyFeed[bot]
 admin: mynick!myident@myhost
 alerts_channel: '##mybot-alerts'
 mode:
+publish:
+  github: MyGithubServiceAccountUsername/IrcServerName-MyBotName-live
 defaults:
   new: all
 feeds:
@@ -286,6 +293,14 @@ It is recommended that the alerts channel be registered and monitored.
 * **`mode`**: This can for example be `+igR` for [Freenode](https://freenode.net/kb/answer/usermodes) 
 and `+igpR` for [Rizon](https://wiki.rizon.net/index.php?title=User_Modes).
 Setting it is recommended.
+* **`publish.github`**: This is the username and repo name of a GitHub repo, e.g. [`feedarchive/freenode-feedbot-live`](https://github.com/feedarchive/freenode-feedbot-live).
+All posts are published to the repo, thereby providing a basic option to archive and search them.
+The repo must exist; it is not created by the bot. It is recommended that an empty new repo is used.
+If your repo is of public interest, it can be included in the [`feedarchive`](https://github.com/feedarchive) organization by filing an issue.
+A GitHub "_personal access token_" is required with access to the entire "_repo_" scope. This token is provisioned for the bot via the `GITHUB_TOKEN` secret environment variable.
+The GitHub user must have access to write to the repo. It is recommended that a dedicated new service account be used, not your primary user account.
+A new CSV file is written to the repo for each posted feed having one or more new posts.
+GitHub Actions can externally be used for aggregation or processing of the CSV files, and doing so is outside the scope of the bot.
 
 ##### Developer
 * **`log.irc`**: If `true`, low level IRC events are logged by `miniirc`. These are quite noisy. Its default is `false`.
