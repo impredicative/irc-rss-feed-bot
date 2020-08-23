@@ -48,7 +48,7 @@ class BasePublisher(abc.ABC):
         if entries:
             entries_gen = ({"channel": e.feed_reader.channel, "feed": e.feed_reader.name, "title": e.title, "long_url": e.long_url, "short_url": e.short_url} for e in entries)
             return pd.DataFrame(entries_gen, dtype="string")
-        return pd.DataFrame([{}], columns=["channel", "feed", "title", "long_url", "short_url"], dtype="string").drop(labels=0)  # Workaround for https://git.io/Jfbjd
+        return pd.DataFrame(columns=["channel", "feed", "title", "long_url", "short_url"], dtype="string")
 
     @abc.abstractmethod
     def _publish(self, channel: str, df_entries: pd.DataFrame) -> Dict[str, Any]:
