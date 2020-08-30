@@ -42,7 +42,7 @@ class Bot:
         self._outgoing_msg_lock = threading.Lock()  # Used for rate limiting across multiple channels.
         self._db = Database()
         self._url_shortener = bitlyshortener.Shortener(
-            tokens=[token.strip() for token in os.environ["BITLY_TOKENS"].strip().split(",")], max_cache_size=config.CACHE_MAXSIZE__BITLY_SHORTENER,
+            tokens=[token.strip() for token in os.environ["BITLY_TOKENS"].strip().split(",")], max_cache_size=config.CACHE_MAXSIZE__BITLY_SHORTENER
         )
         self._publishers = [getattr(getattr(publishers, p), "Publisher")() for p in dir(publishers) if ((not p.startswith("_")) and (p in (instance.get("publish") or {})))]
 
@@ -260,9 +260,7 @@ class Bot:
         instance = config.INSTANCE
         channels = instance["feeds"]
         channels_str = ", ".join(channels)
-        log.debug(
-            "Setting up threads and queues for %s channels (%s) and their feeds with %s currently active " "threads.", len(channels), channels_str, threading.active_count(),
-        )
+        log.debug("Setting up threads and queues for %s channels (%s) and their feeds with %s currently active " "threads.", len(channels), channels_str, threading.active_count())
         num_feeds_setup = 0
         num_urls = 0
         num_reads_daily = 0
@@ -285,9 +283,7 @@ class Bot:
                     group = feed_config["group"]
                     barriers_parties[group] = barriers_parties.get(group, 0) + 1
                 num_feeds_setup += 1
-            log.debug(
-                "Finished setting up threads and queue for %s and its %s feeds with %s currently active threads.", channel, num_channel_feeds, threading.active_count(),
-            )
+            log.debug("Finished setting up threads and queue for %s and its %s feeds with %s currently active threads.", channel, num_channel_feeds, threading.active_count())
         for barrier, parties in barriers_parties.items():
             self.FEED_GROUP_BARRIERS[barrier] = threading.Barrier(parties)
 
@@ -330,9 +326,7 @@ def _handle_900_loggedin(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args:
     runtime_config.nick_casefold = nick_casefold = nick.casefold()
     log.info("The client identity as <nick>!<user>@<host> is %s.", identity)
     if nick_casefold != config.INSTANCE["nick:casefold"]:
-        runtime_config.alert(
-            f"The client nick was configured to be {config.INSTANCE['nick']} but it is {nick}. " "The configured nick will be regained.", log.warning,
-        )
+        runtime_config.alert(f"The client nick was configured to be {config.INSTANCE['nick']} but it is {nick}. " "The configured nick will be regained.", log.warning)
         irc.msg("nickserv", "REGAIN", config.INSTANCE["nick"], os.environ["IRC_PASSWORD"])
 
 

@@ -32,7 +32,7 @@ class ChannelPublisher(BaseChannelPublisher):
         except github.GithubException.UnknownObjectException:
             log.debug("Unable to read existing %s.", content_desc)
             log.debug("Creating new %s.", content_desc)
-            content_file = self._repo.create_file(path=self.channel_path, message=f"Initialize RSS content for {self.channel}", content=self.default_content,)["content"]
+            content_file = self._repo.create_file(path=self.channel_path, message=f"Initialize RSS content for {self.channel}", content=self.default_content)["content"]
             log.info("Created new %s.", content_desc)
         self._content, self._sha = content_file.decoded_content(), content_file.sha
 

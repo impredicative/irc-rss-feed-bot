@@ -69,9 +69,7 @@ class FeedEntry:
         for pattern in patterns["category"]:
             for category in self.categories:  # This loop is only for categories.
                 if pattern.search(category):
-                    log.log(
-                        5, "%s having category %s matches category pattern %s.", self, repr(category), repr(pattern.pattern),
-                    )
+                    log.log(5, "%s having category %s matches category pattern %s.", self, repr(category), repr(pattern.pattern))
                     return "category", pattern
 
         return None
@@ -103,7 +101,7 @@ class FeedEntry:
             return style(text, styler="irc" if style_config else "unicode", **kwargs)
 
         # Define post params
-        format_map = dict(identity=config.runtime.identity, channel=self.feed_reader.channel, feed=_style_name(self.feed_reader.name), url=self.short_url or self.long_url,)
+        format_map = dict(identity=config.runtime.identity, channel=self.feed_reader.channel, feed=_style_name(self.feed_reader.name), url=self.short_url or self.long_url)
 
         # Define post caption
         format_map["caption"] = ""

@@ -27,8 +27,9 @@ CHANNEL = "##servicebot"  # CUSTOMIZE
 # FEED = "stats:🇷🇺"  # Russia
 # FEED = "stats:🇨🇳"  # China
 FEED = "COVID-19:stats:USA:NY"
-CHANNEL, FEED = "##machinelearning", "Fritz"
-CHANNEL, FEED = "##us-market-news" or "##robinhood-alerts", "SeekingAlpha"
+CHANNEL, FEED = "##RL", "r/ML:50+"
+# CHANNEL, FEED = "##us-market-news", "SeekingAlpha"
+# CHANNEL, FEED = "##usm-earnings", "SA:beats"
 
 config.LOGGING["loggers"][config.PACKAGE_NAME]["level"] = "DEBUG"  # type: ignore
 config.configure_logging()
@@ -46,9 +47,7 @@ config.INSTANCE["feeds"][CHANNEL][FEED]["style"] = None
 # )
 
 url_reader = URLReader(max_cache_age=3600)
-feed = FeedReader(
-    channel=CHANNEL, name=FEED, irc=None, db=None, url_reader=url_reader, url_shortener=None, publishers=None,  # type: ignore
-).read()
+feed = FeedReader(channel=CHANNEL, name=FEED, irc=None, db=None, url_reader=url_reader, url_shortener=None, publishers=None).read()  # type: ignore
 for index, entry in enumerate(feed.entries):
     post = f"\n#{index + 1:,}: {entry.message}"
     if entry.categories:

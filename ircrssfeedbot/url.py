@@ -187,8 +187,8 @@ class URLReader:
         if response.status_code == 304:  # pylint: disable=too-many-nested-blocks
             # Note: 304 = Not Modified.
             assert all((cached_url_content, has_cached_etag, not test_cached_etag, request_headers["If-None-Match"]))
-            url_content = URLContent(
-                content=cached_url_content.content, etag=cached_url_content.etag, approach=URLContent.Approach.CACHE_ETAG_HIT,  # Sets updated time attribute too.
+            url_content = URLContent(  # Sets updated time attribute too.
+                content=cached_url_content.content, etag=cached_url_content.etag, approach=URLContent.Approach.CACHE_ETAG_HIT
             )
             log.debug(f"Returning unchanged ETag matched URL content from cache for {url}.")
             self._CACHE[url] = url_content

@@ -105,9 +105,7 @@ class FeedReader:
         entries_deduped = list(dict.fromkeys(entries))
         num_removed = len(entries) - len(entries_deduped)
         action = f"After {after_what}, removed" if after_what else "Removed"
-        log.debug(
-            "%s %s duplicate entry URLs out of %s, leaving %s, for %s.", action, num_removed, len(entries), len(entries_deduped), self,
-        )
+        log.debug("%s %s duplicate entry URLs out of %s, leaving %s, for %s.", action, num_removed, len(entries), len(entries_deduped), self)
         return entries_deduped
 
     def _process_entries(self, entries: List[FeedEntry]) -> List[FeedEntry]:  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
@@ -259,7 +257,7 @@ class FeedReader:
         log.debug(f"Using process worker from pool to parse entries for {self} using {self.parser_name}.")
         raw_entries, urls = self.worker_pool.apply(_parse_entries, (self.parser_name, self.parser_selector, self.parser_follower, url_content))
         log.debug(f"Used process worker from pool to parse {len(raw_entries):,} raw entries and {len(urls):,} URLs for {self} using {self.parser_name}.")
-        entries = [FeedEntry(title=e.title, long_url=e.link, summary=e.summary, categories=e.categories, data=dict(e), feed_reader=self,) for e in raw_entries]
+        entries = [FeedEntry(title=e.title, long_url=e.link, summary=e.summary, categories=e.categories, data=dict(e), feed_reader=self) for e in raw_entries]
         log.debug(f"Converted {len(raw_entries):,} raw entries to actual entries for {self}.")
         return entries, urls
 
