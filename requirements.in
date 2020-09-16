@@ -19,3 +19,4 @@ psutil
 pygithub
 requests
 ruamel.yaml
+tabulate

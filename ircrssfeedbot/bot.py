@@ -11,9 +11,10 @@ import time
 from typing import Callable, Dict, List, Tuple
 
 import bitlyshortener
+import ircstyle
 import miniirc
 
-from . import config, publishers
+from . import config, publishers, searchers
 from .db import Database
 from .feed import FeedReader
 from .url import URLReader
@@ -33,6 +34,7 @@ class Bot:
     CHANNEL_LAST_INCOMING_MSG_TIMES: Dict[str, float] = {}
     CHANNEL_QUEUES: Dict[str, queue.Queue] = {}
     EXITCODE_QUEUE: queue.SimpleQueue = queue.SimpleQueue()
+    SEARCH_QUEUE: queue.SimpleQueue = queue.SimpleQueue()
     FEED_GROUP_BARRIERS: Dict[str, threading.Barrier] = {}
 
     def __init__(self) -> None:
@@ -45,6 +47,7 @@ class Bot:
             tokens=[token.strip() for token in os.environ["BITLY_TOKENS"].strip().split(",")], max_cache_size=config.CACHE_MAXSIZE__BITLY_SHORTENER
         )
         self._publishers = [getattr(getattr(publishers, p), "Publisher")() for p in dir(publishers) if ((not p.startswith("_")) and (p in (instance.get("publish") or {})))]
+        self._searchers = {s: getattr(getattr(searchers, s), "Searcher")() for s in dir(searchers) if ((not s.startswith("_")) and (s in (instance.get("publish") or {})))}
 
         # Setup miniirc
         log.debug("Initializing IRC client.")
@@ -66,7 +69,63 @@ class Bot:
         self._setup_alerter()
         self._setup_channels()
         self._log_config()
+        threading.Thread(target=self._search, name="Searcher").start()
         self._exit()  # Blocks.
+
+    def _search(self) -> None:
+        while self._active:
+            try:
+                # Receive request
+                request = self.SEARCH_QUEUE.get()
+                log.debug(f"Dequeued search request: {request}.")
+                target = request["channel"] or request["sender"]
+
+                # Define helper functions
+                def send_search_reply(reply: str) -> None:
+                    """Send the given reply."""
+                    reply = f"{request['sender']}: {reply}" if request["channel"] else reply
+                    self._irc.msg(target, reply)
+
+                def send_search_error() -> None:
+                    """Alert and also reply with an error."""
+                    reply = f"Search command must be of the format: `search {'|'.join(self._searchers)}: <query>`"
+                    config.runtime.alert(f"Error searching: {request}: {reply}", log.error)
+                    send_search_reply(f"Error: {reply}")
+
+                # Check args
+                command_args = request["command"].split(None, 2)
+                if len(command_args) != 3:
+                    send_search_error()
+                    continue
+
+                # Define searcher
+                searcher_name = command_args[1].rstrip(":").lower()
+                searcher_aliases = {"gh": "github"}
+                searcher_name = searcher_aliases.get(searcher_name, searcher_name)
+                if searcher_name not in self._searchers:
+                    send_search_error()
+                    continue
+                searcher = self._searchers[searcher_name]
+
+                # Define query
+                query = command_args[2]
+                description = f"{searcher_name} for {query!r} for {request['sender']}"
+                if request["channel"]:
+                    description += f" in {request['channel']}"
+
+                # Search
+                log.info(f"Searching {description}.")
+                try:
+                    reply = searcher.search(query)
+                except Exception as exc:
+                    send_search_reply(f"Error searching: {exc.__class__.__qualname__}: {exc}")
+                    raise
+                unstyled_reply = ircstyle.unstyle(reply)
+                log.info(f"Searched {description}, replying with: {unstyled_reply}")
+                send_search_reply(reply)
+
+            except Exception as exc:
+                config.runtime.alert(f"Error searching: {request}: {exc.__class__.__qualname__}: {exc}")
 
     def _exit(self) -> None:
         code = self.EXITCODE_QUEUE.get()
@@ -95,13 +154,14 @@ class Bot:
         # Note: sys.exit doesn't exit the application as it doesn't exit all threads.
         os._exit(code)  # pylint: disable=protected-access
 
-    @staticmethod
-    def _log_config() -> None:
+    def _log_config(self) -> None:
         diskcache_size = sum(f.stat().st_size for f in config.DISKCACHE_PATH.glob("**/*") if f.is_file())
         log.info(f"Disk cache path is {config.DISKCACHE_PATH} and its current size is {humanize_bytes(diskcache_size)}.")
         log.info(f"Alerts will be sent to {config.INSTANCE['alerts_channel']}.")
         if admin := config.INSTANCE.get("admin"):
             log.info(f"Administrative commands will be accepted as private messages or directed public messages from {admin}.")
+        if searchers_ := self._searchers:
+            log.info(f"Search commands will be accepted as private messages or directed public messages for the sources: {', '.join(searchers_)}")
 
     def _msg_channel(self, channel: str) -> None:  # pylint: disable=too-many-branches,too-many-locals,too-many-statements
         log.debug(f"Channel messenger for {channel} is starting and is waiting to be notified of channel join.")
@@ -393,7 +453,7 @@ def _handle_nick(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[s
 
 
 @miniirc.Handler("PRIVMSG", colon=False)
-def _handle_privmsg(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
+def _handle_privmsg(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:  # pylint: disable=too-many-locals
     # Parse message
     log.debug("Handling incoming message: hostmask=%s, args=%s", hostmask, args)
     channel = args[0]
@@ -401,12 +461,10 @@ def _handle_privmsg(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: Lis
     msg = args[-1]
     is_channel_msg = channel.casefold() in config.INSTANCE["channels:casefold"]
     is_private_msg = channel.casefold() == config.runtime.nick_casefold
+    if is_private_msg:
+        channel = None  # type: ignore
     sender = f"{user}!{ident}@{hostname}"
-    is_command = (
-        (admin := config.INSTANCE.get("admin"))
-        and fnmatch.fnmatch(sender, admin)  # pylint: disable=used-before-assignment
-        and (is_private_msg or (is_channel_msg and msg.strip().casefold().startswith(f"{config.runtime.nick_casefold}:")))
-    )
+    is_command = is_private_msg or (is_channel_msg and msg.strip().casefold().startswith(f"{config.runtime.nick_casefold}:"))
 
     # Check assumptions for safety
     assert is_channel_msg != is_private_msg  # Ref: https://stackoverflow.com/a/433161/
@@ -416,18 +474,21 @@ def _handle_privmsg(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: Lis
         Bot.CHANNEL_LAST_INCOMING_MSG_TIMES[channel] = msg_time = time.monotonic()
         log.debug("Updated the last incoming message time for %s to %s.", channel, msg_time)
 
-    # Alert if non-command PM
-    if is_private_msg and (not is_command) and (msg != "\x01VERSION\x01"):
-        # Ignoring private message from freenode-connect having ident frigg and hostname freenode/utility-bot/frigg: VERSION
-        config.runtime.alert(f"Ignoring private message from {sender}: {msg}", log.warning)
-
     # Execute if command
-    if is_command and (command := (msg.strip() if is_private_msg else msg.split(":", 1)[1].strip())):
+    if is_command:
+        command = msg.strip() if is_private_msg else msg.split(":", 1)[1].strip()
+        command_name = command.split(None, 1)[0].lower().rstrip(":")
         log.info(f"Received command from {sender}: {command}")
-        if command == "exit":
-            Bot.EXITCODE_QUEUE.put(0)
-        elif command == "fail":
-            Bot.EXITCODE_QUEUE.put(1)
+        is_from_admin = (admin := config.INSTANCE.get("admin")) and fnmatch.fnmatch(sender, admin)  # pylint: disable=used-before-assignment
+        if is_from_admin:
+            if command_name == "exit":
+                Bot.EXITCODE_QUEUE.put(0)
+            elif command_name == "fail":
+                Bot.EXITCODE_QUEUE.put(1)
+        if command_name == "search":
+            search_request = {"command": command, "sender": user, "channel": channel}
+            Bot.SEARCH_QUEUE.put(search_request)
+            log.debug(f"Queued search request: {search_request}")
 
 
 @miniirc.Handler("TOPIC", colon=False)

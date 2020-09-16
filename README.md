@@ -300,8 +300,9 @@ GitHub Actions can externally be used as needed for aggregating or processing of
   * The repo must exist; it is not created by the bot. It is recommended that an empty new repo is used.
 If the repo is of public interest, it can be requested to be moved into the [`feedarchive`](https://github.com/feedarchive) organization by filing an issue.
   * The GitHub user must have access to write to the repo. It is recommended that a dedicated new service account be used, not your primary user account.
-  * A GitHub [personal access token](https://github.com/settings/tokens) is required with access to the entire "_repo_" scope.
-This token is provisioned for the bot via the `GITHUB_TOKEN` secret environment variable.
+  * A GitHub [personal access token](https://github.com/settings/tokens) is required with access to the entire `repo` and `gist` scopes.
+The `repo` scope is used for making commits. The `gist` scope is used for sharing search results.
+The token is provisioned for the bot via the `GITHUB_TOKEN` secret environment variable.
 
 ##### Developer
 * **`log.irc`**: If `true`, low level IRC events are logged by `miniirc`. These are quite noisy. Its default is `false`.
@@ -487,17 +488,28 @@ Refer to the embedded sample configuration for a usage example.
 Note that even if a default of `shorten: false` is set, the `BITLY_TOKENS` environment variable is still required.
 
 ### Commands
-Administrative commands can be sent by the configured `admin` to the bot either as a private message or as a directed public message.
-If `admin` is not configured, the commands are not processed.
+Commands can be sent to the bot either as a private message or as a directed public message.
 Private messages may however be prohibited for security purposes using the `mode` configuration.
 Public messages to the bot must be directed as `MyBotNick: my_command`.
-It is expected but not required that public messages to the bot will typically be sent in the `alerts_channel`.
+#### Administrative
+Administrative commands are accepted from the configured `admin`. If `admin` is not configured, the commands are not processed.
+It is expected but not required that administrative commands to the bot will typically be sent in the `alerts_channel`.
 The supported commands are:
 * **`exit`**: Gracefully exit with code 0. The exit is delayed until any feeds that are currently being posted finish posting and being written to the database.
 If running the bot as a Docker Compose service, using this command with `restart: on-failure` will (due to code 0) prevent the bot from automatically restarting.
 Note that a repeated invocation of this command has no effect.
 * **`fail`**: Similar to `exit` but with code 1.
 If running the bot as a Docker Compose service, using this command with `restart: on-failure` will (due to a nonzero code) cause the bot to automatically be restarted.
+#### General
+General commands can be sent by any user. The supported commands are:
+* **`search`**: This requires `publish.github` to be configured and functional. An example is `search github: scikit NOT "scikit-learn" path:/##machinelearning`.
+The response is a link to a secret [GitHub Gist](https://gist.github.com/datarods-svc/1532439d28431b2f7c4e5bfcd4b2cd48#file-results-md) with tabulated results in markdown and CSV formats.
+Depending on the number of results, the search can take a few seconds to two minutes.
+The maximum number of results returned for a search is 500.
+The results are sorted in descending order by the approximate date and time at which they were posted in the channel.
+To search for all entries posted to a channel, construct an all-inclusive query such as `https OR http path:/##MyChannel`
+This feature is affected by GitHub imposed [limitations](https://docs.github.com/en/github/searching-for-information-on-github/searching-code#considerations-for-code-search).
+It must not be trusted for thoroughness.
 
 ## Deployment
 * As a reminder, it is recommended that the alerts channel be registered and monitored.
