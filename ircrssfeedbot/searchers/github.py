@@ -3,12 +3,11 @@ import datetime
 import io
 import logging
 from pathlib import Path
-from typing import Any, Dict
 
 import pandas as pd
 
 from .. import config
-from ._base import BaseSearcher
+from ._base import BaseSearcher, SearchResults
 
 log = logging.getLogger(__name__)
 
@@ -26,7 +25,7 @@ class Searcher(BaseSearcher):
     def _syntax_help(self) -> str:
         return "https://j.mp/gh-search-syntax and https://j.mp/gh-search-code"
 
-    def _search(self, query: str) -> Dict[str, Any]:  # pylint: disable=too-many-locals
+    def _search(self, query: str) -> SearchResults:  # pylint: disable=too-many-locals
         # Docs:
         # https://pygithub.readthedocs.io/en/latest/github.html#github.MainClass.Github.search_code
         # https://docs.github.com/en/rest/reference/search#search-code
@@ -34,7 +33,7 @@ class Searcher(BaseSearcher):
         # https://docs.github.com/en/github/searching-for-information-on-github/searching-code#considerations-for-code-search
         dfs = []
         num_results = 0
-        paginated_results = self._github.search_code(query, sort="indexed", highlight=True, repo=self._repo)  # highlight=True returns text_matches
+        paginated_results = self._github.search_code(query, sort="indexed", highlight=True, repo=self._repo)  # highlight=True returns text_matches.
         for result in paginated_results:
             content = result.decoded_content.decode()
             assert content.startswith("feed,title,long_url,short_url\n")
@@ -54,15 +53,13 @@ class Searcher(BaseSearcher):
                     dfs.append(df)
                     num_results += 1
                     if num_results == _MAX_RESULTS:
-                        df = pd.concat(dfs)
-                        self._process_results_df(df)
-                        num_results = len(df)
+                        self._concat_results_dfs(dfs)
+                        df = dfs[0]
+                        num_results = len(df)  # Note: num_results must not be removed as it is also used in other lines.
                         if num_results == _MAX_RESULTS:
                             return {"results": df, "truncated": True}
-                        dfs = [df]
 
         if dfs:
-            df = pd.concat(dfs)
-            self._process_results_df(df)
-            return {"results": df, "truncated": False}
-        return {"results": None}
+            self._concat_results_dfs(dfs)
+            return {"results": dfs[0], "truncated": False}
+        return {"results": None, "truncated": None}

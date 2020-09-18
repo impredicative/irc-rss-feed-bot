@@ -2,7 +2,7 @@
 import abc
 import logging
 import os
-from typing import Any, Dict
+from typing import List, Optional, TypedDict
 
 import cachetools
 import github
@@ -12,6 +12,13 @@ import pandas as pd
 from .. import config
 
 log = logging.getLogger(__name__)
+
+
+class SearchResults(TypedDict):
+    """Dictionary of search results as returned by a searcher."""
+
+    results: Optional[pd.DataFrame]
+    truncated: Optional[bool]
 
 
 class BaseSearcher(abc.ABC):
@@ -27,12 +34,16 @@ class BaseSearcher(abc.ABC):
         return f"{self.name} searcher"
 
     @staticmethod
-    def _process_results_df(df: pd.DataFrame) -> None:
+    def _concat_results_dfs(dfs: List[pd.DataFrame]) -> None:
+        df = pd.concat(dfs)
+        dfs.clear()
         df.sort_values(by=["datetime"], ascending=False, inplace=True, ignore_index=True)
         df.drop_duplicates(subset=["channel", "feed", "long_url"], inplace=True, ignore_index=True)
+        dfs.append(df)
+        assert len(dfs) == 1
 
     @abc.abstractmethod
-    def _search(self, query: str) -> Dict[str, Any]:
+    def _search(self, query: str) -> SearchResults:
         pass
 
     @property
@@ -48,7 +59,7 @@ class BaseSearcher(abc.ABC):
         df = response["results"]
         if df is None:  # Note: Explicit check prevents: ValueError: The truth value of a DataFrame is ambiguous
             styled_query = ircstyle.style(query, italics=True, reset=True)
-            response_ = f"0 {styled_name} search results for {styled_query}. Refer to {self._syntax_help}"
+            response_ = f"0 {styled_name} search results for {styled_query}. For help, see {self._syntax_help}"
             return response_
 
         markdown_df = df.copy()
