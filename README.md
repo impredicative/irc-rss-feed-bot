@@ -294,9 +294,10 @@ It is recommended that the alerts channel be registered and monitored.
 and `+igpR` for [Rizon](https://wiki.rizon.net/index.php?title=User_Modes).
 Setting it is recommended.
 * **`publish.github`**: This is the username and repo name of a GitHub repo, e.g. [`feedarchive/freenode-feedbot-live`](https://github.com/feedarchive/freenode-feedbot-live).
-All posts are published to the repo, thereby providing a basic option to archive and [search](https://github.com/feedarchive/freenode-feedbot-live/search?o=desc&q=python&s=indexed) them.
+All posts are published to the repo, thereby providing a basic option to archive and search them.
 A new CSV file is written to the repo for each posted feed having one or more new posts.
-GitHub Actions can externally be used as needed for aggregating or processing of the CSV files, and doing so is outside the scope of the bot.
+Basic search functionality is provisioned via a `search` [command](#commands).
+The following requirements apply:
   * The repo must exist; it is not created by the bot. It is recommended that an empty new repo is used.
 If the repo is of public interest, it can be requested to be moved into the [`feedarchive`](https://github.com/feedarchive) organization by filing an issue.
   * The GitHub user must have access to write to the repo. It is recommended that a dedicated new service account be used, not your primary user account.
