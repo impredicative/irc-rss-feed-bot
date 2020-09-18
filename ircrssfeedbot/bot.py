@@ -86,11 +86,17 @@ class Bot:
                     reply = f"{request['sender']}: {reply}" if request["channel"] else reply
                     self._irc.msg(target, reply)
 
-                def send_search_error() -> None:
+                def send_search_error(error: str = None) -> None:
                     """Alert and also reply with an error."""
-                    reply = f"Search command must be of the format: `search {'|'.join(self._searchers)}: <query>`"
-                    config.runtime.alert(f"Error searching: {request}: {reply}", log.error)
-                    send_search_reply(f"Error: {reply}")
+                    if not error:
+                        error = f"Search command must be of the format: `search {'|'.join(self._searchers)}: <query>`"
+                    config.runtime.alert(f"Error searching: {request}: {error}", log.error)
+                    send_search_reply(f"Error: {error}")
+
+                # Ensure searchers
+                if not self._searchers:
+                    send_search_error("No `publish` destination is configured for possible use as a search source.")
+                    continue
 
                 # Check args
                 command_args = request["command"].split(None, 2)
