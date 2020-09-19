@@ -7,6 +7,7 @@ from pathlib import Path
 import pandas as pd
 
 from .. import config
+from ..util import luqum
 from ._base import BaseSearcher, SearchResults
 
 log = logging.getLogger(__name__)
@@ -23,10 +24,8 @@ class Searcher(BaseSearcher):
 
     @staticmethod
     def fix_query(query: str) -> str:
-        """Return the fixed query, removing extra spaces, and converting variable-case conjunctions (AND, OR, NOT) to uppercase."""
-        tokens = query.split()
-        tokens = [(upper_t if ((upper_t := t.upper()) in ("AND", "OR", "NOT")) else t) for t in tokens]
-        return " ".join(tokens)
+        """Return the fixed query by explicitly resolving unknown operations."""
+        return luqum.resolve_unknown_op_to_and(query)
 
     @property
     def _syntax_help(self) -> str:
