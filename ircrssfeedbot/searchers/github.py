@@ -21,6 +21,13 @@ class Searcher(BaseSearcher):
         super().__init__(name=Path(__file__).stem)
         self._repo = config.INSTANCE["publish"][self.name]
 
+    @staticmethod
+    def fix_query(query: str) -> str:
+        """Return the fixed query, removing extra spaces, and converting variable-case conjunctions (AND, OR, NOT) to uppercase."""
+        tokens = query.split()
+        tokens = [(upper_t if ((upper_t := t.upper()) in ("AND", "OR", "NOT")) else t) for t in tokens]
+        return " ".join(tokens)
+
     @property
     def _syntax_help(self) -> str:
         return "https://j.mp/gh-search-syntax and https://j.mp/gh-search-code"

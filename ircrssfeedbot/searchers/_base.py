@@ -51,6 +51,11 @@ class BaseSearcher(abc.ABC):
     def _syntax_help(self) -> str:
         pass
 
+    @staticmethod
+    def fix_query(query: str) -> str:
+        """Return the fixed query, removing extra spaces."""
+        return " ".join(query.split())
+
     @cachetools.func.ttl_cache(maxsize=config.SEARCH_CACHE_MAXSIZE, ttl=config.SEARCH_CACHE_TTL)
     def search(self, query: str) -> str:
         """Return a summary containing a Gist link to the search results for the given query."""

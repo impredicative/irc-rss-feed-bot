@@ -115,6 +115,10 @@ class Bot:
 
                 # Define query
                 query = command_args[2]
+                fixed_query = searcher.fix_query(query)
+                if query != fixed_query:
+                    log.info(f"Fixed the query {query!r} to {fixed_query!r}.")
+                    query = fixed_query
                 description = f"{searcher_name} for {query!r} for {request['sender']}"
                 if request["channel"]:
                     description += f" in {request['channel']}"
