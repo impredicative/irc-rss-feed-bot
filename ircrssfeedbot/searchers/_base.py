@@ -1,6 +1,8 @@
 """Base searcher class with helper attributes and methods for searchers."""
 import abc
 import logging
+import multiprocessing
+import multiprocessing.pool
 import os
 from typing import List, Optional, TypedDict
 
@@ -10,11 +12,8 @@ import ircstyle
 import pandas as pd
 
 from .. import config
-from ..util.multiprocessing import NestablePool
 
 log = logging.getLogger(__name__)
-
-_WORKER_POOL = NestablePool(processes=1, maxtasksperchild=4)
 
 
 class SearchResults(TypedDict):
@@ -91,4 +90,18 @@ class BaseSearcher(abc.ABC):
     @cachetools.func.ttl_cache(maxsize=config.SEARCH_CACHE_MAXSIZE, ttl=config.SEARCH_CACHE_TTL)
     def search(self, query: str) -> str:
         """Return a summary containing a Gist link to the search results for the given query."""
-        return _WORKER_POOL.apply(self._search_inner, (query,))  # To prevent accumulation of potential memory leaks.
+        return self.worker_pool.apply(self._search_inner, (query,))  # To prevent accumulation of potential memory leaks.
+
+    @property
+    def worker_pool(self) -> multiprocessing.pool.Pool:  # Can't use return type "mp.pool.Pool".
+        # Note: This approach is used instead of a ClassVar because the latter led to errors when spawning worker processes.
+        try:
+            return self._worker_pool  # type: ignore
+        except AttributeError:
+            processes = 1
+            maxtasksperchild = 4
+            log.info(f"Creating the {self.__class__.__name__} worker pool with {processes} processes and {maxtasksperchild} tasks per child.")
+            # pylint: disable=protected-access
+            self.__class__._worker_pool = multiprocessing.Pool(processes=processes, maxtasksperchild=maxtasksperchild)  # type: ignore
+            return self.__class__._worker_pool  # type: ignore
+            # pylint: enable=protected-access
