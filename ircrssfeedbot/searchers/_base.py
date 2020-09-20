@@ -4,14 +4,17 @@ import logging
 import os
 from typing import List, Optional, TypedDict
 
-import cachetools
+import cachetools.func
 import github
 import ircstyle
 import pandas as pd
 
 from .. import config
+from ..util.multiprocessing import NestablePool
 
 log = logging.getLogger(__name__)
+
+_WORKER_POOL = NestablePool(processes=1, maxtasksperchild=4)
 
 
 class SearchResults(TypedDict):
@@ -56,9 +59,8 @@ class BaseSearcher(abc.ABC):
         """Return the fixed query, removing extra spaces."""
         return " ".join(query.split())
 
-    @cachetools.func.ttl_cache(maxsize=config.SEARCH_CACHE_MAXSIZE, ttl=config.SEARCH_CACHE_TTL)
-    def search(self, query: str) -> str:
-        """Return a summary containing a Gist link to the search results for the given query."""
+    def _search_inner(self, query: str) -> str:
+        log.debug(f"Searching {self.name} for {query!r}.")
         styled_name = ircstyle.style(self.name, italics=True, reset=True)
         response = self._search(query)
         df = response["results"]
@@ -85,3 +87,8 @@ class BaseSearcher(abc.ABC):
         styled_query = ircstyle.style(query, italics=True, reset=False)
         response = f"{truncation_indicator.capitalize()} {len(df)} search results → {gist.html_url}#file-results-md (from {styled_name} for {styled_query})"
         return response
+
+    @cachetools.func.ttl_cache(maxsize=config.SEARCH_CACHE_MAXSIZE, ttl=config.SEARCH_CACHE_TTL)
+    def search(self, query: str) -> str:
+        """Return a summary containing a Gist link to the search results for the given query."""
+        return _WORKER_POOL.apply(self._search_inner, (query,))  # To prevent accumulation of potential memory leaks.
