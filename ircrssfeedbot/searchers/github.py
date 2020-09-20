@@ -7,7 +7,7 @@ from pathlib import Path
 import pandas as pd
 
 from .. import config
-from ..util import luqum
+from ..util.sqlite3 import SqliteFTS5Matcher
 from ._base import BaseSearcher, SearchResults
 
 log = logging.getLogger(__name__)
@@ -22,11 +22,6 @@ class Searcher(BaseSearcher):
         super().__init__(name=Path(__file__).stem)
         self._repo = config.INSTANCE["publish"][self.name]
 
-    @staticmethod
-    def fix_query(query: str) -> str:
-        """Return the fixed query by explicitly resolving unknown operations."""
-        return luqum.resolve_unknown_op_to_and(query)
-
     @property
     def _syntax_help(self) -> str:
         return "https://j.mp/gh-search-syntax and https://j.mp/gh-search-code"
@@ -39,6 +34,7 @@ class Searcher(BaseSearcher):
         # https://docs.github.com/en/github/searching-for-information-on-github/searching-code#considerations-for-code-search
         dfs = []
         num_results = 0
+        validator = SqliteFTS5Matcher(query)
         paginated_results = self._github.search_code(query, sort="indexed", highlight=True, repo=self._repo)  # highlight=True returns text_matches.
         for result in paginated_results:
             content = result.decoded_content.decode()
@@ -54,6 +50,9 @@ class Searcher(BaseSearcher):
                     line_indices_in_content = [content[: match_indices_in_content[0]].rfind("\n"), match_indices_in_content[1] + content[match_indices_in_content[1] :].find("\n")]
                     line_csv = content[: content.find("\n")] + content[slice(*line_indices_in_content)]
                     df = pd.read_csv(io.StringIO(line_csv), dtype="string")
+                    searchable_full_text = " ".join(df.at[0, c] for c in ("feed", "title", "long_url"))
+                    if not validator.is_match(searchable_full_text):
+                        continue
                     df.insert(0, "channel", path.parts[0])
                     df.insert(0, "datetime", datetime.datetime.strptime(str(Path(*path.parts[1:])) + " +0000", "%Y/%m%d/%H%M%S.csv %z"))
                     dfs.append(df)
