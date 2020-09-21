@@ -499,6 +499,7 @@ If running the bot as a Docker Compose service, using this command with `restart
 Note that a repeated invocation of this command has no effect.
 * **`fail`**: Similar to `exit` but with code 1.
 If running the bot as a Docker Compose service, using this command with `restart: on-failure` will (due to a nonzero code) cause the bot to automatically be restarted.
+* **`quit`**: Alias of `exit`.
 
 ## Deployment
 * As a reminder, it is recommended that the alerts channel be registered and monitored.

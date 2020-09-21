@@ -491,7 +491,7 @@ def _handle_privmsg(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: Lis
         log.info(f"Received command from {sender}: {command}")
         is_from_admin = (admin := config.INSTANCE.get("admin")) and fnmatch.fnmatch(sender, admin)  # pylint: disable=used-before-assignment
         if is_from_admin:
-            if command_name == "exit":
+            if command_name in ("exit", "quit"):
                 Bot.EXITCODE_QUEUE.put(0)
             elif command_name == "fail":
                 Bot.EXITCODE_QUEUE.put(1)
