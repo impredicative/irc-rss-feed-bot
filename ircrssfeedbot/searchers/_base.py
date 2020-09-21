@@ -93,8 +93,9 @@ class BaseSearcher(abc.ABC):
         return self.worker_pool.apply(self._search_inner, (query,))  # To prevent accumulation of potential memory leaks.
 
     @property
-    def worker_pool(self) -> multiprocessing.pool.Pool:  # Can't use return type "mp.pool.Pool".
-        # Note: This approach is used instead of a ClassVar because the latter led to errors when spawning worker processes.
+    def worker_pool(self) -> multiprocessing.pool.Pool:
+        # Ref: https://stackoverflow.com/a/63984747/
+        # Note: This approach is used instead of a ClassVar because the latter led to errors when "spawning" worker processes.
         try:
             return self._worker_pool  # type: ignore
         except AttributeError:
