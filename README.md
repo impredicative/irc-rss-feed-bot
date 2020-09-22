@@ -294,13 +294,15 @@ It is recommended that the alerts channel be registered and monitored.
 and `+igpR` for [Rizon](https://wiki.rizon.net/index.php?title=User_Modes).
 Setting it is recommended.
 * **`publish.github`**: This is the username and repo name of a GitHub repo, e.g. [`feedarchive/freenode-feedbot-live`](https://github.com/feedarchive/freenode-feedbot-live).
-All posts are published to the repo. A new CSV file is written to the repo for each posted feed having one or more new posts.
+All posts are published to the repo, thereby providing a basic option to archive and search them.
+A new CSV file is written to the repo for each posted feed having one or more new posts.
+Basic search functionality is provisioned via a `search` [command](#commands).
 The following requirements apply:
   * The repo must exist; it is not created by the bot. It is recommended that an empty new repo is used.
 If the repo is of public interest, it can be requested to be moved into the [`feedarchive`](https://github.com/feedarchive) organization by filing an issue.
   * The GitHub user must have access to write to the repo. It is recommended that a dedicated new service account be used, not your primary user account.
-  * A GitHub [personal access token](https://github.com/settings/tokens) is required with access to the entire `repo` scope.
-The `repo` scope is used for making commits.
+  * A GitHub [personal access token](https://github.com/settings/tokens) is required with access to the entire `repo` and `gist` scopes.
+The `repo` scope is used for making commits. The `gist` scope is used for sharing search results.
 The token is provisioned for the bot via the `GITHUB_TOKEN` secret environment variable.
 
 ##### Developer
@@ -500,6 +502,21 @@ Note that a repeated invocation of this command has no effect.
 * **`fail`**: Similar to `exit` but with code 1.
 If running the bot as a Docker Compose service, using this command with `restart: on-failure` will (due to a nonzero code) cause the bot to automatically be restarted.
 * **`quit`**: Alias of `exit`.
+#### General
+General commands can be sent by any user. The supported commands are:
+* **`search`**: This requires `publish.github` to be configured and functional. An example is `search github: scikit NOT "scikit-learn" path:/##machinelearning`.
+The response is a link to a secret [GitHub Gist](https://gist.github.com/datarods-svc/1532439d28431b2f7c4e5bfcd4b2cd48#file-results-md) 
+with tabulated results in markdown and CSV formats.
+`AND`, `OR`, and `NOT` are supported. Parentheses for `AND` and `OR` are also supported, not by GitHub, but by local validation of the upstream results.
+A channel filter is also supported as `path:/##MyChannel` for inclusion and `-path:/##MyChannel` for exclusion.
+The post feed name, title, and URL are included in the searched text.
+To search for all entries posted to a channel, construct an all-inclusive query such as `https OR http path:/##MyChannel`
+Depending on the number of results, the search can take a few seconds to two minutes.
+The maximum number of results returned for a search is 500.
+The results are sorted in descending order by the approximate date and time at which they were posted in the channel.
+Major [limitations](https://docs.github.com/en/github/searching-for-information-on-github/searching-code#considerations-for-code-search) 
+imposed by GitHub are that only files smaller than 384 KB and only repositories with less than 500,000 files are searchable.
+For these reasons and more, the search results must not be trusted for thoroughness.
 
 ## Deployment
 * As a reminder, it is recommended that the alerts channel be registered and monitored.
@@ -532,7 +549,7 @@ services:
 
 * In the above service definition in `docker-compose.yml`:
   * `image`: Use a specific
-  [versioned tag](https://hub.docker.com/r/ascensive/irc-rss-feed-bot/tags?ordering=last_updated), e.g. `0.9.27`.
+  [versioned tag](https://hub.docker.com/r/ascensive/irc-rss-feed-bot/tags?ordering=last_updated), e.g. `0.9.34`.
   * `volumes`: Customize the relative path to the previously created `config.yaml` file, e.g. `./irc-rss-feed-bot`.
   This volume source directory must be writable by the container using the UID defined in the Dockerfile; it is 999.
   A simple way to ensure it is writable is to run a command such as `chmod -R a+w ./irc-rss-feed-bot` once on the host.
