@@ -504,7 +504,8 @@ If running the bot as a Docker Compose service, using this command with `restart
 * **`quit`**: Alias of `exit`.
 #### General
 General commands can be sent by any user. The supported commands are:
-* **`search`**: This requires `publish.github` to be configured and functional. An example is `search github: scikit NOT "scikit-learn" path:/##machinelearning`.
+* **`search`**: This requires `publish.github` to be configured and functional. This also requires access to the `gist` scope by `GITHUB_TOKEN`.
+An example of a search command is `MyBot: search github: scikit NOT "scikit-learn"`.
 The response is a link to a secret [GitHub Gist](https://gist.github.com/datarods-svc/1532439d28431b2f7c4e5bfcd4b2cd48#file-results-md) 
 with tabulated results in markdown and CSV formats.
 `AND`, `OR`, and `NOT` are supported. Parentheses for `AND` and `OR` are also supported, not by GitHub, but by local validation of the upstream results.
