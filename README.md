@@ -24,6 +24,8 @@ In this case, it can be viewed correctly on [GitHub](https://github.com/impredic
       - [Conditional](#conditional)
     + [Feed default settings](#feed-default-settings)
   * [Commands](#commands)
+    + [Administrative](#administrative)
+    + [General](#general)
 - [Deployment](#deployment)
 - [Maintenance](#maintenance)
   * [Service](#service)
