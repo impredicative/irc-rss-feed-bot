@@ -15,13 +15,15 @@ from ._base import BasePublisher
 class Publisher(BasePublisher):
     """Publish a list of previously unpublished entries as a new file to GitHub."""
 
+    MAX_ENTRIES_PER_PUBLISH = 128  # Approximate workaround for limit of 384 KB per searchable post. See https://git.io/JUz1Y
+
     def __init__(self):
         super().__init__(name=Path(__file__).stem)
         self._github = github.Github(os.environ["GITHUB_TOKEN"].strip())
         self._repo = self._github.get_repo(self.config)
 
     def _publish(self, channel: str, df_entries: pd.DataFrame) -> Dict[str, Any]:
-        assert not df_entries.empty
+        assert 1 <= len(df_entries) <= self.MAX_ENTRIES_PER_PUBLISH
         path = f"{channel}/{datetime.datetime.utcnow().strftime('%Y/%m%d/%H%M%S')}.csv"  # Ref: https://strftime.org/
         feed_counts = readable_list([f"{count} {value}" for value, count in df_entries["feed"].value_counts().iteritems()])
         content = df_entries.drop(columns="channel").to_csv(index=False)

@@ -18,6 +18,8 @@ log = logging.getLogger(__name__)
 class BasePublisher(abc.ABC):
     """Base publisher class with helper attributes and methods for publishers."""
 
+    MAX_ENTRIES_PER_PUBLISH = 1000
+
     def __init__(self, name: str):
         self.name = name
         self.config = config.INSTANCE["publish"][self.name]
@@ -60,18 +62,23 @@ class BasePublisher(abc.ABC):
         with self._publish_lock:
             df_entries = pd.concat((self._publish_queue.pop(channel, None), df_entries))  # Requires channel-level or broader lock.
             assert not df_entries.empty
-            num_entries = len(df_entries)
-            for num_attempt in itertools.count(start=1):
-                desc_minimal = f"{num_entries:,} entries of {channel} to {self.name}"
-                desc = f"{desc_minimal} in attempt {num_attempt} of {max_attempts}"
-                try:
-                    return {**self._publish(channel, df_entries), "num_entries": num_entries}
-                except Exception as exc:  # pylint: disable=broad-except
-                    if num_attempt == max_attempts:
-                        self._publish_queue[channel] = df_entries
-                        config.runtime.alert(f"Failed to publish {desc_minimal}. The entries are queued. The error was: {exc}")
-                        raise exc from None
-                    assert num_attempt < max_attempts
-                    sleep_time = min(config.PUBLISH_RETRY_SLEEP_MAX, 2 ** num_attempt)
-                    log.warning(f"Failed to publish {desc}. A reattempt will be made in {sleep_time}s. The error was: {exc}")
-                    time.sleep(sleep_time)
+            dfs_entries = [
+                df_entries[i : i + self.MAX_ENTRIES_PER_PUBLISH] for i in range(0, len(df_entries), self.MAX_ENTRIES_PER_PUBLISH)
+            ]  # https://stackoverflow.com/a/44729807/
+            for df_entries in dfs_entries:
+                assert not df_entries.empty
+                num_entries = len(df_entries)
+                for num_attempt in itertools.count(start=1):
+                    desc_minimal = f"{num_entries:,} entries of {channel} to {self.name}"
+                    desc = f"{desc_minimal} in attempt {num_attempt} of {max_attempts}"
+                    try:
+                        return {**self._publish(channel, df_entries), "num_entries": num_entries}
+                    except Exception as exc:  # pylint: disable=broad-except
+                        if num_attempt == max_attempts:
+                            self._publish_queue[channel] = df_entries
+                            config.runtime.alert(f"Failed to publish {desc_minimal}. The entries are queued. The error was: {exc}")
+                            raise exc from None
+                        assert num_attempt < max_attempts
+                        sleep_time = min(config.PUBLISH_RETRY_SLEEP_MAX, 2 ** num_attempt)
+                        log.warning(f"Failed to publish {desc}. A reattempt will be made in {sleep_time}s. The error was: {exc}")
+                        time.sleep(sleep_time)
