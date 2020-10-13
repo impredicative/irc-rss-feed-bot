@@ -44,6 +44,7 @@ ETAG_CACHE_PROHIBITED_NETLOCS: Final = {
     "deeplearning.ai",
     "devblogs.nvidia.com",
     "export.arxiv.org",
+    "microsoft.com",
     "news.developer.nvidia.com",
     "protonmail.com",
     "rise.cs.berkeley.edu",
