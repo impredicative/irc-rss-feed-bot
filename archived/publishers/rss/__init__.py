@@ -2,10 +2,10 @@ import abc
 import datetime
 from typing import List, Union
 
+import feedgen.feed
 import feedparser
 from descriptors import cachedproperty
 
-import feedgen.feed
 from ircrssfeedbot import config
 from ircrssfeedbot.entry import FeedEntry, ShortenedFeedEntry
 

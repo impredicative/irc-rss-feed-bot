@@ -20,12 +20,12 @@ from .util.urllib import url_to_netloc
 log = logging.getLogger(__name__)
 
 
-@cachetools.func.ttl_cache(maxsize=config.CACHE_MAXSIZE__URL_COMPRESSION, ttl=config.CACHE_TTL__URL_COMPRESSION)
+@cachetools.func.ttl_cache(maxsize=config.CACHE_MAXSIZE__URL_COMPRESSION, ttl=config.CACHE_TTL__URL_COMPRESSION)  # type: ignore
 def _compress(content: bytes) -> bytes:
     return gzip.compress(content)
 
 
-@cachetools.func.ttl_cache(maxsize=config.CACHE_MAXSIZE__URL_COMPRESSION, ttl=config.CACHE_TTL__URL_COMPRESSION)
+@cachetools.func.ttl_cache(maxsize=config.CACHE_MAXSIZE__URL_COMPRESSION, ttl=config.CACHE_TTL__URL_COMPRESSION)  # type: ignore
 def _decompress(content: bytes) -> bytes:
     return gzip.decompress(content)
 

@@ -2,4 +2,4 @@
 line-length = 180
 
 [tool.isort]
-line_Length = 180
+line_length = 180

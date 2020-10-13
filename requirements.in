@@ -1,7 +1,7 @@
 bitlyshortener
 bs4  # Required by pandas.read_html
 cachetools
-diskcache
+diskcache==4.*
 dressup
 elasticsearch-dsl  # Required by luqum
 feedparser
@@ -10,7 +10,7 @@ html5lib  # Required by pandas.read_html
 humanize
 ircstyle
 jmespath
-luqum
+luqum==0.9.0
 lxml
 miniirc
 numpy
