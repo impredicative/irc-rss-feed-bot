@@ -24,7 +24,7 @@ class RawFeedEntry(BaseRawFeedEntry):
 
     @property
     def categories(self) -> List[str]:
-        return [tag["term"].strip() for tag in self.get("tags", [])]
+        return [term for tag in self.get("tags", []) if (term := (tag["term"] or "").strip())]  # tag["term"] is None in https://www.sciencemag.org/rss/news_current.xml
 
 
 @dataclasses.dataclass
