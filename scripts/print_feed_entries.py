@@ -27,7 +27,7 @@ CHANNEL = "##servicebot"  # CUSTOMIZE
 # FEED = "stats:🇷🇺"  # Russia
 # FEED = "stats:🇨🇳"  # China
 FEED = "COVID-19:stats:USA:NY"
-CHANNEL, FEED = "##RL", "r/ML:50+"
+CHANNEL, FEED = "##machinelearning", "TDS"
 # CHANNEL, FEED = "##us-market-news", "SeekingAlpha"
 # CHANNEL, FEED = "##usm-earnings", "SA:beats"
 

@@ -191,6 +191,7 @@ feeds:
           - ^(?:Facebook\ AI\ Research|Machine\ Learning|Natural\ Language\ Processing\ \&\ Speech)$
     InfoWorld:
       url: https://www.infoworld.com/index.rss
+      order: reverse
     j:MDPI:N:  # https://www.mdpi.com/journal/nutrients (open access)
       url: https://www.mdpi.com/rss/journal/nutrients
       www: false
@@ -370,6 +371,7 @@ A string value of `none` is interpreted as 0 and will skip all entries for a new
 A value of `all` will skip no entries for a new feed; it is not recommended and should be used sparingly if at all.
 In any case, future entries in the feed are not affected by this option on subsequent reads,
 and they are all forwarded without a limit.
+* **`<feed>.order`**: If `reverse`, the order of the entries is reversed.
 * **`<feed>.period`**: This indicates how frequently to read the feed in hours on an average.
 Its default value is 1.
 Conservative polling is recommended. Any value below 0.2 is changed to a minimum of 0.2.

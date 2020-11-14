@@ -111,6 +111,12 @@ class FeedReader:
     def _process_entries(self, entries: List[FeedEntry]) -> List[FeedEntry]:  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
         feed_config = self.config
 
+        # Reorder
+        if feed_config.get("order") == "reverse":
+            log.debug("Reversing the order of the %s entries for %s.", len(entries), self)
+            entries = entries[::-1]
+            log.debug("Reversed the order of the %s entries for %s.", len(entries), self)
+
         # Remove blacklisted entries
         if feed_config.get("blacklist", {}):
             log.debug("Filtering %s entries using blacklist for %s.", len(entries), self)
