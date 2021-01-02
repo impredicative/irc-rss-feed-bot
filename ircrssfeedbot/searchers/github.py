@@ -12,6 +12,7 @@ from ._base import BaseSearcher, SearchResults
 
 log = logging.getLogger(__name__)
 
+_EXPECTED_FIRST_LINE_OF_CONTENT = "feed,title,long_url,short_url\n"
 _MAX_RESULTS = 500
 
 
@@ -37,13 +38,13 @@ class Searcher(BaseSearcher):
         validator = SqliteFTS5Matcher(query)
         paginated_results = self._github.search_code(query, sort="indexed", highlight=True, repo=self._repo)  # highlight=True returns text_matches.
         for result in paginated_results:
-            content = result.decoded_content.decode()
-            assert content.startswith("feed,title,long_url,short_url\n")
             path = Path(result.path)
+            content = result.decoded_content.decode()
+            assert content.startswith(_EXPECTED_FIRST_LINE_OF_CONTENT), f"Content of {path} is expected to start with {_EXPECTED_FIRST_LINE_OF_CONTENT.strip()!r} but it doesn't."
             for text_match in result.text_matches:
                 fragment = text_match["fragment"]
                 fragment_index_in_content = content.find(fragment)
-                assert fragment_index_in_content != -1
+                assert fragment_index_in_content != -1, f"Content of {path} is expected to but doesn't contain the matched fragment: {fragment}"
                 for match in text_match["matches"]:
                     match_indices_in_fragment = match["indices"]
                     match_indices_in_content = [fragment_index_in_content + i for i in match_indices_in_fragment]  # Expected to always use only a single line.
