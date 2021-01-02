@@ -1,24 +1,28 @@
 """sqlite3 utilities."""
-import contextlib
-import io
 import logging
 import sqlite3
 import string
 
 from luqum.parser import parser
 from luqum.tree import AndOperation
-from luqum.utils import LuceneTreeTransformer, UnknownOperationResolver
+from luqum.utils import UnknownOperationResolver
+from luqum.visitor import TreeTransformer
 
 log = logging.getLogger(__name__)
 
-_SAFE_QUERY_CHARS = set(':()"')  # "-" is not processed to NOT by luqum. ":" is required by luqum for "path:/foo". "()" are used by sqlite3 FTS5. """ is used for quoting.
+_SAFE_QUERY_CHARS = set('-:()"')
+# "-" is safe as it is manually handled after it is ignored by luqum.
+# ":" is safe as it is processed by luqum from "path:/foo" and is then removed.
+# "()" are safe as they are used by sqlite3 FTS5.
+# """ is safe as it is used for quoting.
+
 _UNKNOWN_OP_RESOLVER = UnknownOperationResolver(AndOperation)
 _UNSAFE_QUERY_CHARS = set(string.punctuation) - _SAFE_QUERY_CHARS
 
 
-class _SearchFieldRemover(LuceneTreeTransformer):
+class _SearchFieldRemover(TreeTransformer):
     def visit_search_field(self, node, parents):  # pylint: disable=unused-argument,no-self-use
-        return None
+        return ""
 
 
 class SqliteFTS5Matcher:
@@ -35,13 +39,13 @@ class SqliteFTS5Matcher:
 
         Unsafe characters and search fields are removed.
 
-        For example, 'foo bar -baz path:/##baz' is mapped to 'foo AND bar NOT baz'.
+        For example, 'foo bar -baz path:/##qux' is mapped to 'foo AND bar NOT baz'.
         """
         query = "".join(c for c in query if c not in _UNSAFE_QUERY_CHARS)
-        with contextlib.redirect_stdout(io.StringIO()):  # Workaround for https://github.com/jurismarches/luqum/issues/57
-            tree = _UNKNOWN_OP_RESOLVER(parser.parse(query))
+        tree = _UNKNOWN_OP_RESOLVER(parser.parse(query))
         tree = _SearchFieldRemover().visit(tree)
-        query = str(tree)
+        query = str(tree).strip()
+        query = query.replace(" -", " NOT ")  # Approximate workaround for luqum ignoring -
         query = query.replace(" AND NOT ", " NOT ")  # Approximate workaround for sqlite3.OperationalError: fts5: syntax error near "NOT"
         return query
 

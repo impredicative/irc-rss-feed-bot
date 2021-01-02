@@ -3,14 +3,13 @@ bs4  # Required by pandas.read_html
 cachetools
 diskcache==4.*
 dressup
-elasticsearch-dsl  # Required by luqum
 feedparser  # https://github.com/kurtmckee/feedparser/blob/develop/CHANGELOG.rst
 hext
 html5lib  # Required by pandas.read_html
 humanize
 ircstyle
 jmespath
-luqum==0.9.0
+luqum  # https://github.com/jurismarches/luqum/blob/master/CHANGELOG.rst
 lxml
 miniirc  # https://github.com/luk3yx/miniirc/blob/master/CHANGELOG.md
 numpy
