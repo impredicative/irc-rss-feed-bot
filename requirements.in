@@ -4,7 +4,7 @@ cachetools
 diskcache==4.*
 dressup
 elasticsearch-dsl  # Required by luqum
-feedparser
+feedparser  # https://github.com/kurtmckee/feedparser/blob/develop/CHANGELOG.rst
 hext
 html5lib  # Required by pandas.read_html
 humanize
@@ -12,13 +12,13 @@ ircstyle
 jmespath
 luqum==0.9.0
 lxml
-miniirc
+miniirc  # https://github.com/luk3yx/miniirc/blob/master/CHANGELOG.md
 numpy
 orderedset
 pandas
-peewee
+peewee  # https://github.com/coleifer/peewee/releases
 psutil
-pygithub
-requests
+pygithub  # https://pygithub.readthedocs.io/en/latest/changes.html
+requests  # https://requests.readthedocs.io/en/latest/community/updates/#release-history
 ruamel.yaml
 tabulate
