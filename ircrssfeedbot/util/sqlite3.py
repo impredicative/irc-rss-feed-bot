@@ -31,7 +31,7 @@ class SqliteFTS5Matcher:
     def __init__(self, query: str) -> None:
         self._query = self._convert_github_query_to_sqlite_fts5_query(query)
         if query != self._query:
-            log.info(f"Adjusted the query {query!r} for local validation to {self._query!r}.")
+            log.info(f"For the query {query!r}, the corresponding query used for local validation of the search results is {self._query!r}.")
 
     @staticmethod
     def _convert_github_query_to_sqlite_fts5_query(query: str) -> str:
@@ -42,6 +42,7 @@ class SqliteFTS5Matcher:
         For example, 'foo bar -baz path:/##qux' is mapped to 'foo AND bar NOT baz'.
         """
         query = "".join(c for c in query if c not in _UNSAFE_QUERY_CHARS)
+        query = query.replace(" -path:", " path:")  # Approximate workaround for luqum raising ValueError. The search field is later removed anyway.
         tree = _UNKNOWN_OP_RESOLVER(parser.parse(query))
         tree = _SearchFieldRemover().visit(tree)
         query = str(tree).strip()
