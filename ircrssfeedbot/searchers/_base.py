@@ -65,7 +65,7 @@ class BaseSearcher(abc.ABC):
         df = response["results"]
         if df is None:  # Note: Explicit check prevents: ValueError: The truth value of a DataFrame is ambiguous
             styled_query = ircstyle.style(query, italics=True, reset=True)
-            response_ = f"0 {styled_name} search results for {styled_query}. For help, see {self._syntax_help}"
+            response_ = f"0 {styled_name} search results for {styled_query}."
             return response_
 
         markdown_df = df.copy()

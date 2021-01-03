@@ -509,13 +509,12 @@ If running the bot as a Docker Compose service, using this command with `restart
 #### General
 General commands can be sent by any user. The supported commands are:
 * **`search`**: This requires `publish.github` to be configured and functional. This also requires access to the `gist` scope by `GITHUB_TOKEN`.
-An example of a search command is `MyBot: search github: scikit NOT "scikit-learn"`.
-The response is a link to a secret [GitHub Gist](https://gist.github.com/datarods-svc/1532439d28431b2f7c4e5bfcd4b2cd48#file-results-md) 
+An example of a search command is `MyBot: search github: foo bar -baz`.
+The response is a link to a secret [GitHub Gist](https://gist.github.com/c8b57d9e4bbae5a67240eb4802814da6#file-results-md) 
 with tabulated results in markdown and CSV formats.
-`AND`, `OR`, and `NOT` are supported. Parentheses for `AND` and `OR` are also supported, not by GitHub, but by local validation of the upstream results.
 A channel filter is also supported as `path:/##MyChannel` for inclusion and `-path:/##MyChannel` for exclusion.
 The post feed name, title, and URL are included in the searched text.
-To search for all entries posted to a channel, construct an all-inclusive query such as `https OR http path:/##MyChannel`
+To search for all entries posted to a channel, up to the returned limit, construct an all-inclusive query such as `https path:/##MyChannel`
 Depending on the number of results, the search can take a few seconds to two minutes.
 The maximum number of results returned for a search is 500.
 The results are sorted in descending order by the approximate date and time at which they were posted in the channel.

@@ -23,10 +23,6 @@ class Searcher(BaseSearcher):
         super().__init__(name=Path(__file__).stem)
         self._repo = config.INSTANCE["publish"][self.name]
 
-    @property
-    def _syntax_help(self) -> str:
-        return "https://j.mp/gh-search-syntax and https://j.mp/gh-search-code"
-
     def _search(self, query: str) -> SearchResults:  # pylint: disable=too-many-locals
         # Docs:
         # https://pygithub.readthedocs.io/en/latest/github.html#github.MainClass.Github.search_code
