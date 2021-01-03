@@ -3,10 +3,11 @@ import logging
 import sqlite3
 import string
 
-from luqum.parser import parser
-from luqum.tree import AndOperation
-from luqum.utils import UnknownOperationResolver
-from luqum.visitor import TreeTransformer
+import luqum
+import luqum.parser
+import luqum.tree
+import luqum.utils
+import luqum.visitor
 
 log = logging.getLogger(__name__)
 
@@ -16,12 +17,18 @@ _SAFE_QUERY_CHARS = set('-:()"')
 # "()" are safe as they are used by sqlite3 FTS5.
 # """ is safe as it is used for quoting.
 
-_UNKNOWN_OP_RESOLVER = UnknownOperationResolver(AndOperation)
+_UNKNOWN_OP_RESOLVER = luqum.utils.UnknownOperationResolver(luqum.tree.AndOperation)
 _UNSAFE_QUERY_CHARS = set(string.punctuation) - _SAFE_QUERY_CHARS
 
 
-class _SearchFieldRemover(TreeTransformer):
-    def visit_search_field(self, node, parents):  # pylint: disable=unused-argument,no-self-use
+class _QueryTreeTransformer(luqum.visitor.TreeTransformer):
+
+    # def visit_prohibit(self, node, context):
+    #     new_node = luqum.tree.Not(luqum.tree.NONE_ITEM)
+    #     _children = self.clone_children(node, new_node, context)
+    #     yield new_node
+
+    def visit_search_field(self, node, context):  # pylint: disable=unused-argument,no-self-use
         return ""
 
 
@@ -43,8 +50,8 @@ class SqliteFTS5Matcher:
         """
         query = "".join(c for c in query if c not in _UNSAFE_QUERY_CHARS)
         query = query.replace(" -path:", " path:")  # Approximate workaround for luqum raising ValueError. The search field is later removed anyway.
-        tree = _UNKNOWN_OP_RESOLVER(parser.parse(query))
-        tree = _SearchFieldRemover().visit(tree)
+        tree = _UNKNOWN_OP_RESOLVER(luqum.parser.parser.parse(query))
+        tree = _QueryTreeTransformer().visit(tree)
         query = str(tree).strip()
         query = query.replace(" -", " NOT ")  # Approximate workaround for luqum ignoring -
         query = query.replace(" AND NOT ", " NOT ")  # Approximate workaround for sqlite3.OperationalError: fts5: syntax error near "NOT"
