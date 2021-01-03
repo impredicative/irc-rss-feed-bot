@@ -36,7 +36,7 @@ CACHE_TTL__URL_COMPRESSION: Final = 60
 DB_FILENAME: Final = "posts.v2.db"
 DISKCACHE_PATH: Final = PACKAGE_PATH.parent / f".{PACKAGE_NAME}_cache"
 DISKCACHE_SIZE_LIMIT: Final = GiB * 2
-DEDUP_STRATEGY_DEFAULT: Final = "channel"
+DEDUP_STRATEGY_DEFAULT: Final = "feed"
 ETAG_CACHE_PROHIBITED_NETLOCS: Final = {
     "blog.ml.cmu.edu",
     "blogs.cornell.edu",

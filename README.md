@@ -214,10 +214,14 @@ feeds:
       url: https://www.reddit.com/r/MachineLearning/hot/.json?limit=50
       jmespath: 'data.children[*].data | [?score >= `100`].{title: title, link: join(``, [`https://redd.it/`, id])}'
       shorten: false
+    PwC:Latest:
+      url: https://us-east1-ml-feeds.cloudfunctions.net/pwc/latest
+      period: 0.5
+      dedup: channel
     PwC:Trending:
       url: https://us-east1-ml-feeds.cloudfunctions.net/pwc/trending
       period: 0.5
-      dedup: feed
+      dedup: channel
     SeekingAlpha:
       period: 0.2
       sub:
@@ -351,7 +355,7 @@ The nesting permits lists to be creatively reused between feeds via YAML anchors
 * **`<feed>.blacklist.url`**: Similar to `<feed>.blacklist.title`.
 * **`<feed>.dedup`**: This indicates how to deduplicate posts for the feed, thereby preventing them from being 
 reposted.
-The default value is `channel` (per-channel), and an alternate possible value is `feed` (per-feed per-channel).
+The default value is `feed` (per-feed per-channel), and an alternate possible value is `channel` (per-channel).
 * **`<feed>.group`**: If a string, this delays the processing of a feed that has just been read until all 
 other feeds having the same group are also read.
 This encourages multiple feeds having the same group to be be posted in succession, except if interrupted by
