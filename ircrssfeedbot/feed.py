@@ -324,9 +324,9 @@ class FeedReader:
             num_after_processing = len(entries)
 
             # Alert if no processed entries for feed
+            entries_count_desc = {0: "but 0", num_before_processing: "and"}.get(num_after_processing, f"and {num_after_processing:,}")
             entries_desc = (
-                f"{num_before_processing:,} parsed and {num_after_processing:,} processed entries via {url_read_approach_desc} for {self} having used {self.parser_name} parser "
-                f"in {timer}"
+                f"{num_before_processing:,} parsed {entries_count_desc} processed entries via {url_read_approach_desc} for {self} having used {self.parser_name} parser in {timer}"
             )
             if entries:
                 log.debug(f"Returning {entries_desc}.")
