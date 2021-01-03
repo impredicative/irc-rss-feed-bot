@@ -269,7 +269,7 @@ class Bot:
                 # Read feed
                 log.debug(f"Retrieving feed {feed_name} of {channel}.")
                 feed = feed_reader.read()
-                log.info(f"Retrieved in {feed.read_time_used:.1f}s the {feed} with {len(feed.entries)} approved entries via {feed.read_approach}.")
+                log.info(f"Retrieved in {feed.read_time_used:.1f}s the {feed} with {len(feed.entries):,} approved entries via {feed.read_approach}.")
 
                 # Wait for other feeds in group
                 if feed_config.get("group"):

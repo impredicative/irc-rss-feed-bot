@@ -444,7 +444,7 @@ class Feed:
         seconds_per_msg = config.SECONDS_PER_MESSAGE
         channel_topics = config.runtime.channel_topics
         postable_entries = self._postable_entries
-        log.info(f"Posting {len(postable_entries)} entries for {self}.")
+        log.info(f"Posting {len(postable_entries):,} entries for {self}.")
 
         # Post postable entries
         for entry in postable_entries:
@@ -464,7 +464,7 @@ class Feed:
                 irc.quote("TOPIC", channel, f":{new_topic}")
                 log.info(f"Updated {channel} topic: {new_topic}")
 
-        log.info(f"Posted {len(postable_entries)} entries for {self}.")
+        log.info(f"Posted {len(postable_entries):,} entries for {self}.")
 
     def publish(self) -> None:
         """Publish the posted entries as relevant."""
