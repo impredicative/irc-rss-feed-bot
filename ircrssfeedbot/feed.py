@@ -271,7 +271,7 @@ class FeedReader:
         """Read feed with entries."""
         timer = Timer()
         feed_config = self.config
-        alert_config = feed_config.get("alerts", {})
+        alert_config = feed_config.get("alerts") or {}
         alert_if_any_empty_before_processing = alert_config.get("empty", True)
         alert_if_emptied_by_processing = alert_config.get("emptied", False)
 
