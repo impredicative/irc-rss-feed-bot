@@ -40,7 +40,8 @@ class Searcher(BaseSearcher):
             for text_match in result.text_matches:
                 fragment = text_match["fragment"]
                 fragment_index_in_content = content.find(fragment)
-                assert fragment_index_in_content != -1, f"Content of {path} is expected to but doesn't contain the matched fragment: {fragment}"
+                if fragment_index_in_content == -1:  # Can happen when fragment matches path instead of matching entry.
+                    continue
                 for match in text_match["matches"]:
                     match_indices_in_fragment = match["indices"]
                     match_indices_in_content = [fragment_index_in_content + i for i in match_indices_in_fragment]  # Expected to always use only a single line.
