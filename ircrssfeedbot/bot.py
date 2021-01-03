@@ -307,7 +307,7 @@ class Bot:
                     and ((failure_time := time.monotonic()) >= (last_failure_alert_time + config.MIN_FEED_INTERVAL_FOR_REPEATED_ALERT))
                 ):
                     alerter(msg)
-                    alerter("Either check the feed configuration, or wait for its next successful read, or set `alerts.read` to `false` for it.")
+                    alerter("Either check the feed configuration, or wait for its next successful read, or set `alerts.read: false` for it.")
                     last_failure_alert_time = failure_time
                 else:
                     log.error(msg)  # Not logging as exception.

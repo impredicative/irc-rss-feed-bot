@@ -264,6 +264,8 @@ feeds:
       hext: <a href:filter("/watch\?v=(.+)"):prepend("https://youtu.be/"):link href^="/watch?v=" title:title/>
       period: 12
       shorten: false
+      alerts:
+        emptied: true
       blacklist:
         title:
           - \bWikipedia\ audio\ article\b
@@ -330,8 +332,10 @@ If a list, the URLs are read in sequence with an interval of one second between 
 
 ##### Optional
 These are optional and are independent of each other:
-* **`<feed>.alerts.empty`**: If `true`, an alert is sent if the feed has no entries. If `false`, such an alert
-is not sent. Its default value is `true`.
+* **`<feed>.alerts.empty`**: If `true`, an alert is sent if any source URL of the feed has no entries before their validation. 
+If `false`, such an alert is not sent. Its default value is `true`.
+* **`<feed>.alerts.emptied`**: If `true`, an alert is sent if the feed has entries before but not after their validation.
+If `false`, such an alert is not sent. Its default value is `false`.
 * **`<feed>.alerts.read`**: If `true`, an alert is sent if an error occurs three or more consecutive times 
 when reading or processing the feed, but no more than once every 15 minutes.
 If `false`, such an alert is not sent. Its default value is `true`.
