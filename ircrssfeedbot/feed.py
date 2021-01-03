@@ -267,7 +267,7 @@ class FeedReader:
         log.debug(f"Converted {len(raw_entries):,} raw entries to actual entries for {self}.")
         return entries, urls
 
-    def read(self) -> "Feed":  # pylint: disable=too-many-locals
+    def read(self) -> "Feed":  # pylint: disable=too-many-locals,too-many-statements
         """Read feed with entries."""
         timer = Timer()
         feed_config = self.config
@@ -294,15 +294,16 @@ class FeedReader:
             urls_pending.update(follow_urls - urls_read)
 
             # Alert if no entries of URL
-            entries_desc = f"{len(selected_entries):,} entries and {len(follow_urls):,} followable URLs for {url} of {self} using {self.parser_name}"
+            entries_desc = f"{len(selected_entries):,} entries and {len(follow_urls):,} followable URLs for {url} of {self} using {self.parser_name!r} parser"
             if selected_entries:
                 log.debug(f"Parsed {entries_desc}.")
             else:
-                log_msg = f"There are {entries_desc}. Wait for its next read or set `alerts.empty: false` for it."
+                log_msg = f"There are {entries_desc}."
                 if alert_if_any_empty_before_processing:
+                    log_msg += " Wait for its next read or set `alerts.empty: false` for it."
                     config.runtime.alert(log_msg)
                 else:
-                    log.warning(log_msg)
+                    log.debug(log_msg)
 
             # Sleep between URLs
             if urls_pending and url_content.is_cache_miss:
@@ -315,7 +316,7 @@ class FeedReader:
         # Log entries
         url_read_approach_desc = readable_list([f"{count} URLs {approach}" for approach, count in url_read_approach_counts.items()])
         num_before_processing = len(entries)
-        log.debug(f"Read {num_before_processing:,} entries via {url_read_approach_desc} for {self} using {self.parser_name} parser in {timer}.")
+        log.debug(f"Read {num_before_processing:,} entries via {url_read_approach_desc} for {self} using {self.parser_name!r} parser in {timer}.")
 
         # Conditionally process entries
         if num_before_processing > 0:
@@ -326,16 +327,18 @@ class FeedReader:
             # Alert if no processed entries for feed
             entries_count_desc = {0: "but 0", num_before_processing: "and"}.get(num_after_processing, f"and {num_after_processing:,}")
             entries_desc = (
-                f"{num_before_processing:,} parsed {entries_count_desc} processed entries via {url_read_approach_desc} for {self} having used {self.parser_name} parser in {timer}"
+                f"{num_before_processing:,} parsed {entries_count_desc} processed entries for {self}. "
+                f"This is via {url_read_approach_desc}, having used {self.parser_name!r} parser in {timer}"
             )
             if entries:
                 log.debug(f"Returning {entries_desc}.")
             else:
-                log_msg = f"There are {entries_desc}. Wait for its next read or set `alerts.emptied: false` for it."
+                log_msg = f"There are {entries_desc}."
                 if alert_if_emptied_by_processing:
+                    log_msg += " Wait for its next read or set `alerts.emptied: false` for it."
                     config.runtime.alert(log_msg)
                 else:
-                    log.warning(log_msg)
+                    log.info(log_msg)
 
         return Feed(entries=entries, reader=self, read_approach=url_read_approach_desc, read_time_used=timer())
 
