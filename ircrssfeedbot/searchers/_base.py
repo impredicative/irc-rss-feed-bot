@@ -48,11 +48,6 @@ class BaseSearcher(abc.ABC):
     def _search(self, query: str) -> SearchResults:
         pass
 
-    @property
-    @abc.abstractmethod
-    def _syntax_help(self) -> str:
-        pass
-
     @staticmethod
     def fix_query(query: str) -> str:
         """Return the fixed query, removing extra spaces."""
