@@ -338,7 +338,7 @@ class FeedReader:
                     log_msg += " Wait for its next read or set `alerts.emptied: false` for it."
                     config.runtime.alert(log_msg)
                 else:
-                    log.info(log_msg)
+                    log.debug(log_msg)
 
         return Feed(entries=entries, reader=self, read_approach=url_read_approach_desc, read_time_used=timer())
 
