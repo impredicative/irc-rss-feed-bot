@@ -65,7 +65,7 @@ class BaseSearcher(abc.ABC):
 
         markdown_df = df.copy()
         markdown_df.insert(0, "date_utc", markdown_df["datetime"].dt.date)
-        markdown_df["title"] = "[" + markdown_df["title"].str.replace("|", r"\|") + "](" + markdown_df["long_url"] + ")"
+        markdown_df["title"] = "[" + markdown_df["title"].str.replace("|", r"\|", regex=False) + "](" + markdown_df["long_url"] + ")"
         markdown_df.drop(columns=["datetime", "long_url", "short_url"], inplace=True)
 
         truncation_indicator = "max" if response["truncated"] else "all"
