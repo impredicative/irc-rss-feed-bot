@@ -22,12 +22,6 @@ _UNSAFE_QUERY_CHARS = set(string.punctuation) - _SAFE_QUERY_CHARS
 
 
 class _QueryTreeTransformer(luqum.visitor.TreeTransformer):
-
-    # def visit_prohibit(self, node, context):
-    #     new_node = luqum.tree.Not(luqum.tree.NONE_ITEM)
-    #     _children = self.clone_children(node, new_node, context)
-    #     yield new_node
-
     def visit_search_field(self, node, context):  # pylint: disable=unused-argument,no-self-use
         return ""
 
