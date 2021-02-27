@@ -11,6 +11,7 @@ method-rgx=([a-z_][a-z0-9_]{2,60}|test_[a-z0-9_]{2,90})$
 disable=
     bad-continuation,
     broad-except,
+    duplicate-code,
     locally-disabled,
     locally-enabled,
     logging-format-interpolation,

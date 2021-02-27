@@ -54,6 +54,7 @@ class BasePublisher(abc.ABC):
     def _publish(self, channel: str, df_entries: pd.DataFrame) -> Dict[str, Any]:
         """Return the result after publishing the given entries for the given channel."""
 
+    # pylint:disable=inconsistent-return-statements
     def publish(self, channel: str, entries: List[FeedEntry], max_attempts: Union[int, float] = config.PUBLISH_ATTEMPTS_MAX) -> Dict[str, Any]:  # type: ignore
         """Return the result after publishing the given entries along with any previously queued entries for the given channel."""
         df_entries = self.entries_df(entries)
@@ -75,3 +76,5 @@ class BasePublisher(abc.ABC):
                     sleep_time = min(config.PUBLISH_RETRY_SLEEP_MAX, 2 ** num_attempt)
                     log.warning(f"Failed to publish {desc}. A reattempt will be made in {sleep_time}s. The error was: {exc}")
                     time.sleep(sleep_time)
+
+    # pylint:enable=inconsistent-return-statements
