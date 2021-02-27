@@ -76,6 +76,7 @@ TITLE_MAX_BYTES: Final = 2048  # Relevant for publishing.
 USER_AGENT_DEFAULT: Final = "Mozilla/5.0 (X11; Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0"
 USER_AGENT_OVERRIDES: Final = {  # Site-specific overrides (without www prefix). Sites must be in lowercase.
     "medscape.com": "Googlebot-News",
+    "nasdaq.com": "https://www",
     "news.google.com": "(entropy)",
     "swansonvitamins.com": "FeedFetcher-Google; (+http://www.google.com/feedfetcher.html)",
     "youtube.com": "Mozilla/5.0",
