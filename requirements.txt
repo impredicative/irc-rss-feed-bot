@@ -6,11 +6,11 @@
 #
 beautifulsoup4==4.9.3
     # via bs4
-bitlyshortener==0.5.0
+bitlyshortener==0.5.1
     # via -r requirements.in
 bs4==0.0.1
     # via -r requirements.in
-cachetools==4.2.0
+cachetools==4.2.1
     # via
     #   -r requirements.in
     #   bitlyshortener
@@ -28,7 +28,7 @@ colorama==0.4.4
     #   rich
 commonmark==0.9.1
     # via rich
-deprecated==1.2.10
+deprecated==1.2.11
     # via pygithub
 diskcache==4.1.0
     # via -r requirements.in
@@ -54,15 +54,15 @@ lxml==4.6.2
     # via -r requirements.in
 miniirc==1.6.3
     # via -r requirements.in
-numpy==1.19.4
+numpy==1.20.1
     # via
     #   -r requirements.in
     #   pandas
 orderedset==2.0.3
     # via -r requirements.in
-pandas==1.2.0
+pandas==1.2.2
     # via -r requirements.in
-peewee==3.14.0
+peewee==3.14.1
     # via -r requirements.in
 ply==3.11
     # via luqum
@@ -72,13 +72,13 @@ psutil==5.8.0
     # via -r requirements.in
 pygithub==1.54.1
     # via -r requirements.in
-pygments==2.7.3
+pygments==2.8.0
     # via rich
 pyjwt==1.7.1
     # via pygithub
 python-dateutil==2.8.1
     # via pandas
-pytz==2020.5
+pytz==2021.1
     # via pandas
 requests==2.25.1
     # via
@@ -97,9 +97,9 @@ six==1.15.0
     # via
     #   html5lib
     #   python-dateutil
-soupsieve==2.1
+soupsieve==2.2
     # via beautifulsoup4
-tabulate==0.8.7
+tabulate==0.8.9
     # via -r requirements.in
 toml==0.10.2
     # via dressup
@@ -107,7 +107,7 @@ typer==0.2.1
     # via dressup
 typing-extensions==3.7.4.3
     # via rich
-urllib3==1.26.2
+urllib3==1.26.3
     # via requests
 webencodings==0.5.1
     # via html5lib

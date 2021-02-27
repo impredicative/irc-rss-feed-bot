@@ -9,7 +9,7 @@ html5lib  # Required by pandas.read_html
 humanize
 ircstyle
 jmespath
-luqum  # https://github.com/jurismarches/luqum/blob/master/CHANGELOG.rst
+luqum==0.10.0  # https://github.com/jurismarches/luqum/blob/master/CHANGELOG.rst
 lxml
 miniirc  # https://github.com/luk3yx/miniirc/blob/master/CHANGELOG.md
 numpy
