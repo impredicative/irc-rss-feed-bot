@@ -432,10 +432,11 @@ For a non-XML feed, one of the following non-default parsers can be used.
 Multiple parsers cannot be used for a feed.
 The parsers are searched for in the alphabetical order listed below, and the first to be found is used.
 Each parsed entry must at a minimum return a `title`, a `link`, an optional `summary` (description),
-and zero or more values for `category`.
+and zero or more values for `category`
+The `title` can be a string or a list of strings.
 
 * **`<feed>.hext`**: This is a string representing the [hext](https://hext.thomastrapp.com/documentation) DSL 
-for parsing a list of entry [dictionaries](https://en.wikipedia.org/wiki/Associative_array#Example) from a HTML web 
+for parsing a list of entry [dictionaries](https://en.wikipedia.org/wiki/Associative_array#Example) from an HTML web 
 page. 
 Before using, it can be tested in the form [here](https://hext.thomastrapp.com/).
 * **`<feed>.jmespath`**: This is a string representing the [jmespath](http://jmespath.org/examples.html) DSL 

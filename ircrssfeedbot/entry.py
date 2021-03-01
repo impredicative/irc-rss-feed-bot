@@ -23,7 +23,10 @@ class RawFeedEntry(dict):
     @property
     def title(self) -> str:
         """Return the entry title."""
-        return self.get("title", "(no title)").strip()  # Default value was useful for https://www.ncsc.gov.uk/api/1/services/v1/all-rss-feed.xml
+        title = self.get("title") or "(no title)"  # Supports None and empty str/list. Default value was useful for https://www.ncsc.gov.uk/api/1/services/v1/all-rss-feed.xml
+        if isinstance(title, list):
+            return " | ".join(t.strip() for t in title)  # Useful for https://snacks.robinhood.com/newsletters/
+        return title.strip()
 
     @property
     def link(self) -> str:
