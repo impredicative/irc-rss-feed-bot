@@ -214,6 +214,14 @@ feeds:
       url: https://www.reddit.com/r/MachineLearning/hot/.json?limit=50
       jmespath: 'data.children[*].data | [?score >= `100`].{title: title, link: join(``, [`https://redd.it/`, id])}'
       shorten: false
+    r/wallstreetbets:50+:
+      url: https://www.reddit.com/r/wallstreetbets/hot/.json?limit=98
+      jmespath: 'data.children[*].data | [?(not_null(link_flair_text) && score >= `50`)].{title: join(``, [`[`, link_flair_text, `] `, title]), link: join(``, [`https://redd.it/`, id]), category: link_flair_text}'
+      emoji: false
+      shorten: false
+      blacklist:
+        category:
+          - ^(?:Daily\ Discussion|Gain|Loss|Meme|Weekend\ Discussion|YOLO)$
     PwC:Latest:
       url: https://us-east1-ml-feeds.cloudfunctions.net/pwc/latest
       period: 0.5
@@ -324,7 +332,7 @@ It is for diagnostic purposes. Its default is `false`.
 A feed is defined under a channel as in the sample configuration. The feed's key represents its name.
 
 The order of execution of the interacting operations is:
-`blacklist`, `whitelist`, `https`, `www`, `sub`, `format`, `shorten`.
+`blacklist`, `whitelist`, `https`, `www`, `emoji`, `sub`, `format`, `shorten`.
 Refer to the sample configuration for usage examples.
 
 YAML [anchors and references](https://en.wikipedia.org/wiki/YAML#Advanced_components) can be used to reuse nodes.
@@ -356,6 +364,7 @@ The nesting permits lists to be creatively reused between feeds via YAML anchors
 * **`<feed>.dedup`**: This indicates how to deduplicate posts for the feed, thereby preventing them from being 
 reposted.
 The default value is `feed` (per-feed per-channel), and an alternate possible value is `channel` (per-channel).
+  * **`<feed>.emoji`**: If `false`, emojis in entry titles are removed. Its default value is `null`.
 * **`<feed>.group`**: If a string, this delays the processing of a feed that has just been read until all 
 other feeds having the same group are also read.
 This encourages multiple feeds having the same group to be be posted in succession, except if interrupted by

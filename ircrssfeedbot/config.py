@@ -4,8 +4,9 @@ import os
 import tempfile
 import types
 from pathlib import Path
-from typing import Dict, Final
+from typing import Dict, Final, Pattern
 
+import emoji
 import ircstyle
 
 
@@ -37,6 +38,7 @@ DB_FILENAME: Final = "posts.v2.db"
 DISKCACHE_PATH: Final = PACKAGE_PATH.parent / f".{PACKAGE_NAME}_cache"
 DISKCACHE_SIZE_LIMIT: Final = GiB * 2
 DEDUP_STRATEGY_DEFAULT: Final = "feed"
+EMOJI_REGEXP: Final[Pattern] = emoji.get_emoji_regexp()
 ETAG_CACHE_PROHIBITED_NETLOCS: Final = {
     "blog.ml.cmu.edu",
     "blogs.cornell.edu",

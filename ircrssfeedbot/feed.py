@@ -158,6 +158,14 @@ class FeedReader:
                         entry.long_url = entry.long_url.replace(prefix, prefix[:-4], 1)
             log.debug("Removed WWW from URLs in %s.", self)
 
+        # Remove emojis from title
+        if feed_config.get("emoji") is False:
+            emoji_regexp = config.EMOJI_REGEXP
+            log.debug("Removing emojis for titles in %s.", self)
+            for entry in entries:
+                entry.title = emoji_regexp.sub("", entry.title)
+            log.debug("Removed emojis for titles in %s.", self)
+
         # Substitute entries
         if sub_config := feed_config.get("sub"):
             log.debug("Substituting entries for %s.", self)

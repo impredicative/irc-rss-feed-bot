@@ -34,6 +34,8 @@ diskcache==4.1.0
     # via -r requirements.in
 dressup==0.1.1
     # via -r requirements.in
+emoji==1.2.0
+    # via -r requirements.in
 feedparser==6.0.2
     # via -r requirements.in
 hext==0.2.5
