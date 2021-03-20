@@ -80,7 +80,6 @@ def load_instance_config(log_details: bool = True) -> None:  # pylint: disable=t
 
     # Process instance config
     instance_config["dir"] = instance_config_path.parent
-    instance_config["nick:casefold"] = instance_config["nick"].casefold()
     instance_config["channels:casefold"] = [channel.casefold() for channel in instance_config["feeds"]]
     # instance_config["repeated_urls"] = {url for url, count in url_counter.items() if count > 1}
 

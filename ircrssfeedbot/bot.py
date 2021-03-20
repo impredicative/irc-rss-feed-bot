@@ -34,6 +34,7 @@ class Bot:
     CHANNEL_LAST_INCOMING_MSG_TIMES: Dict[str, float] = {}
     CHANNEL_QUEUES: Dict[str, queue.Queue] = {}
     EXITCODE_QUEUE: queue.SimpleQueue = queue.SimpleQueue()
+    RECENT_NICK_REGAIN_TIMES: List[float] = []
     SEARCH_QUEUE: queue.SimpleQueue = queue.SimpleQueue()
     FEED_GROUP_BARRIERS: Dict[str, threading.Barrier] = {}
 
@@ -51,7 +52,6 @@ class Bot:
 
         # Setup miniirc
         log.debug("Initializing IRC client.")
-        config.runtime.nick_casefold = instance["nick"].casefold()  # Prevents AttributeError if RPL_LOGGEDIN (900) is not sent by server, but is not always an accurate value.
         config.runtime.channel_topics = {}
         self._irc = miniirc.IRC(
             ip=instance["host"],
@@ -376,6 +376,22 @@ class Bot:
 # Refs: https://tools.ietf.org/html/rfc1459 https://modern.ircdocs.horse
 
 
+def _regain_nick(irc: miniirc.IRC, explanation: str) -> None:
+    max_recent_nick_regains_age = 15
+    max_recent_nick_regains = 3
+    current_time = time.monotonic()
+    min_recent_nick_regains_time = current_time - max_recent_nick_regains_age
+    Bot.RECENT_NICK_REGAIN_TIMES = [t for t in Bot.RECENT_NICK_REGAIN_TIMES if t > min_recent_nick_regains_time]
+    if len(Bot.RECENT_NICK_REGAIN_TIMES) < max_recent_nick_regains:
+        Bot.RECENT_NICK_REGAIN_TIMES.append(current_time)
+        attempt = len(Bot.RECENT_NICK_REGAIN_TIMES)
+        log.warning(f"The user configured nick is {config.INSTANCE['nick']}. {explanation} The configured nick will be regained in attempt {attempt}/{max_recent_nick_regains}.")
+        irc.msg("nickserv", "REGAIN", config.INSTANCE["nick"], os.environ["IRC_PASSWORD"])
+    else:
+        log.error(f"All {max_recent_nick_regains} recent nick regain attempts are exhausted.")
+        Bot.EXITCODE_QUEUE.put(1)
+
+
 @miniirc.Handler(332, colon=False)
 def _handle_332_notice(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     log.debug("Received initial topic: hostmask=%s args=%s", hostmask, args)
@@ -388,27 +404,38 @@ def _handle_332_notice(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: 
 
 @miniirc.Handler(900, colon=False)
 def _handle_900_loggedin(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
-    # Parse message
     log.debug("Handling RPL_LOGGEDIN (900): hostmask=%s, args=%s", hostmask, args)
     runtime_config = config.runtime
     runtime_config.identity = identity = args[1]
     nick = identity.split("!", 1)[0]
-    runtime_config.nick_casefold = nick_casefold = nick.casefold()
-    log.info("The client identity as <nick>!<user>@<host> is %s.", identity)
-    if nick_casefold != config.INSTANCE["nick:casefold"]:
-        runtime_config.alert(f"The client nick was configured to be {config.INSTANCE['nick']} but it is {nick}. " "The configured nick will be regained.", log.warning)
-        irc.msg("nickserv", "REGAIN", config.INSTANCE["nick"], os.environ["IRC_PASSWORD"])
+    log.info(f"The client identity as <nick>!<user>@<host> is {identity}.")
+    if nick.casefold() != config.INSTANCE["nick"].casefold():
+        _regain_nick(irc, f"The server sent event 900 reported the current nick {nick}.")
+
+
+@miniirc.Handler("NOTICE", colon=False)
+def _handle_notice(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
+    log.debug("Received notice: hostmask=%s, args=%s", hostmask, args)
+    user, _ident, _hostname = hostmask
+
+    if (user.casefold() == "nickserv") and (len(args) >= 2):
+        nick, msg = args[:2]
+        if "not a registered nickname" in msg:
+            msg = f"The server sent event NOTICE reporting the current nick {nick} is not registered."
+            if nick.casefold() != config.INSTANCE["nick"].casefold():
+                _regain_nick(irc, msg)
+            else:
+                log.warning(msg)
 
 
 @miniirc.Handler("JOIN", colon=False)
-def _handle_join(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
-    # Parse message
+def _handle_join(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     log.debug("Handling channel join: hostmask=%s, args=%s", hostmask, args)
     user, _ident, _hostname = hostmask
     channel = args[0]
 
     # Ignore if not actionable
-    if (user.casefold() != config.runtime.nick_casefold) or (channel.casefold() not in config.INSTANCE["channels:casefold"]):
+    if (user.casefold() not in (config.INSTANCE["nick"].casefold(), irc.current_nick.casefold())) or (channel.casefold() not in config.INSTANCE["channels:casefold"]):
         return
 
     # Update channel last message time
@@ -418,15 +445,14 @@ def _handle_join(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[s
 
 
 @miniirc.Handler("MODE", colon=False)
-def _handle_mode(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
+def _handle_mode(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     log.debug("Received mode: hostmask=%s args=%s", hostmask, args)
 
     if len(args) < 2:
         return
 
     target, mode, *_ = args
-    runtime_config = config.runtime
-    if target.casefold() != runtime_config.nick_casefold:
+    if target.casefold() not in (config.INSTANCE["nick"].casefold(), irc.current_nick.casefold()):
         return
 
     modes = list_irc_modes(mode)
@@ -438,43 +464,46 @@ def _handle_mode(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[s
         return
 
     identity = f"{nick}!{user}@{host}"
-    if identity == runtime_config.identity:
+    runtime_config = config.runtime
+    if hasattr(runtime_config, "identity") and (identity == runtime_config.identity):
         return
-
     runtime_config.identity = identity
-    log.info(f"The updated client identity as <nick>!<user>@<host> is inferred to be {identity}.")
+    log.info(f"The client identity as <nick>!<user>@<host> is inferred to be {identity}.")
 
 
 @miniirc.Handler("NICK", colon=False)
 def _handle_nick(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     log.debug("Handling nick change: hostmask=%s, args=%s", hostmask, args)
-    old_nick, _ident, _hostname = hostmask
+    old_nick, ident, hostname = hostmask
+    if len(args) < 1:
+        return
+    new_nick = args[0]
     runtime_config = config.runtime
 
     # Ignore if not actionable
-    if old_nick.casefold() != runtime_config.nick_casefold:
+    if config.INSTANCE["nick"].casefold() not in (old_nick.casefold(), new_nick.casefold()):
         return
 
-    # Update identity, possibly after a nick regain
-    new_nick = args[0]
-    runtime_config.identity = identity = runtime_config.identity.replace(old_nick, new_nick, 1)
-    runtime_config.nick_casefold = new_nick.casefold()
-    runtime_config.alert(f"The updated client identity as <nick>!<user>@<host> is inferred to be {identity}.", log.info)
+    # Set identity
+    identity = f"{new_nick}!{ident}@{hostname}"
+    if hasattr(runtime_config, "identity") and (identity == runtime_config.identity):
+        return
+    runtime_config.identity = identity
+    log.info(f"The client identity as <nick>!<user>@<host> is inferred to be {identity}.")
 
 
 @miniirc.Handler("PRIVMSG", colon=False)
-def _handle_privmsg(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:  # pylint: disable=too-many-locals
-    # Parse message
+def _handle_privmsg(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:  # pylint: disable=too-many-locals
     log.debug("Handling incoming message: hostmask=%s, args=%s", hostmask, args)
     channel = args[0]
     user, ident, hostname = hostmask
     msg = args[-1]
     is_channel_msg = channel.casefold() in config.INSTANCE["channels:casefold"]
-    is_private_msg = channel.casefold() == config.runtime.nick_casefold
+    is_private_msg = channel.casefold() in (config.INSTANCE["nick"].casefold(), irc.current_nick.casefold())
     if is_private_msg:
         channel = None  # type: ignore
     sender = f"{user}!{ident}@{hostname}"
-    is_command = is_private_msg or (is_channel_msg and msg.strip().casefold().startswith(f"{config.runtime.nick_casefold}:"))
+    is_command = is_private_msg or (is_channel_msg and msg.strip().casefold().startswith((f"{config.INSTANCE['nick'].casefold()}:", f"{irc.current_nick.casefold()}:")))
 
     # Check assumptions for safety
     assert is_channel_msg != is_private_msg  # Ref: https://stackoverflow.com/a/433161/
