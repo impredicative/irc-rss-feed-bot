@@ -377,11 +377,12 @@ class Bot:
 
 
 def _regain_nick(irc: miniirc.IRC, explanation: str) -> None:
-    max_recent_nick_regains_age = 15
+    max_recent_nick_regains_age = 30
     max_recent_nick_regains = 3
     current_time = time.monotonic()
     min_recent_nick_regains_time = current_time - max_recent_nick_regains_age
     Bot.RECENT_NICK_REGAIN_TIMES = [t for t in Bot.RECENT_NICK_REGAIN_TIMES if t > min_recent_nick_regains_time]
+    # Note: Modifying Bot.RECENT_NICK_REGAIN_TIMES without a lock has obvious race conditions, but they're not serious enough to warrant a lock.
     if len(Bot.RECENT_NICK_REGAIN_TIMES) < max_recent_nick_regains:
         Bot.RECENT_NICK_REGAIN_TIMES.append(current_time)
         attempt = len(Bot.RECENT_NICK_REGAIN_TIMES)
