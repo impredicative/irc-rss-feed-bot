@@ -52,7 +52,7 @@ jmespath==0.10.0
     # via -r requirements.in
 luqum==0.10.0
     # via -r requirements.in
-lxml==4.6.2
+lxml==4.6.3
     # via -r requirements.in
 miniirc==1.6.3
     # via -r requirements.in
