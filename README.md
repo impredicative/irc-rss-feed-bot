@@ -57,9 +57,11 @@ for the duration of the process. Note that this detection is skipped for a _weak
 For several more features, see the customizable [global](#global-settings) and [feed-specific](#feed-specific-settings) settings, and [commands](#commands).
 
 ## Links
-* Code: https://github.com/impredicative/irc-rss-feed-bot
-* Changelog: https://github.com/impredicative/irc-rss-feed-bot/releases
-* Container: https://hub.docker.com/r/ascensive/irc-rss-feed-bot
+| Caption   | Link                                                        |
+|-----------|-------------------------------------------------------------|
+| Code      | https://github.com/impredicative/irc-rss-feed-bot           |
+| Changelog | https://github.com/impredicative/irc-rss-feed-bot/releases  |
+| Image     | https://hub.docker.com/r/ascensive/irc-rss-feed-bot         |
 
 ## Examples
 ```text
