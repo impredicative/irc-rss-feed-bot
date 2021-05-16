@@ -383,13 +383,14 @@ def _regain_nick(irc: miniirc.IRC, explanation: str) -> None:
     min_recent_nick_regains_time = current_time - max_recent_nick_regains_age
     Bot.RECENT_NICK_REGAIN_TIMES = [t for t in Bot.RECENT_NICK_REGAIN_TIMES if t > min_recent_nick_regains_time]
     # Note: Modifying Bot.RECENT_NICK_REGAIN_TIMES without a lock has obvious race conditions, but they're not serious enough to warrant a lock.
+    msg = f"The user configured nick is {config.INSTANCE['nick']}. {explanation}"
     if len(Bot.RECENT_NICK_REGAIN_TIMES) < max_recent_nick_regains:
         Bot.RECENT_NICK_REGAIN_TIMES.append(current_time)
         attempt = len(Bot.RECENT_NICK_REGAIN_TIMES)
-        log.warning(f"The user configured nick is {config.INSTANCE['nick']}. {explanation} The configured nick will be regained in attempt {attempt}/{max_recent_nick_regains}.")
+        log.warning(f"{msg} The configured nick will be regained in attempt {attempt}/{max_recent_nick_regains}.")
         irc.msg("nickserv", "REGAIN", config.INSTANCE["nick"], os.environ["IRC_PASSWORD"])
     else:
-        log.error(f"All {max_recent_nick_regains} recent nick regain attempts are exhausted.")
+        log.error(f"{msg} All {max_recent_nick_regains} recent nick regain attempts are exhausted.")
         Bot.EXITCODE_QUEUE.put(1)
 
 
