@@ -393,8 +393,14 @@ def _regain_nick(irc: miniirc.IRC, explanation: str) -> None:
         Bot.EXITCODE_QUEUE.put(1)
 
 
+@miniirc.Handler(433, colon=False)
+def _handle_433_err_nicknameinuse(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
+    log.info("Received ERR_NICKNAMEINUSE (433): hostmask=%s args=%s", hostmask, args)
+    _regain_nick(irc, "The server sent event ERR_NICKNAMEINUSE (433) reporting the current nick is already in use.")
+
+
 @miniirc.Handler(332, colon=False)
-def _handle_332_notice(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
+def _handle_332_rpl_topic(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     log.debug("Received initial topic: hostmask=%s args=%s", hostmask, args)
     _nick, channel, topic, *_ = args
 
@@ -404,14 +410,14 @@ def _handle_332_notice(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: 
 
 
 @miniirc.Handler(900, colon=False)
-def _handle_900_loggedin(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
+def _handle_900_rpl_loggedin(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     log.debug("Handling RPL_LOGGEDIN (900): hostmask=%s, args=%s", hostmask, args)
     runtime_config = config.runtime
     runtime_config.identity = identity = args[1]
     nick = identity.split("!", 1)[0]
     log.info(f"The client identity as <nick>!<user>@<host> is {identity}.")
     if nick.casefold() != config.INSTANCE["nick"].casefold():
-        _regain_nick(irc, f"The server sent event 900 reported the current nick {nick}.")
+        _regain_nick(irc, f"The server sent event RPL_LOGGEDIN (900) reporting the current nick {nick}.")
 
 
 @miniirc.Handler("NOTICE", colon=False)
