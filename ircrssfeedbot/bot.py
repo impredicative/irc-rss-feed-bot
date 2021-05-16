@@ -396,6 +396,7 @@ def _regain_nick(irc: miniirc.IRC, explanation: str) -> None:
 @miniirc.Handler(433, colon=False)
 def _handle_433_err_nicknameinuse(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
     log.info("Received ERR_NICKNAMEINUSE (433): hostmask=%s args=%s", hostmask, args)
+    # Ref: https://stackoverflow.com/a/67560902/
     _regain_nick(irc, "The server sent event ERR_NICKNAMEINUSE (433) reporting the current nick is already in use.")
 
 
