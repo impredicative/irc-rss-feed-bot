@@ -403,7 +403,7 @@ def _handle_433_err_nicknameinuse(irc: miniirc.IRC, hostmask: Tuple[str, str, st
 
 @miniirc.Handler(332, colon=False)
 def _handle_332_rpl_topic(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
-    log.debug("Received initial topic: hostmask=%s args=%s", hostmask, args)
+    log.debug("Received RPL_TOPIC (332): hostmask=%s args=%s", hostmask, args)
     _nick, channel, topic, *_ = args
 
     # Store topic
@@ -413,7 +413,7 @@ def _handle_332_rpl_topic(_irc: miniirc.IRC, hostmask: Tuple[str, str, str], arg
 
 @miniirc.Handler(900, colon=False)
 def _handle_900_rpl_loggedin(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
-    log.debug("Handling RPL_LOGGEDIN (900): hostmask=%s, args=%s", hostmask, args)
+    log.info("Handling RPL_LOGGEDIN (900): hostmask=%s, args=%s", hostmask, args)
     runtime_config = config.runtime
     runtime_config.identity = identity = args[1]
     nick = identity.split("!", 1)[0]
@@ -424,7 +424,7 @@ def _handle_900_rpl_loggedin(irc: miniirc.IRC, hostmask: Tuple[str, str, str], a
 
 @miniirc.Handler("NOTICE", colon=False)
 def _handle_notice(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[str]) -> None:
-    log.debug("Received notice: hostmask=%s, args=%s", hostmask, args)
+    log.info("Received NOTICE: hostmask=%s, args=%s", hostmask, args)
     user, _ident, _hostname = hostmask
 
     if (user.casefold() == "nickserv") and (len(args) >= 2):
@@ -435,6 +435,9 @@ def _handle_notice(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List[
                 _regain_nick(irc, msg)
             else:
                 log.warning(msg)
+        elif "can not regain your nickname" in msg:
+            log.error(f"The nick could not be regained due to error: {msg}")
+            Bot.EXITCODE_QUEUE.put(1)
 
 
 @miniirc.Handler("JOIN", colon=False)
