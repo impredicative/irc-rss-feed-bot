@@ -107,6 +107,7 @@ ssl_port: 6697
 nick: MyFeed[bot]
 admin: mynick!myident@myhost
 alerts_channel: '##mybot-alerts'
+mirror: '##mybot-mirror'
 mode:
 publish:
   github: MyGithubServiceAccountUsername/IrcServerName-MyBotName-live
@@ -125,6 +126,7 @@ feeds:
         summary: true
     j:AJCN:
       url: https://academic.oup.com/rss/site_6122/3981.xml
+      mirror: false
       period: 12
       blacklist:
         title:
@@ -305,14 +307,18 @@ Without this email verification, the bot can fail to receive the required event 
 * **`admin`**: Administrative commands by this user pattern are accepted and executed.
 Its format is `nick!ident@host`. An example is `JDoe11!sid654321@gateway/web/irccloud.com/x-*`.
 A case-insensitive pattern match is tested for using [`fnmatch`](https://docs.python.org/3/library/fnmatch.html).
-* **`alerts_channel`**: Some but not all warning and error alerts are sent to the this channel.
+* **`alerts_channel`**: Some but not all warning and error alerts are sent to this channel.
 Its default value is `##{nick}-alerts`. The key `{nick}`, if present in the value, is formatted with the actual nick.
 For example, if the nick is `MyFeed[bot]`, alerts will by default be sent to `##MyFeed[bot]-alerts`.
 Since a channel name starts with #, the name if provided **must be quoted**.
 It is recommended that the alerts channel be registered and monitored.
 * **`mode`**: This can for example be `+igR` for [Freenode](https://freenode.net/kb/answer/usermodes) 
 and `+igpR` for [Rizon](https://wiki.rizon.net/index.php?title=User_Modes).
-Setting it is recommended.
+  
+##### Optional
+* **`mirror`**: If specified as a channel name, all posts across all channels are mirrored to this channel.
+This however doubles the time between consecutive posts in any given channel.
+Mirroring can however individually be disabled for a feed by setting `<feed>.mirror`.
 * **`publish.github`**: This is the username and repo name of a GitHub repo, e.g. [`feedarchive/freenode-feedbot-live`](https://github.com/feedarchive/freenode-feedbot-live).
 All posts are published to the repo, thereby providing a basic option to archive and search them.
 A new CSV file is written to the repo for each posted feed having one or more new posts.
@@ -367,7 +373,7 @@ The nesting permits lists to be creatively reused between feeds via YAML anchors
 * **`<feed>.dedup`**: This indicates how to deduplicate posts for the feed, thereby preventing them from being 
 reposted.
 The default value is `feed` (per-feed per-channel), and an alternate possible value is `channel` (per-channel).
-  * **`<feed>.emoji`**: If `false`, emojis in entry titles are removed. Its default value is `null`.
+* **`<feed>.emoji`**: If `false`, emojis in entry titles are removed. Its default value is `null`.
 * **`<feed>.group`**: If a string, this delays the processing of a feed that has just been read until all 
 other feeds having the same group are also read.
 This encourages multiple feeds having the same group to be be posted in succession, except if interrupted by
@@ -383,6 +389,8 @@ This is applied using IRC formatting if a `style` is defined for the feed, other
 The default value is `false`.
 * **`<feed>.message.title`**: If `false`, the entry title is not included in its message.
 Its default value is `true`.
+* **`<feed>.mirror`**: If `false`, mirroring is disabled for this feed. 
+  Its default value is `true`, subject to the global-setting for mirroring.
 * **`<feed>.new`**: This indicates up to how many entries of a new feed to post.
 A new feed is defined as one with no prior posts in its channel.
 The default value is `some` which is interpreted as 3.
@@ -599,7 +607,7 @@ It is recommended that the supported administrative commands be used together wi
 This database file must be preserved with routine backups. After restoring a backup, before starting the container,
 ensure the database file is writable by running a command such as `chmod a+w ./irc-rss-feed-bot/posts.v2.db`.
 * The database file grows as new posts are made. For the most part this indefinite growth can be ignored.
-Currently the standard approach for handling this, if necessary, is to stop the bot and delete the
+Currently, the standard approach for handling this, if necessary, is to stop the bot and delete the
 database file if it has grown unacceptably large.
 Restarting the bot after deleting the database will then create a new database file, and all configured feeds will be
 handled as new.
