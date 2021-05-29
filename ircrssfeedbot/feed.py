@@ -75,6 +75,7 @@ class FeedReader:
         self.blacklist = _patterns(self.channel, self.name, "blacklist")
         self.whitelist = _patterns(self.channel, self.name, "whitelist")
         self.max_posts_if_new = config.NEW_FEED_POSTS_MAX[self.config["new"]]
+        self.mirror = self.config.get("mirror") in (None, True)
 
         # Configure parser
         for parser_name in ("hext", "jmes", "jmespath", "pandas"):  # Searched in alphabetical order.
@@ -449,7 +450,7 @@ class Feed:
         """Post the postable entries and also update the channel topic as relevant."""
         irc = self.reader.irc
         channel = self.channel
-        mirror_channel = config.INSTANCE.get("mirror")
+        mirror_channel = config.INSTANCE.get("mirror") if self.reader.mirror else None
         seconds_per_msg = config.SECONDS_PER_MESSAGE
         channel_topics = config.runtime.channel_topics
         postable_entries = self._postable_entries

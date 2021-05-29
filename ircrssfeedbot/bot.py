@@ -171,7 +171,7 @@ class Bot:
         if admin := config.INSTANCE.get("admin"):
             log.info(f"Administrative commands will be accepted as private messages or directed public messages from {admin}.")
         if mirror_channel := config.INSTANCE.get("mirror"):
-            log.info(f"Feeds will be mirrored to {mirror_channel}.")
+            log.info(f"Feeds will be mirrored to {mirror_channel} except for any feeds which have mirroring disabled.")
         if searchers_ := self._searchers:
             log.info(f"Search commands will be accepted as private messages or directed public messages for the sources: {', '.join(searchers_)}")
 
