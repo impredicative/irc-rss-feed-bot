@@ -87,24 +87,28 @@ class FeedEntry:
         """Return the matching key name and whitelisted regular expression pattern, if any."""
         return self._matching_pattern(self.feed_reader.whitelist)
 
-    @property
-    def message(self) -> str:  # pylint: disable=too-many-locals
+    def message(self, channel: Optional[str] = None) -> str:  # pylint: disable=too-many-locals
         """Return the message to post."""
         # Obtain feed config
         feed_config = self.feed_reader.config
+        native_channel = self.feed_reader.channel
+        channel = channel or native_channel
         explain = (feed_config.get("whitelist") or {}).get("explain")
         msg_config = feed_config.get("message") or {}
         include_summary = msg_config.get("summary") and self.summary
         style_config = feed_config.get("style") or {}
 
-        def _style_name(text: str) -> str:
-            return style(text, styler="irc", **style_config.get("name", {}))
-
         def _style_title(text: str, **kwargs: Any) -> str:
             return style(text, styler="irc" if style_config else "unicode", **kwargs)
 
         # Define post params
-        format_map = dict(identity=config.runtime.identity, channel=self.feed_reader.channel, feed=_style_name(self.feed_reader.name), url=self.short_url or self.long_url)
+        format_map = dict(
+            identity=config.runtime.identity,
+            channel=channel,
+            styled_native_channel=style(native_channel, styler="irc", fg="silver"),  # Note: silver color may be unclear for some clients.
+            styled_feed=style(self.feed_reader.name, styler="irc", **style_config.get("name", {})),
+            url=self.short_url or self.long_url,
+        )
 
         # Define post caption
         format_map["caption"] = ""
@@ -129,7 +133,8 @@ class FeedEntry:
             format_map["caption"] += self.summary
 
         # Define message format
-        msg_format = "[{feed}]"
+        msg_format = "" if (channel == native_channel) else "<{styled_native_channel}> "
+        msg_format += "[{styled_feed}]"
         if format_map["caption"]:
             msg_format += " {caption} →"
         msg_format += " {url}"

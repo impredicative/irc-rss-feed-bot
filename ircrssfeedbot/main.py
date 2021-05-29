@@ -76,7 +76,13 @@ def load_instance_config(log_details: bool = True) -> None:  # pylint: disable=t
     alerts_channel_format = instance_config.get("alerts_channel") or config.ALERTS_CHANNEL_FORMAT_DEFAULT
     instance_config["alerts_channel"] = alerts_channel_format.format(nick=instance_config["nick"])
     if instance_config["alerts_channel"] not in instance_config["feeds"]:
-        instance_config["feeds"][instance_config["alerts_channel"]] = {}  # Set as a feeds channel.
+        instance_config["feeds"][instance_config["alerts_channel"]] = {}  # Assists in joining channel.
+
+    # Set mirror channel
+    mirror_channel = instance_config.get("mirror")
+    if mirror_channel:
+        assert mirror_channel not in instance_config["feeds"]
+        instance_config["feeds"][mirror_channel] = {}  # Assists in joining channel.
 
     # Process instance config
     instance_config["dir"] = instance_config_path.parent

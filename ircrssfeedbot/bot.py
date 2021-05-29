@@ -170,6 +170,8 @@ class Bot:
         log.info(f"Alerts will be sent to {config.INSTANCE['alerts_channel']}.")
         if admin := config.INSTANCE.get("admin"):
             log.info(f"Administrative commands will be accepted as private messages or directed public messages from {admin}.")
+        if mirror_channel := config.INSTANCE.get("mirror"):
+            log.info(f"Feeds will be mirrored to {mirror_channel}.")
         if searchers_ := self._searchers:
             log.info(f"Search commands will be accepted as private messages or directed public messages for the sources: {', '.join(searchers_)}")
 

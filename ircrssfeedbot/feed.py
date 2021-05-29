@@ -449,6 +449,7 @@ class Feed:
         """Post the postable entries and also update the channel topic as relevant."""
         irc = self.reader.irc
         channel = self.channel
+        mirror_channel = config.INSTANCE.get("mirror")
         seconds_per_msg = config.SECONDS_PER_MESSAGE
         channel_topics = config.runtime.channel_topics
         postable_entries = self._postable_entries
@@ -458,7 +459,7 @@ class Feed:
         for entry in postable_entries:
             # Send message
             with Throttle(seconds_per_msg):
-                msg = entry.message
+                msg = entry.message()
                 irc.msg(channel, msg)
                 log.debug("Sent message to %s: %s", channel, msg)
 
@@ -471,6 +472,13 @@ class Feed:
                 channel_topics[channel] = new_topic
                 irc.quote("TOPIC", channel, f":{new_topic}")
                 log.info(f"Updated {channel} topic: {new_topic}")
+
+            # Mirror message
+            if mirror_channel:
+                with Throttle(seconds_per_msg):
+                    msg = entry.message(mirror_channel)
+                    irc.msg(mirror_channel, msg)
+                    log.debug("Mirrored message to %s: %s", mirror_channel, msg)
 
         log.info(f"Posted {len(postable_entries):,} entries for {self}.")
 
