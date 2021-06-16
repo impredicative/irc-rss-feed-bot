@@ -100,14 +100,14 @@ Refer to the optional `publish.github` feature.
 ### Configuration: non-secret
 Prepare a version-controlled `config.yaml` file using the sample below.
 A full-fledged real-world example is also
-[available](https://github.com/impredicative/irc-bots/blob/master/freenode/feed-bot/config.yaml).
+[available](https://github.com/impredicative/irc-bots/blob/master/libera/news-bot/config.yaml).
 ```yaml
-host: chat.freenode.net
+host: irc.libera.chat
 ssl_port: 6697
-nick: MyFeed[bot]
+nick: MyFeedBot
 admin: mynick!myident@myhost
-alerts_channel: '##mybot-alerts'
-mirror: '##mybot-mirror'
+alerts_channel: '#mybot-alerts'
+mirror: '#mybot-mirror'
 mode:
 publish:
   github: MyGithubServiceAccountUsername/IrcServerName-MyBotName-live
@@ -312,14 +312,14 @@ Its default value is `##{nick}-alerts`. The key `{nick}`, if present in the valu
 For example, if the nick is `MyFeed[bot]`, alerts will by default be sent to `##MyFeed[bot]-alerts`.
 Since a channel name starts with #, the name if provided **must be quoted**.
 It is recommended that the alerts channel be registered and monitored.
-* **`mode`**: This can for example be `+igR` for [Freenode](https://freenode.net/kb/answer/usermodes) 
+* **`mode`**: This can for example be `+igR` for [Libera](https://libera.chat/guides/usermodes) 
 and `+igpR` for [Rizon](https://wiki.rizon.net/index.php?title=User_Modes).
   
 ##### Optional
 * **`mirror`**: If specified as a channel name, all posts across all channels are mirrored to this channel.
 This however doubles the time between consecutive posts in any given channel.
 Mirroring can however individually be disabled for a feed by setting `<feed>.mirror`.
-* **`publish.github`**: This is the username and repo name of a GitHub repo, e.g. [`feedarchive/freenode-feedbot-live`](https://github.com/feedarchive/freenode-feedbot-live).
+* **`publish.github`**: This is the username and repo name of a GitHub repo, e.g. [`feedarchive/libera-feedbot-live`](https://github.com/feedarchive/libera-feedbot-live).
 All posts are published to the repo, thereby providing a basic option to archive and search them.
 A new CSV file is written to the repo for each posted feed having one or more new posts.
 Basic search functionality is provisioned via a `search` [command](#commands).
