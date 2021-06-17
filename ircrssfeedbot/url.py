@@ -20,12 +20,12 @@ from .util.urllib import url_to_netloc
 log = logging.getLogger(__name__)
 
 
-@cachetools.func.ttl_cache(maxsize=config.CACHE_MAXSIZE__URL_COMPRESSION, ttl=config.CACHE_TTL__URL_COMPRESSION)
+@cachetools.func.ttl_cache(maxsize=config.CACHE_MAXSIZE__URL_COMPRESSION, ttl=config.CACHE_TTL__URL_COMPRESSION)  # type: ignore
 def _compress(content: bytes) -> bytes:
     return gzip.compress(content)
 
 
-@cachetools.func.ttl_cache(maxsize=config.CACHE_MAXSIZE__URL_COMPRESSION, ttl=config.CACHE_TTL__URL_COMPRESSION)
+@cachetools.func.ttl_cache(maxsize=config.CACHE_MAXSIZE__URL_COMPRESSION, ttl=config.CACHE_TTL__URL_COMPRESSION)  # type: ignore
 def _decompress(content: bytes) -> bytes:
     return gzip.decompress(content)
 
@@ -45,7 +45,7 @@ class URLContent:
     def __init__(self, content: bytes, etag: Optional[str], approach: str):
         self.time = time.time()
         self.version = self.CURRENT_VERSION
-        self._content = _compress(content)
+        self._content = _compress(content)  # type: ignore
         self.etag = etag
         self.approach = approach
 
@@ -57,7 +57,7 @@ class URLContent:
     @property  # Effectively read-only. For memory and diskcache efficiency, don't use cachedproperty here.
     def content(self) -> bytes:
         """Return URL content."""
-        return _decompress(self._content)
+        return _decompress(self._content)  # type: ignore
 
     @property
     def etag_type(self) -> str:

@@ -82,7 +82,7 @@ class BaseSearcher(abc.ABC):
         response = f"{truncation_indicator.capitalize()} {len(df)} search results → {gist.html_url}#file-results-md (from {styled_name} for {styled_query})"
         return response
 
-    @cachetools.func.ttl_cache(maxsize=config.SEARCH_CACHE_MAXSIZE, ttl=config.SEARCH_CACHE_TTL)
+    @cachetools.func.ttl_cache(maxsize=config.SEARCH_CACHE_MAXSIZE, ttl=config.SEARCH_CACHE_TTL)  # type: ignore
     def search(self, query: str) -> str:
         """Return a summary containing a Gist link to the search results for the given query."""
         return self.worker_pool.apply(self._search_inner, (query,))  # To prevent accumulation of potential memory leaks.
