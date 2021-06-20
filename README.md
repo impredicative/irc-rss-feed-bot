@@ -66,11 +66,11 @@ For several more features, see the customizable [global](#global-settings) and [
 
 ## Examples
 ```text
-<Feed[bot]> [ArXiv:cs.AI] Concurrent Meta Reinforcement Learning → https://arxiv.org/abs/1903.02710v1
-<Feed[bot]> [ArXiv:cs.AI] Attack Graph Obfuscation → https://arxiv.org/abs/1903.02601v1
-<Feed[bot]> [InfoWorld] What is a devops engineer? And how do you become one? → https://j.mp/2NOgQ3g
-<Feed[bot]> [InfoWorld] What is Jupyter Notebook? Data analysis made easier → https://j.mp/2NMailP
-<Feed[bot]> [AWS:OpenData] COVID-19 Open Research Dataset (CORD-19): Full-text and metadata dataset of
+<FeedBot> [ArXiv:cs.AI] Concurrent Meta Reinforcement Learning → https://arxiv.org/abs/1903.02710v1
+<FeedBot> [ArXiv:cs.AI] Attack Graph Obfuscation → https://arxiv.org/abs/1903.02601v1
+<FeedBot> [InfoWorld] What is a devops engineer? And how do you become one? → https://j.mp/2NOgQ3g
+<FeedBot> [InfoWorld] What is Jupyter Notebook? Data analysis made easier → https://j.mp/2NMailP
+<FeedBot> [AWS:OpenData] COVID-19 Open Research Dataset (CORD-19): Full-text and metadata dataset of
             COVID-19 research articles. → https://registry.opendata.aws/cord-19
 ```
 ![](images/sample_posts.png)
@@ -309,7 +309,7 @@ Its format is `nick!ident@host`. An example is `JDoe11!sid654321@gateway/web/irc
 A case-insensitive pattern match is tested for using [`fnmatch`](https://docs.python.org/3/library/fnmatch.html).
 * **`alerts_channel`**: Some but not all warning and error alerts are sent to this channel.
 Its default value is `##{nick}-alerts`. The key `{nick}`, if present in the value, is formatted with the actual nick.
-For example, if the nick is `MyFeed[bot]`, alerts will by default be sent to `##MyFeed[bot]-alerts`.
+For example, if the nick is `MyFeedBot`, alerts will by default be sent to `##MyFeedBot-alerts`.
 Since a channel name starts with #, the name if provided **must be quoted**.
 It is recommended that the alerts channel be registered and monitored.
 * **`mode`**: This can for example be `+igR` for [Libera](https://libera.chat/guides/usermodes) 
