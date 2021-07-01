@@ -560,7 +560,7 @@ This is despite the bot-enforced limit of two seconds per message across the ser
 
 * It is recommended that the bot be run as a Docker container using using Docker ≥18.09.2, possibly with
 Docker Compose ≥1.24.0.
-To run the bot using Docker Compose, create or add to a version-controlled `docker-compose.yml` file such as:
+To run the bot using Docker Compose, create or add to a version-controlled `docker-compose.yaml` file such as:
 ```yaml
 version: '3.7'
 services:
@@ -574,14 +574,14 @@ services:
         max-size: 2m
         max-file: "5"
     volumes:
-      - ./irc-rss-feed-bot:/config
+      - ./irc-rss-feed-bot:/config.yaml
     env_file:
       - ./irc-rss-feed-bot/secrets.env
     environment:
       TZ: America/New_York
 ```
 
-* In the above service definition in `docker-compose.yml`:
+* In the above service definition in `docker-compose.yaml`:
   * `image`: Use a specific
   [versioned tag](https://hub.docker.com/r/ascensive/irc-rss-feed-bot/tags?ordering=last_updated), e.g. `0.10.0`.
   * `volumes`: Customize the relative path to the previously created `config.yaml` file, e.g. `./irc-rss-feed-bot`.
