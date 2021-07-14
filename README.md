@@ -578,7 +578,7 @@ services:
     env_file:
       - ./irc-rss-feed-bot/secrets.env
     environment:
-      TZ: America/New_York
+      TZ: America/New_York  # Select TZ database name from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 ```
 
 * In the above service definition in `docker-compose.yml`:
