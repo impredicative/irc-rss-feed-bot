@@ -124,6 +124,9 @@ feeds:
       url: https://registry.opendata.aws/rss.xml
       message:
         summary: true
+    CDC:FoodSafety:
+      url: https://tools.cdc.gov/api/v2/resources/media/316422.rss
+      redirect: true
     j:AJCN:
       url: https://academic.oup.com/rss/site_6122/3981.xml
       mirror: false
@@ -341,7 +344,7 @@ It is for diagnostic purposes. Its default is `false`.
 A feed is defined under a channel as in the sample configuration. The feed's key represents its name.
 
 The order of execution of the interacting operations is:
-`blacklist`, `whitelist`, `https`, `www`, `emoji`, `sub`, `format`, `shorten`.
+`redirect`, `blacklist`, `whitelist`, `https`, `www`, `emoji`, `sub`, `format`, `shorten`.
 Refer to the sample configuration for usage examples.
 
 YAML [anchors and references](https://en.wikipedia.org/wiki/YAML#Advanced_components) can be used to reuse nodes.
@@ -407,6 +410,8 @@ Note that 0.2 hours is equal to 12 minutes.
 To make service restarts safer by preventing excessive reads, the first read is delayed by half the period.
 To better distribute the load of reading multiple feeds, a uniformly distributed random ±5% is applied to the period for
 each read.
+* **`<feed>.redirect`**: This indicates whether to substitute each entry URL with its redirect target.
+The default value is `false`.
 * **`<feed>.shorten`**: This indicates whether to post shortened URLs for the feed.
 The default value is `true`.
 The alternative value `false` is recommended if the URL is naturally small, or if `sub` or `format` can be used to make
