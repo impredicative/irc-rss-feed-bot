@@ -1,5 +1,6 @@
 """time utilities."""
 import time
+from typing import Union
 
 
 class Throttle:
@@ -8,7 +9,7 @@ class Throttle:
     class Break(Exception):
         """Raise this exception to disable the requirement of using at least the given number of seconds."""
 
-    def __init__(self, seconds: int):
+    def __init__(self, seconds: Union[int, float]):
         self._seconds = seconds
 
     def __enter__(self):

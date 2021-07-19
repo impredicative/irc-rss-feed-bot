@@ -22,6 +22,7 @@ from .url import URLReader
 from .util.bs4 import html_to_text
 from .util.dict import dict_str
 from .util.list import ensure_list
+from .util.requests import find_redirect
 from .util.set import leaves
 from .util.str import readable_list
 from .util.textwrap import shorten_to_bytes_width
@@ -117,6 +118,13 @@ class FeedReader:
             log.debug("Reversing the order of the %s entries for %s.", len(entries), self)
             entries = entries[::-1]
             log.debug("Reversed the order of the %s entries for %s.", len(entries), self)
+
+        # Map redirects
+        if feed_config.get("redirect"):
+            log.debug("Redirecting %s URLs in %s.", len(entries), self)
+            for entry in entries:
+                entry.long_url = find_redirect(entry.long_url)
+            log.debug("Redirected URLs in %s.", self)
 
         # Remove blacklisted entries
         if feed_config.get("blacklist", {}):
