@@ -18,7 +18,7 @@ def configure_logging() -> None:
 
 
 # Meta
-CACHE_MAXSIZE_DEFAULT: Final = 512
+CACHE_MAXSIZE_DEFAULT: Final = 1024
 INSTANCE: Dict = {}  # Gets set from YAML config file.
 runtime = types.SimpleNamespace()  # Set at runtime.  # pylint: disable=invalid-name
 PACKAGE_PATH: Final = Path(__file__).parent
