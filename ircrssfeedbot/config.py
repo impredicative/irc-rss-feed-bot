@@ -44,6 +44,7 @@ ETAG_CACHE_PROHIBITED_NETLOCS: Final = {
     "blog.ml.cmu.edu",
     "blogs.cornell.edu",
     "bodyrecomposition.com",
+    "code.fb.com",
     "deeplearning.ai",
     "devblogs.nvidia.com",
     "export.arxiv.org",
