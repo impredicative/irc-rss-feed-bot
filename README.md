@@ -104,6 +104,7 @@ A full-fledged real-world example is also
 ```yaml
 host: irc.libera.chat
 ssl_port: 6697
+#ssl_verify: true
 nick: MyFeedBot
 admin: mynick!myident@myhost
 alerts_channel: '#mybot-alerts'

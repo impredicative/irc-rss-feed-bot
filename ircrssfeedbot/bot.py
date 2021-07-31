@@ -64,6 +64,7 @@ class Bot:
             connect_modes=instance.get("mode"),
             quit_message="",
             ping_interval=30,
+            verify_ssl=instance.get("ssl_verify", True),
         )
         log.info("Initialized IRC client.")
         self._setup_alerter()
