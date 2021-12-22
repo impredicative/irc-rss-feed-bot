@@ -78,7 +78,7 @@ SECONDS_PER_HEAD_REQUEST: Final = 0.5
 SECONDS_PER_MESSAGE: Final = 2
 TEMPDIR: Final = Path(tempfile.gettempdir())
 TITLE_MAX_BYTES: Final = 2048  # Relevant for publishing.
-USER_AGENT_DEFAULT: Final = "Mozilla/5.0 (X11; Linux x86_64; rv:90.0) Gecko/20100101 Firefox/90.0"
+USER_AGENT_DEFAULT: Final = "Mozilla/5.0 (X11; Linux x86_64; rv:95.0) Gecko/20100101 Firefox/95.0"
 USER_AGENT_OVERRIDES: Final = {  # Site-specific overrides (without www prefix). Sites must be in lowercase.
     "etf.com": "Googlebot-News",
     "medscape.com": "Googlebot-News",
