@@ -34,6 +34,7 @@ class Bot:
     CHANNEL_LAST_INCOMING_MSG_TIMES: Dict[str, float] = {}
     CHANNEL_QUEUES: Dict[str, queue.Queue] = {}
     EXITCODE_QUEUE: queue.SimpleQueue = queue.SimpleQueue()
+    FEED_COMMAND_QUEUES_BY_CHANNEL: Dict[str, Dict[str, queue.SimpleQueue]] = {}
     RECENT_NICK_REGAIN_TIMES: List[float] = []
     SEARCH_QUEUE: queue.SimpleQueue = queue.SimpleQueue()
     FEED_GROUP_BARRIERS: Dict[str, threading.Barrier] = {}
@@ -190,7 +191,7 @@ class Bot:
         while self._active:  # pylint: disable=too-many-nested-blocks
             feed = channel_queue.get()
             log.debug(f"Dequeued {feed}.")
-            min_channel_idle_time = feed.reader.min_channel_idle_time
+            min_channel_idle_time = feed.min_channel_idle_time
             log.debug(f"The minimum required channel idle time for {feed} is {timedelta_desc(min_channel_idle_time)}.")
             try:
                 if not feed.is_postable:
@@ -238,6 +239,7 @@ class Bot:
         feed_config = instance["feeds"][channel][feed_name]
 
         channel_queue = Bot.CHANNEL_QUEUES[channel]
+        feed_command_queue = Bot.FEED_COMMAND_QUEUES_BY_CHANNEL[channel][feed_name] = queue.SimpleQueue()
         feed_period_avg = max(config.PERIOD_HOURS_MIN, feed_config.get("period", config.PERIOD_HOURS_DEFAULT)) * 3600
         feed_period_min = feed_period_avg * (1 - config.PERIOD_RANDOM_PERCENT / 100)
         feed_period_max = feed_period_avg * (1 + config.PERIOD_RANDOM_PERCENT / 100)
@@ -264,14 +266,22 @@ class Bot:
             feed_period = random.uniform(feed_period_min, feed_period_max)
             query_time = max(time.monotonic(), query_time + feed_period)  # "max" is used in case of wait using "put".
             sleep_time = max(0.0, query_time - time.monotonic())
+            read_is_forced = False
             if sleep_time != 0:
-                log.debug(f"Will wait {timedelta_desc(sleep_time)} to read feed {feed_name} of {channel}.")
-                time.sleep(sleep_time)
+                log.debug(f"Will wait up to {timedelta_desc(sleep_time)} to read feed {feed_name} of {channel}.")
+                try:
+                    feed_command = feed_command_queue.get(timeout=sleep_time)
+                except queue.Empty:
+                    pass
+                else:
+                    assert feed_command == "get"
+                    log.info(f"Aborted waiting up to {timedelta_desc(sleep_time)} to force read feed {feed_name} of {channel}.")
+                    read_is_forced = True
 
             try:
                 # Read feed
                 log.debug(f"Retrieving feed {feed_name} of {channel}.")
-                feed = feed_reader.read()
+                feed = feed_reader.read(is_forced=read_is_forced)
                 log.info(f"Retrieved in {feed.read_time_used:.1f}s the {feed} with {len(feed.entries):,} approved entries via {feed.read_approach}.")
 
                 # Wait for other feeds in group
@@ -286,7 +296,6 @@ class Bot:
                     log.debug(f"Finished waiting for other feeds in group {feed_group} to also be read before queuing {feed}.")
 
                 # Queue feed
-                # FIXME: This doesn't work correctly when `feed_reader.min_channel_idle_time == 0`.
                 try:
                     channel_queue.put_nowait(feed)
                 except queue.Full:
@@ -296,7 +305,7 @@ class Bot:
                         f"The queue for this channel is full. The feed will be put in the queue in blocking mode."
                     )
                     alerter(msg, log.warning)
-                    channel_queue.put(feed)
+                    channel_queue.put(feed)  # FIXME: The put delay is undesirable when feed.min_channel_idle_time is low.
                 log.debug(f"Queued {feed}.")
             except Exception as exc:  # pylint: disable=broad-except
                 num_consecutive_failures += 1
@@ -344,6 +353,7 @@ class Bot:
             self.CHANNEL_BUSY_LOCKS[channel] = threading.Lock()
             self.CHANNEL_JOIN_EVENTS[channel] = threading.Event()
             self.CHANNEL_QUEUES[channel] = queue.Queue(maxsize=num_channel_feeds * 2)
+            self.FEED_COMMAND_QUEUES_BY_CHANNEL[channel] = {}
             threading.Thread(target=self._msg_channel, name=f"ChannelMessenger-{channel}", args=(channel,)).start()
             for feed, feed_config in channel_config.items():
                 threading.Thread(target=self._read_feed, name=f"FeedReader-{channel}-{feed}", args=(channel, feed)).start()
@@ -531,7 +541,8 @@ def _handle_privmsg(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List
     # Execute if command
     if is_command:
         command = msg.strip() if is_private_msg else msg.split(":", 1)[1].strip()
-        command_name = command.split(None, 1)[0].lower().rstrip(":")
+        command_name = command.split(maxsplit=1)[0].lower().rstrip(":")
+        command_args = command.split()[1:]
         log.info(f"Received command from {sender}: {command}")
         is_from_admin = (admin := config.INSTANCE.get("admin")) and fnmatch.fnmatch(sender, admin)  # pylint: disable=used-before-assignment
         if is_from_admin:
@@ -539,6 +550,10 @@ def _handle_privmsg(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List
                 Bot.EXITCODE_QUEUE.put(0)
             elif command_name == "fail":
                 Bot.EXITCODE_QUEUE.put(1)
+            # elif command_name == "get":
+            #     if command
+            #     try:
+            #         Bot[channel]
         if command_name == "search":
             search_request = {"command": command, "sender": user, "channel": channel}
             Bot.SEARCH_QUEUE.put(search_request)

@@ -34,7 +34,9 @@ def shorten_to_bytes_width(string: str, maximum_bytes: int) -> str:
     substring = encoded_string[: maximum_bytes - len(encoded_placeholder)]
     splitted = substring.rsplit(b" ", 1)  # Split at last space-character
     if len(splitted) == 2:
-        return b" ".join([splitted[0], encoded_placeholder]).decode()
+        shortened = b" ".join([splitted[0], encoded_placeholder])
+        assert len(shortened) <= maximum_bytes
+        return shortened.decode()
     return "[...]"
 
 

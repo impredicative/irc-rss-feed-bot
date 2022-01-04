@@ -9,7 +9,7 @@ import re
 import time
 import types
 from functools import cached_property, lru_cache
-from typing import Callable, Dict, List, Optional, Pattern, Tuple
+from typing import Callable, Dict, List, Optional, Pattern, Tuple, Union
 
 import bitlyshortener
 import miniirc
@@ -72,6 +72,7 @@ class FeedReader:
         log.debug(f"Initializing {self}.")
         self.config: Dict = {**config.INSTANCE["defaults"], **config.INSTANCE["feeds"][self.channel][self.name]}
         self.urls = OrderedSet(ensure_list(self.config["url"]))
+        self.url_reader_uncached = URLReader(max_cache_age=1)
         self.min_channel_idle_time = config.MIN_CHANNEL_IDLE_TIME_DEFAULT if (self.config.get("period", config.PERIOD_HOURS_DEFAULT) > config.PERIOD_HOURS_MIN) else 0
         self.blacklist = _patterns(self.channel, self.name, "blacklist")
         self.whitelist = _patterns(self.channel, self.name, "whitelist")
@@ -284,13 +285,15 @@ class FeedReader:
         log.debug(f"Converted {len(raw_entries):,} raw entries to actual entries for {self}.")
         return entries, urls
 
-    def read(self) -> "Feed":  # pylint: disable=too-many-locals,too-many-statements
+    def read(self, is_forced: bool = False) -> "Feed":  # pylint: disable=too-many-locals,too-many-statements
         """Read feed with entries."""
         timer = Timer()
         feed_config = self.config
         alert_config = feed_config.get("alerts") or {}
         alert_if_any_empty_before_processing = alert_config.get("empty", True)
         alert_if_emptied_by_processing = alert_config.get("emptied", False)
+        min_channel_idle_time = 0 if is_forced else self.min_channel_idle_time
+        url_reader = self.url_reader_uncached if is_forced else self.url_reader
 
         # Retrieve URL content and parse entries
         urls_pending, urls_read = self.urls.copy(), OrderedSet()
@@ -299,7 +302,7 @@ class FeedReader:
         while urls_pending:
             # Read URL
             url = urls_pending.pop(last=False)
-            url_content = self.url_reader[url]
+            url_content = url_reader[url]
             url_read_finish_time = time.monotonic()
             urls_read.add(url)
             url_read_approach_counts.update([url_content.approach])
@@ -357,7 +360,7 @@ class FeedReader:
                 else:
                     log.debug(log_msg)
 
-        return Feed(entries=entries, reader=self, read_approach=url_read_approach_desc, read_time_used=timer())
+        return Feed(entries=entries, reader=self, read_approach=url_read_approach_desc, read_time_used=timer(), min_channel_idle_time=min_channel_idle_time)
 
     @property
     def worker_pool(self) -> multiprocessing.pool.Pool:  # Can't use return type "mp.pool.Pool".
@@ -382,6 +385,7 @@ class Feed:
     reader: FeedReader
     read_approach: str
     read_time_used: float
+    min_channel_idle_time: Union[int, float]
 
     def __str__(self):
         return f"feed {self.name} of {self.channel}"
@@ -459,6 +463,7 @@ class Feed:
         irc = self.reader.irc
         channel = self.channel
         mirror_channel = config.INSTANCE.get("mirror") if self.reader.mirror else None
+        mirror_channel = mirror_channel if (mirror_channel != channel) else None
         seconds_per_msg = config.SECONDS_PER_MESSAGE
         channel_topics = config.runtime.channel_topics
         postable_entries = self._postable_entries
