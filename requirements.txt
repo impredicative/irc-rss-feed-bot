@@ -6,7 +6,7 @@
 #
 beautifulsoup4==4.9.3
     # via bs4
-bitlyshortener==0.5.3
+bitlyshortener==0.6.0
     # via -r requirements.in
 bs4==0.0.1
     # via -r requirements.in
