@@ -37,11 +37,12 @@ jobs:
       run: echo $DOCKER_HUB_TOKEN | docker login -u ascensive --password-stdin
     - name: Build, tag, list, and push Docker image
       run: |
+        set -x
         echo "$GITHUB_REF"
-        TAG="${GITHUB_REF#refs/tags/}"
-        echo "$TAG"
-        IMAGE=ascensive/irc-rss-feed-bot:"$TAG"
-        echo "$IMAGE"
-        docker build -t "$IMAGE" .
+        GITHUB_TAG="${GITHUB_REF#refs/tags/}"
+        echo "GITHUB_TAG"
+        DOCKERHUB_TAG=ascensive/irc-rss-feed-bot:"GITHUB_TAG"
+        echo "DOCKERHUB_TAG"
+        docker build -t "DOCKERHUB_TAG" .
         docker images
-        docker push "$IMAGE"
+        docker push "DOCKERHUB_TAG"
