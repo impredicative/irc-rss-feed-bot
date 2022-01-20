@@ -1,4 +1,4 @@
-.PHONY: help build clean compile fmt install prep setup test
+.PHONY: help build build-v clean compile fmt install prep setup test
 
 help:
 	@echo "build  : Build Docker image."
