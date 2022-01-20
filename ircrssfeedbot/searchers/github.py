@@ -52,9 +52,9 @@ class Searcher(BaseSearcher):
                     searchable_full_text = " ".join(df.at[0, c] for c in ("feed", "title", "long_url"))
                     if not validator.is_match(searchable_full_text):
                         continue
-                    df = cast(pd.DataFrame, df)  # Prevents subsequent pylint no-member error.
-                    df.insert(0, "channel", path.parts[0])
-                    df.insert(0, "datetime", datetime.datetime.strptime(str(Path(*path.parts[1:])) + " +0000", "%Y/%m%d/%H%M%S.csv %z"))
+                    df = cast(pd.DataFrame, df)  # Intended to prevent subsequent pylint no-member errors.
+                    df.insert(0, "channel", path.parts[0])  # pylint: disable=no-member
+                    df.insert(0, "datetime", datetime.datetime.strptime(str(Path(*path.parts[1:])) + " +0000", "%Y/%m%d/%H%M%S.csv %z"))  # pylint: disable=no-member
                     dfs.append(df)
                     num_results += 1
                     if num_results == _MAX_RESULTS:
