@@ -2,7 +2,7 @@
 
 help:
 	@echo "build  : Build, tag, and list Docker image."
-	@echo "build-v: Build and tag Docker image using the host network, as can be relevant in a virtual machine."
+	@echo "build-v: Build, tag, and list Docker image using the host network. This can be relevant in a virtual machine."
 	@echo "clean  : Remove auto-created files and directories."
 	@echo "compile: Compile required third-party Python packages."
 	@echo "fmt    : Autoformat Python code in-place using various tools in sequence."
@@ -19,6 +19,7 @@ build:
 
 build-v:
 	docker build --network host -t irc-rss-feed-bot -t ascensive/irc-rss-feed-bot .
+	docker images
 
 clean:
 	rm -rf ./.*_cache
