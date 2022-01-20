@@ -3,6 +3,7 @@ import datetime
 import io
 import logging
 from pathlib import Path
+from typing import cast
 
 import pandas as pd
 
@@ -51,6 +52,7 @@ class Searcher(BaseSearcher):
                     searchable_full_text = " ".join(df.at[0, c] for c in ("feed", "title", "long_url"))
                     if not validator.is_match(searchable_full_text):
                         continue
+                    df = cast(pd.DataFrame, df)  # Prevents subsequent pylint no-member error.
                     df.insert(0, "channel", path.parts[0])
                     df.insert(0, "datetime", datetime.datetime.strptime(str(Path(*path.parts[1:])) + " +0000", "%Y/%m%d/%H%M%S.csv %z"))
                     dfs.append(df)
