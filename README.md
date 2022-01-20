@@ -302,9 +302,10 @@ feeds:
 ##### Mandatory
 * **`host`**: IRC server address.
 * **`ssl_port`**: IRC server SSL port.
+* **`ssl_verify`**: If `false`, the TLS/SSL certificate is not verified. Its default is `true`.
 * **`nick`**: This is a registered IRC nick. If the nick is in use, it will be regained.
 Ensure that the email verification of the registered nick, as applicable to many IRC servers, is complete.
-Without this email verification, the bot can fail to receive the required event 900 and therefore fail to function.
+Without this email verification being completed, the bot can fail to receive the required event 900 and therefore fail to function.
 
 ##### Recommended
 * **`admin`**: Administrative commands by this user pattern are accepted and executed.
