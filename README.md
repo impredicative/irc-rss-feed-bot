@@ -62,7 +62,6 @@ For several more features, see the customizable [global](#global-settings) and [
 | Repo      | https://github.com/impredicative/irc-rss-feed-bot          |
 | Changelog | https://github.com/impredicative/irc-rss-feed-bot/releases |
 | Image     | https://hub.docker.com/r/ascensive/irc-rss-feed-bot        |
-| Donation  | [BTC](https://blockchair.com/bitcoin/address/bc1q05p96m0s9kqe9c67jq87sjsnuv6vmzeuxea872) / [LTC](https://blockchair.com/litecoin/address/ltc1q95jq6j78kvyfrvxalwgt9m9xhj9f4r7jfwrqth) / [ETH](https://blockchair.com/ethereum/address/0x0d2d5c576af8ed9f3833f4a3b1e4de6cac2285f0) / [DOGE](https://blockchair.com/dogecoin/address/D5atn8Q9f5iBXrWByxW3i3483QFNH4RFnP) |
 
 ## Examples
 ```text
