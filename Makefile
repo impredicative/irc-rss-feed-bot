@@ -1,7 +1,7 @@
 .PHONY: help build build-v clean compile fmt install prep push setup test
 
 help:
-	@echo "build  : Build and tag Docker image."
+	@echo "build  : Build, tag, and list Docker image."
 	@echo "build-v: Build and tag Docker image using the host network, as can be relevant in a virtual machine."
 	@echo "clean  : Remove auto-created files and directories."
 	@echo "compile: Compile required third-party Python packages."
