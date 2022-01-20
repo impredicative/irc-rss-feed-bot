@@ -2,6 +2,7 @@
 
 help:
 	@echo "build  : Build Docker image."
+	@echo "build-v: Build Docker image using the host network, as can be relevant in a virtual machine."
 	@echo "clean  : Remove auto-created files and directories."
 	@echo "compile: Compile required third-party Python packages."
 	@echo "fmt    : Autoformat Python code in-place using various tools in sequence."
@@ -13,7 +14,9 @@ help:
 build:
 	#docker build -t "${PWD##*/}" .
 	docker build -t irc-rss-feed-bot .
-	docker images
+
+build-v:
+	docker build --network host -t irc-rss-feed-bot .
 
 clean:
 	rm -rf ./.*_cache
