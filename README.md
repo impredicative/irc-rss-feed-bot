@@ -68,8 +68,8 @@ For several more features, see the customizable [global](#global-settings) and [
 ```text
 <FeedBot> [ArXiv:cs.AI] Concurrent Meta Reinforcement Learning → https://arxiv.org/abs/1903.02710v1
 <FeedBot> [ArXiv:cs.AI] Attack Graph Obfuscation → https://arxiv.org/abs/1903.02601v1
-<FeedBot> [InfoWorld] What is a devops engineer? And how do you become one? → https://j.mp/2NOgQ3g
-<FeedBot> [InfoWorld] What is Jupyter Notebook? Data analysis made easier → https://j.mp/2NMailP
+<FeedBot> [InfoWorld] What is a devops engineer? And how do you become one? → https://bit.ly/2NOgQ3g
+<FeedBot> [InfoWorld] What is Jupyter Notebook? Data analysis made easier → https://bit.ly/2NMailP
 <FeedBot> [AWS:OpenData] COVID-19 Open Research Dataset (CORD-19): Full-text and metadata dataset of
             COVID-19 research articles. → https://registry.opendata.aws/cord-19
 ```
