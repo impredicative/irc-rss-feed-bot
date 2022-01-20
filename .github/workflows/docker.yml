@@ -40,9 +40,9 @@ jobs:
         set -x
         echo "$GITHUB_REF"
         GITHUB_TAG="${GITHUB_REF#refs/tags/}"
-        echo "GITHUB_TAG"
-        DOCKERHUB_TAG=ascensive/irc-rss-feed-bot:"GITHUB_TAG"
-        echo "DOCKERHUB_TAG"
-        docker build -t "DOCKERHUB_TAG" .
+        echo "$GITHUB_TAG"
+        DOCKERHUB_TAG=ascensive/irc-rss-feed-bot:"$GITHUB_TAG"
+        echo "$DOCKERHUB_TAG"
+        docker build -t "$DOCKERHUB_TAG" .
         docker images
-        docker push "DOCKERHUB_TAG"
+        docker push "$DOCKERHUB_TAG"
