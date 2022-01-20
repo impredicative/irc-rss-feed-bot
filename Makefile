@@ -14,8 +14,8 @@ help:
 
 build:
 	#docker build -t "${PWD##*/}" .
-	docker build -t irc-rss-feed-bot .
-	docker image tag irc-rss-feed-bot:latest ascensive/irc-rss-feed-bot:latest
+	docker build -t irc-rss-feed-bot -t ascensive/irc-rss-feed-bot .
+	docker images
 
 build-v:
 	docker build --network host -t irc-rss-feed-bot -t ascensive/irc-rss-feed-bot .
