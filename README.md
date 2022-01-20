@@ -107,12 +107,12 @@ ssl_port: 6697
 nick: MyFeedBot
 admin: mynick!myident@myhost
 alerts_channel: '#mybot-alerts'
-mirror: '#mybot-mirror'
 mode:
-publish:
-  github: MyGithubServiceAccountUsername/IrcServerName-MyBotName-live
-defaults:
-  new: all
+#mirror: '#mybot-mirror'
+#publish:
+#  github: MyGithubServiceAccountUsername/IrcServerName-MyBotName-live
+#defaults:
+#  new: all
 feeds:
   "##mybot-alerts":
     irc-rss-feed-bot:
