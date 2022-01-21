@@ -41,6 +41,7 @@ DISKCACHE_SIZE_LIMIT: Final = GiB * 2
 DEDUP_STRATEGY_DEFAULT: Final = "feed"
 EMOJI_REGEXP: Final[Pattern] = emoji.get_emoji_regexp()
 ETAG_CACHE_PROHIBITED_NETLOCS: Final = {
+    "ambcrypto.com",
     "blog.ml.cmu.edu",
     "blogs.cornell.edu",
     "bodyrecomposition.com",
