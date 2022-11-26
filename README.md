@@ -3,13 +3,14 @@
 It essentially posts the entries of feeds in IRC channels, one entry per message.
 More specifically, it posts the titles and shortened URLs of entries.
 
-If viewing this readme on Docker Hub, note that it may be misformatted.
+If viewing this readme on Docker Hub, note that it may be misformatted or incomplete.
 In this case, it can be viewed correctly on [GitHub](https://github.com/impredicative/irc-rss-feed-bot).
 
 ## Contents
 - [Features](#features)
 - [Links](#links)
 - [Examples](#examples)
+- [Development](#development)
 - [Usage](#usage)
   * [Configuration: secret](#configuration-secret)
   * [Configuration: non-secret](#configuration-non-secret)
@@ -73,6 +74,19 @@ For several more features, see the customizable [global](#global-settings) and [
             COVID-19 research articles. → https://registry.opendata.aws/cord-19
 ```
 ![](images/sample_posts.png)
+
+## Development
+For software development purposes only, the local environment can be set up on Ubuntu as below.
+```bash
+git clone https://github.com/impredicative/irc-rss-feed-bot.git
+cd ./irc-rss-feed-bot
+make setup-ppa
+make install-py
+make setup-venv
+make install
+make test
+make build
+```
 
 ## Usage
 ### Configuration: secret
