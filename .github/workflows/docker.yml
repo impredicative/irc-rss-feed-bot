@@ -1,10 +1,10 @@
 name: Docker build and push
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-  release:
-    types: published
+  # push:
+  #   branches: [ master ]
+  # pull_request:
+  # release:
+  #   types: published
 jobs:
   push:
     runs-on: ubuntu-latest
