@@ -1,7 +1,7 @@
-bitlyshortener
 bs4  # Required by pandas.read_html
 cachetools
-diskcache==4.*
+dagdshort
+diskcache
 dressup
 emoji
 feedparser  # https://github.com/kurtmckee/feedparser/blob/develop/CHANGELOG.rst
@@ -10,7 +10,6 @@ html5lib  # Required by pandas.read_html
 humanize
 ircstyle
 jmespath
-luqum==0.10.0  # https://github.com/jurismarches/luqum/blob/master/CHANGELOG.rst
 lxml
 miniirc  # https://github.com/luk3yx/miniirc/blob/master/CHANGELOG.md
 numpy
