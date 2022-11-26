@@ -1,0 +1,46 @@
+name: Docker build and push
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+  release:
+    types: published
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    steps:
+    - uses: actions/checkout@v2.4.0
+    - name: Build, tag, and list Docker image
+      run: make build
+    - name: Login to Docker Hub
+      env:
+        DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+      run: echo $DOCKER_HUB_TOKEN | docker login -u ascensive --password-stdin
+    - name: Push to Docker Hub
+      run: make push
+  pull_request:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+    - uses: actions/checkout@v2.4.0
+    - name: Build, tag, and list Docker image
+      run: make build
+  release:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    steps:
+    - uses: actions/checkout@v2.4.0
+    - name: Login to Docker Hub
+      env:
+        DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+      run: echo $DOCKER_HUB_TOKEN | docker login -u ascensive --password-stdin
+    - name: Build, tag, list, and push Docker image
+      run: |
+        set -x
+        echo "$GITHUB_REF"
+        GITHUB_TAG="${GITHUB_REF#refs/tags/}"
+        DOCKERHUB_TAG=ascensive/irc-rss-feed-bot:"$GITHUB_TAG"
+        docker build -t "$DOCKERHUB_TAG" .
+        docker images
+        docker push "$DOCKERHUB_TAG"
