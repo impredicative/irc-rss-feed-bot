@@ -28,7 +28,9 @@ clean:
 	rm -rf ./.*_cache
 
 compile:
-	pip-compile -U
+	pip install -U pip
+	pip install -U pip-tools
+	pip-compile -U --resolver=backtracking
 
 fmt:
 	isort .
