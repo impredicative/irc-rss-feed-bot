@@ -81,10 +81,10 @@ For software development purposes only, the project can be set up on Ubuntu as b
 make setup-ppa
 make install-py
 make setup-venv
+source ./venv/bin/activate
 make install
 make test
 make build
-source ./venv/bin/activate
 ```
 
 ## Usage
