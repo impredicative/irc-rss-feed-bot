@@ -78,8 +78,6 @@ For several more features, see the customizable [global](#global-settings) and [
 ## Development
 For software development purposes only, the project can be set up on Ubuntu as below.
 ```bash
-git clone https://github.com/impredicative/irc-rss-feed-bot.git
-cd ./irc-rss-feed-bot
 make setup-ppa
 make install-py
 make setup-venv
