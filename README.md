@@ -86,6 +86,7 @@ make setup-venv
 make install
 make test
 make build
+source ./venv/bin/activate
 ```
 
 ## Usage
