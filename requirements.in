@@ -13,7 +13,7 @@ jmespath
 lxml
 miniirc  # https://github.com/luk3yx/miniirc/blob/master/CHANGELOG.md
 numpy
-orderedset
+ordered-set
 pandas
 peewee  # https://github.com/coleifer/peewee/releases
 psutil

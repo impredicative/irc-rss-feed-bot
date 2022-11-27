@@ -58,7 +58,7 @@ numpy==1.23.5
     # via
     #   -r requirements.in
     #   pandas
-orderedset==2.0.3
+ordered-set==4.1.0
     # via -r requirements.in
 pandas==1.5.2
     # via -r requirements.in
