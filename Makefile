@@ -39,7 +39,8 @@ fmt:
 
 install:
 	pip install -U pip wheel
-	pip install -U -r ./requirements.txt -U -r ./requirements-dev.in
+	pip install -U -r ./requirements.txt
+	pip install -U -r ./requirements-dev.in
 
 install-py:
 	sudo apt install python3.11-full
