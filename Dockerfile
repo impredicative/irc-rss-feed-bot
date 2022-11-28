@@ -1,4 +1,4 @@
-FROM python:3.9-slim-buster as build
+FROM python:3.11-slim-buster as build
 WORKDIR /app
 COPY requirements.txt .
 RUN set -x && \
