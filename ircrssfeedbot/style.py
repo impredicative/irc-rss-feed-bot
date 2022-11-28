@@ -5,7 +5,7 @@ The supported stylers are: asterisk, irc, unicode
 import logging
 from typing import Any, Callable, Dict, Union
 
-import dressup
+import dressuplite
 import ircstyle
 
 log = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ def _asterisk_style(text: str, **_kwargs: Any) -> str:
 
 
 def _dressup_style(text: str, bold: bool = False, italics: bool = False) -> str:
-    """Style the given text with the given options using `dressup`."""
+    """Style the given text with the given options using `dressuplite`."""
     if not (bold or italics):
         return text
 
@@ -29,9 +29,9 @@ def _dressup_style(text: str, bold: bool = False, italics: bool = False) -> str:
 
     # Style
     try:
-        text = dressup.convert(text, unicode_type=unicode_type)
+        text = dressuplite.convert(text, unicode_type=unicode_type)
     except Exception as exc:  # pylint: disable=broad-except
-        log.exception(f"Error using dressup with {unicode_type=} to format {text!r}: {exc}")
+        log.exception(f"Error using dressuplite with {unicode_type=} to format {text!r}: {exc}")
 
     return text
 
