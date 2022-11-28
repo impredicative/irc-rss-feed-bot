@@ -2,7 +2,7 @@ bs4  # Required by pandas.read_html
 cachetools
 dagdshort
 diskcache
-dressup
+dressuplite
 emoji
 feedparser  # https://github.com/kurtmckee/feedparser/blob/develop/CHANGELOG.rst
 hext
