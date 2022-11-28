@@ -13,7 +13,7 @@ from typing import Callable, Dict, List, Optional, Pattern, Tuple
 
 import bitlyshortener
 import miniirc
-from orderedset import OrderedSet
+from ordered_set import OrderedSet
 
 from . import config
 from .db import Database
@@ -298,7 +298,7 @@ class FeedReader:
         entries = []
         while urls_pending:
             # Read URL
-            url = urls_pending.pop(last=False)
+            url = urls_pending.pop(0)
             url_content = self.url_reader[url]
             url_read_finish_time = time.monotonic()
             urls_read.add(url)
