@@ -23,17 +23,18 @@ INSTANCE: Dict = {}  # Gets set from YAML config file.
 runtime = types.SimpleNamespace()  # Set at runtime.  # pylint: disable=invalid-name
 PACKAGE_PATH: Final = Path(__file__).parent
 PACKAGE_NAME: Final = PACKAGE_PATH.stem
+REPO_NAME = "impredicative/irc-rss-feed-bot"
 ENV: Final = os.getenv(f"{PACKAGE_NAME.upper()}_ENV", "prod")  # Externally set as needed: IRCRSSFEEDBOT_ENV='dev'
 GiB = 1024 ** 3  # pylint: disable=invalid-name
 
 # Main
 ALERTS_CHANNEL_FORMAT_DEFAULT: Final = "##{nick}-alerts"
-CACHE_MAXSIZE__BITLY_SHORTENER: Final = CACHE_MAXSIZE_DEFAULT
 CACHE_MAXSIZE__INT8HASH: Final = CACHE_MAXSIZE_DEFAULT
 CACHE_MAXSIZE__URL_COMPRESSION: Final = 4
 CACHE_MAXSIZE__URL_GOOGLE_NEWS: Final = CACHE_MAXSIZE_DEFAULT
 CACHE_MAXSIZE__URL_NETLOC: Final = CACHE_MAXSIZE_DEFAULT
 CACHE_MAXSIZE__URL_REDIRECT: Final = CACHE_MAXSIZE_DEFAULT
+CACHE_MAXSIZE__URL_SHORTENER: Final = CACHE_MAXSIZE_DEFAULT
 CACHE_TTL__URL_COMPRESSION: Final = 60
 DB_FILENAME: Final = "posts.v2.db"
 DISKCACHE_PATH: Final = PACKAGE_PATH.parent / f".{PACKAGE_NAME}_cache"
@@ -100,7 +101,7 @@ LOGGING: Final = {  # Ref: https://docs.python.org/3/howto/logging.html#configur
     "handlers": {"console": {"class": "logging.StreamHandler", "level": "DEBUG", "formatter": "detailed", "stream": "ext://sys.stdout"}},
     "loggers": {
         PACKAGE_NAME: {"level": "INFO", "handlers": ["console"], "propagate": False},
-        "bitlyshortener": {"level": "INFO", "handlers": ["console"], "propagate": False},
+        "dagdshorten": {"level": "INFO", "handlers": ["console"], "propagate": False},
         "peewee": {"level": "INFO", "handlers": ["console"], "propagate": False},
         "": {"level": "INFO", "handlers": ["console"]},
     },

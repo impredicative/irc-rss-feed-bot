@@ -11,7 +11,7 @@ import types
 from functools import cached_property, lru_cache
 from typing import Callable, Dict, List, Optional, Pattern, Tuple
 
-import bitlyshortener
+import dagdshort
 import miniirc
 from ordered_set import OrderedSet
 
@@ -65,7 +65,7 @@ class FeedReader:
     irc: miniirc.IRC = dataclasses.field(repr=False)
     db: Database = dataclasses.field(repr=False)
     url_reader: URLReader = dataclasses.field(repr=False)
-    url_shortener: bitlyshortener.Shortener = dataclasses.field(repr=False)
+    url_shortener: dagdshort.Shortener = dataclasses.field(repr=False)
     publishers: List = dataclasses.field(repr=False)
 
     def __post_init__(self):
@@ -405,9 +405,9 @@ class Feed:
         if postable_entries and self.reader.config["shorten"]:
             log.debug(f"Shortening {len(postable_entries)} postable long URLs for {self}.")
             long_urls = [entry.long_url for entry in postable_entries]
-            short_urls = self.reader.url_shortener.shorten_urls(long_urls)
-            for entry, short_url in zip(postable_entries, short_urls):
-                entry.short_url = short_url
+            short_urls_map = self.reader.url_shortener.shorten_urls(long_urls)
+            for entry in postable_entries:
+                entry.short_url = short_urls_map[entry.long_url]
             log.debug(f"Shortened {len(postable_entries)} postable long URLs for {self}.")
 
         log.debug(f"Returning {len(postable_entries)} postable entries for {self}.")
