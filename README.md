@@ -44,6 +44,7 @@ There is however no delay for any feed which has a polling period less than or e
 considered urgent.
 * A SQLite database file records hashes of the entries that have been posted, thereby preventing them from being
 reposted.
+* URLs are optionally shortened using the [da.gd](https://da.gd/) service.
 * The [`hext`](https://pypi.org/project/hext/), [`jmespath`](https://pypi.org/project/jmespath/), and 
 [`pandas`](https://pandas.pydata.org/) DSLs are supported for flexibly parsing arbitrary HTML, JSON, and CSV content 
 respectively. These parsers also support configurable recursive crawling.
@@ -68,8 +69,8 @@ For several more features, see the customizable [global](#global-settings) and [
 ```text
 <FeedBot> [ArXiv:cs.AI] Concurrent Meta Reinforcement Learning → https://arxiv.org/abs/1903.02710v1
 <FeedBot> [ArXiv:cs.AI] Attack Graph Obfuscation → https://arxiv.org/abs/1903.02601v1
-<FeedBot> [InfoWorld] What is a devops engineer? And how do you become one? → https://bit.ly/2NOgQ3g
-<FeedBot> [InfoWorld] What is Jupyter Notebook? Data analysis made easier → https://bit.ly/2NMailP
+<FeedBot> [InfoWorld] What is a devops engineer? And how do you become one? → https://da.gd/dvXh9
+<FeedBot> [InfoWorld] What is Jupyter Notebook? Data analysis made easier → https://da.gd/yrCi
 <FeedBot> [AWS:OpenData] COVID-19 Open Research Dataset (CORD-19): Full-text and metadata dataset of
             COVID-19 research articles. → https://registry.opendata.aws/cord-19
 ```
@@ -92,19 +93,8 @@ make build
 Prepare a private `secrets.env` environment file using the sample below.
 ```ini
 IRC_PASSWORD=YourActualPassword
-BITLY_TOKENS=5e71a58b19582f48edcb0235637ac3536dd3b6dc,bd90119a7b617e81b293ddebbbfed3e955eac5af,42f309642a018e6b4d7cfba6854080719dccf0cc,0819552eb8b42e52dbc8b4c3e1654f5cd96c0dcc
 GITHUB_TOKEN=c81a62ca23caa140715bbfc175997c02d0fdd768
 ```
-
-#### BITLY_TOKENS
-[Bitly](https://nullrefer.com/?https://bitly.com/) tokens are required for shortening URLs.
-URL shortening is enabled for all feeds by default but can be disabled selectively per feed.
-The sample tokens above are for illustration only and are invalid.
-To obtain tokens, refer to [these instructions](https://github.com/impredicative/bitlyshortener#usage).
-Providing multiple comma-separated tokens, perhaps as many as 40 free ones or sufficient commercial ones, is required.
-Failing this, Bitly imposed rate limits for shortening URLs will lead to errors.
-If there are errors, the batched new entries in a feed may get reprocessed the next time the feed is read.
-It is safer to provide more tokens than are necessary.
 
 #### GITHUB_TOKEN
 Refer to the optional `publish.github` feature.
@@ -537,8 +527,6 @@ It facilitates not having to set the same value individually for many feeds.
 
 Refer to "Feed-specific settings" for the possible values and internal defaults of these settings.
 Refer to the embedded sample configuration for a usage example.
-
-Note that even if a default of `shorten: false` is set, the `BITLY_TOKENS` environment variable is still required.
 
 ### Commands
 Commands can be sent to the bot either as a private message or as a directed public message.
