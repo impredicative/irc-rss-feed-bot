@@ -44,7 +44,7 @@ There is however no delay for any feed which has a polling period less than or e
 considered urgent.
 * A SQLite database file records hashes of the entries that have been posted, thereby preventing them from being
 reposted.
-* URLs are optionally shortened using the [da.gd](https://da.gd/) service.
+* Posted URLs are shortened using the [da.gd](https://da.gd/) service.
 * The [`hext`](https://pypi.org/project/hext/), [`jmespath`](https://pypi.org/project/jmespath/), and 
 [`pandas`](https://pandas.pydata.org/) DSLs are supported for flexibly parsing arbitrary HTML, JSON, and CSV content 
 respectively. These parsers also support configurable recursive crawling.
