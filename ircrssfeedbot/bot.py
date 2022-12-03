@@ -11,7 +11,6 @@ import time
 from typing import Callable, Dict, List, Tuple
 
 import dagdshort
-import ircstyle
 import miniirc
 
 from . import config, publishers
@@ -334,7 +333,7 @@ class Bot:
         instance = config.INSTANCE
         channels = instance["feeds"]
         channels_str = ", ".join(channels)
-        log.debug("Setting up threads and queues for %s channels (%s) and their feeds with %s currently active " "threads.", len(channels), channels_str, threading.active_count())
+        log.debug("Setting up threads and queues for %s channels (%s) and their feeds with %s currently active threads.", len(channels), channels_str, threading.active_count())
         num_feeds_setup = 0
         num_urls = 0
         num_reads_daily = 0

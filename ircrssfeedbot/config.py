@@ -4,7 +4,7 @@ import os
 import tempfile
 import types
 from pathlib import Path
-from typing import Dict, Final, Pattern
+from typing import Dict, Final
 
 import ircstyle
 

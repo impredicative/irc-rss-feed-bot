@@ -1,5 +1,7 @@
 [MASTER]
 jobs=0
+ignore=.git,archived,venv
+recursive=y
 
 [BASIC]
 good-names=db,df,fn,KiB,log,MiB

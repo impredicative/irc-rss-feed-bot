@@ -363,6 +363,7 @@ class FeedReader:
 
     @property
     def worker_pool(self) -> multiprocessing.pool.Pool:  # Can't use return type "mp.pool.Pool".
+        """Return a cached `multiprocessing` worker pool created on demand."""
         # Note: This approach is used instead of a ClassVar because the latter led to errors when spawning worker processes.
         try:
             return self._worker_pool  # type: ignore
