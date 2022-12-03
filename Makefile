@@ -35,7 +35,6 @@ compile:
 fmt:
 	isort .
 	black .
-	autopep8 --in-place --aggressive --recursive .
 
 install:
 	pip install -U pip wheel
