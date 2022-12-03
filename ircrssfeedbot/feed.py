@@ -204,7 +204,7 @@ class FeedReader:
                     "feed": feed_params,
                 }
                 for re_key, re_val in format_re.items():
-                    if match := re.search(re_val, params[re_key]): # type: ignore
+                    if match := re.search(re_val, params[re_key]):  # type: ignore
                         params.update(match.groupdict())
                 # Format title:
                 title_format_str = format_str.get("title", "{title}")
