@@ -12,6 +12,7 @@ from functools import cached_property, lru_cache
 from typing import Callable, Dict, List, Optional, Pattern, Tuple
 
 import dagdshort
+import emoji
 import miniirc
 from ordered_set import OrderedSet
 
@@ -71,7 +72,7 @@ class FeedReader:
     def __post_init__(self):
         log.debug(f"Initializing {self}.")
         self.config: Dict = {**config.INSTANCE["defaults"], **config.INSTANCE["feeds"][self.channel][self.name]}
-        self.urls = OrderedSet(ensure_list(self.config["url"]))
+        self.urls: OrderedSet[str] = OrderedSet(ensure_list(self.config["url"]))
         self.min_channel_idle_time = config.MIN_CHANNEL_IDLE_TIME_DEFAULT if (self.config.get("period", config.PERIOD_HOURS_DEFAULT) > config.PERIOD_HOURS_MIN) else 0
         self.blacklist = _patterns(self.channel, self.name, "blacklist")
         self.whitelist = _patterns(self.channel, self.name, "whitelist")
@@ -169,10 +170,9 @@ class FeedReader:
 
         # Remove emojis from title
         if feed_config.get("emoji") is False:
-            emoji_regexp = config.EMOJI_REGEXP
             log.debug("Removing emojis for titles in %s.", self)
             for entry in entries:
-                entry.title = emoji_regexp.sub("", entry.title)
+                entry.title = emoji.replace_emoji(entry.title, "")
             log.debug("Removed emojis for titles in %s.", self)
 
         # Substitute entries
@@ -204,7 +204,7 @@ class FeedReader:
                     "feed": feed_params,
                 }
                 for re_key, re_val in format_re.items():
-                    if match := re.search(re_val, params[re_key]):
+                    if match := re.search(re_val, params[re_key]): # type: ignore
                         params.update(match.groupdict())
                 # Format title:
                 title_format_str = format_str.get("title", "{title}")
@@ -293,7 +293,8 @@ class FeedReader:
         alert_if_emptied_by_processing = alert_config.get("emptied", False)
 
         # Retrieve URL content and parse entries
-        urls_pending, urls_read = self.urls.copy(), OrderedSet()
+        urls_pending = self.urls.copy()
+        urls_read: OrderedSet[str] = OrderedSet()
         url_read_approach_counts: collections.Counter = collections.Counter()
         entries = []
         while urls_pending:
@@ -307,6 +308,7 @@ class FeedReader:
             # Parse entries of URL
             log.debug(f"Parsing entries for {url} for {self} using {self.parser_name}.")
             selected_entries, follow_urls = self._parse_entries(url_content.content)
+            follow_urls = OrderedSet(follow_urls)
             entries.extend(selected_entries)
             urls_pending.update(follow_urls - urls_read)
 

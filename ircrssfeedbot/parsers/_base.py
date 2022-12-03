@@ -4,7 +4,7 @@ import dataclasses
 from typing import Dict, List, Optional, Union
 
 
-@dataclasses.dataclass  # type: ignore
+@dataclasses.dataclass
 class BaseParser(abc.ABC):
     """Base parser class with helper attributes and methods for parsers."""
 
