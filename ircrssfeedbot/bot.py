@@ -14,7 +14,8 @@ import dagdshort
 import ircstyle
 import miniirc
 
-from . import config, publishers, searchers
+from . import config, publishers
+# from . import searchers
 from .db import Database
 from .feed import FeedReader
 from .url import URLReader
@@ -35,7 +36,7 @@ class Bot:
     CHANNEL_QUEUES: Dict[str, queue.Queue] = {}
     EXITCODE_QUEUE: queue.SimpleQueue = queue.SimpleQueue()
     RECENT_NICK_REGAIN_TIMES: List[float] = []
-    SEARCH_QUEUE: queue.SimpleQueue = queue.SimpleQueue()
+    # SEARCH_QUEUE: queue.SimpleQueue = queue.SimpleQueue()
     FEED_GROUP_BARRIERS: Dict[str, threading.Barrier] = {}
 
     def __init__(self) -> None:
@@ -48,7 +49,7 @@ class Bot:
             user_agent_suffix=config.REPO_NAME, max_cache_size=config.CACHE_MAXSIZE__URL_SHORTENER,
         )
         self._publishers = [getattr(getattr(publishers, p), "Publisher")() for p in dir(publishers) if ((not p.startswith("_")) and (p in (instance.get("publish") or {})))]
-        self._searchers = {s: getattr(getattr(searchers, s), "Searcher")() for s in dir(searchers) if ((not s.startswith("_")) and (s in (instance.get("publish") or {})))}
+        # self._searchers = {s: getattr(getattr(searchers, s), "Searcher")() for s in dir(searchers) if ((not s.startswith("_")) and (s in (instance.get("publish") or {})))}
 
         # Setup miniirc
         log.debug("Initializing IRC client.")
@@ -70,73 +71,73 @@ class Bot:
         self._setup_alerter()
         self._setup_channels()
         self._log_config()
-        threading.Thread(target=self._search, name="Searcher").start()
+        # threading.Thread(target=self._search, name="Searcher").start()
         self._exit()  # Blocks.
 
-    def _search(self) -> None:
-        while self._active:
-            try:
-                # Receive request
-                request = self.SEARCH_QUEUE.get()
-                log.debug(f"Dequeued search request: {request}.")
-                target = request["channel"] or request["sender"]
+    # def _search(self) -> None:
+    #     while self._active:
+    #         try:
+    #             # Receive request
+    #             request = self.SEARCH_QUEUE.get()
+    #             log.debug(f"Dequeued search request: {request}.")
+    #             target = request["channel"] or request["sender"]
 
-                # Define helper functions
-                def send_search_reply(reply: str) -> None:
-                    """Send the given reply."""
-                    reply = f"{request['sender']}: {reply}" if request["channel"] else reply
-                    self._irc.msg(target, reply)
+    #             # Define helper functions
+    #             def send_search_reply(reply: str) -> None:
+    #                 """Send the given reply."""
+    #                 reply = f"{request['sender']}: {reply}" if request["channel"] else reply
+    #                 self._irc.msg(target, reply)
 
-                def send_search_error(error: str = None) -> None:
-                    """Alert and also reply with an error."""
-                    if not error:
-                        error = f"Search command must be of the format: `search {'|'.join(self._searchers)}: <query>`"
-                    config.runtime.alert(f"Error searching: {request}: {error}", log.error)
-                    send_search_reply(f"Error: {error}")
+    #             def send_search_error(error: str = None) -> None:
+    #                 """Alert and also reply with an error."""
+    #                 if not error:
+    #                     error = f"Search command must be of the format: `search {'|'.join(self._searchers)}: <query>`"
+    #                 config.runtime.alert(f"Error searching: {request}: {error}", log.error)
+    #                 send_search_reply(f"Error: {error}")
 
-                # Ensure searchers
-                if not self._searchers:
-                    send_search_error("No `publish` destination is configured for possible use as a search source.")
-                    continue
+    #             # Ensure searchers
+    #             if not self._searchers:
+    #                 send_search_error("No `publish` destination is configured for possible use as a search source.")
+    #                 continue
 
-                # Check args
-                command_args = request["command"].split(None, 2)
-                if len(command_args) != 3:
-                    send_search_error()
-                    continue
+    #             # Check args
+    #             command_args = request["command"].split(None, 2)
+    #             if len(command_args) != 3:
+    #                 send_search_error()
+    #                 continue
 
-                # Define searcher
-                searcher_name = command_args[1].rstrip(":").lower()
-                searcher_aliases = {"gh": "github"}
-                searcher_name = searcher_aliases.get(searcher_name, searcher_name)
-                if searcher_name not in self._searchers:
-                    send_search_error()
-                    continue
-                searcher = self._searchers[searcher_name]
+    #             # Define searcher
+    #             searcher_name = command_args[1].rstrip(":").lower()
+    #             searcher_aliases = {"gh": "github"}
+    #             searcher_name = searcher_aliases.get(searcher_name, searcher_name)
+    #             if searcher_name not in self._searchers:
+    #                 send_search_error()
+    #                 continue
+    #             searcher = self._searchers[searcher_name]
 
-                # Define query
-                query = command_args[2]
-                fixed_query = searcher.fix_query(query)
-                if query != fixed_query:
-                    log.info(f"Fixed the query {query!r} to {fixed_query!r}.")
-                    query = fixed_query
-                description = f"{searcher_name} for {query!r} for {request['sender']}"
-                if request["channel"]:
-                    description += f" in {request['channel']}"
+    #             # Define query
+    #             query = command_args[2]
+    #             fixed_query = searcher.fix_query(query)
+    #             if query != fixed_query:
+    #                 log.info(f"Fixed the query {query!r} to {fixed_query!r}.")
+    #                 query = fixed_query
+    #             description = f"{searcher_name} for {query!r} for {request['sender']}"
+    #             if request["channel"]:
+    #                 description += f" in {request['channel']}"
 
-                # Search
-                log.info(f"Searching {description}.")
-                try:
-                    reply = searcher.search(query)
-                except Exception as exc:
-                    send_search_reply(f"Error searching: {exc.__class__.__qualname__}: {exc}")
-                    raise
-                unstyled_reply = ircstyle.unstyle(reply)
-                log.info(f"Searched {description}, replying with: {unstyled_reply}")
-                send_search_reply(reply)
+    #             # Search
+    #             log.info(f"Searching {description}.")
+    #             try:
+    #                 reply = searcher.search(query)
+    #             except Exception as exc:
+    #                 send_search_reply(f"Error searching: {exc.__class__.__qualname__}: {exc}")
+    #                 raise
+    #             unstyled_reply = ircstyle.unstyle(reply)
+    #             log.info(f"Searched {description}, replying with: {unstyled_reply}")
+    #             send_search_reply(reply)
 
-            except Exception as exc:
-                config.runtime.alert(f"Error searching: {request}: {exc.__class__.__qualname__}: {exc}")
+    #         except Exception as exc:
+    #             config.runtime.alert(f"Error searching: {request}: {exc.__class__.__qualname__}: {exc}")
 
     def _exit(self) -> None:
         code = self.EXITCODE_QUEUE.get()
@@ -173,8 +174,8 @@ class Bot:
             log.info(f"Administrative commands will be accepted as private messages or directed public messages from {admin}.")
         if mirror_channel := config.INSTANCE.get("mirror"):
             log.info(f"Feeds will be mirrored to {mirror_channel} except for any feeds which have mirroring disabled.")
-        if searchers_ := self._searchers:
-            log.info(f"Search commands will be accepted as private messages or directed public messages for the sources: {', '.join(searchers_)}")
+        # if searchers_ := self._searchers:
+        #     log.info(f"Search commands will be accepted as private messages or directed public messages for the sources: {', '.join(searchers_)}")
 
     def _msg_channel(self, channel: str) -> None:  # pylint: disable=too-many-branches,too-many-locals,too-many-statements
         log.debug(f"Channel messenger for {channel} is starting and is waiting to be notified of channel join.")
@@ -539,10 +540,10 @@ def _handle_privmsg(irc: miniirc.IRC, hostmask: Tuple[str, str, str], args: List
                 Bot.EXITCODE_QUEUE.put(0)
             elif command_name == "fail":
                 Bot.EXITCODE_QUEUE.put(1)
-        if command_name == "search":
-            search_request = {"command": command, "sender": user, "channel": channel}
-            Bot.SEARCH_QUEUE.put(search_request)
-            log.debug(f"Queued search request: {search_request}")
+        # if command_name == "search":
+        #     search_request = {"command": command, "sender": user, "channel": channel}
+        #     Bot.SEARCH_QUEUE.put(search_request)
+        #     log.debug(f"Queued search request: {search_request}")
 
 
 @miniirc.Handler("TOPIC", colon=False)

@@ -1,5 +1,5 @@
 # irc-rss-feed-bot
-**irc-rss-feed-bot** is a dockerized Python 3.9 and IRC based RSS/Atom and scraped HTML/JSON/CSV feed posting bot.
+**irc-rss-feed-bot** is a dockerized Python 3.11 and IRC based RSS/Atom and scraped HTML/JSON/CSV feed posting bot.
 It essentially posts the entries of feeds in IRC channels, one entry per message.
 More specifically, it posts the titles and shortened URLs of entries.
 
@@ -26,7 +26,6 @@ In this case, it can be viewed correctly on [GitHub](https://github.com/impredic
     + [Feed default settings](#feed-default-settings)
   * [Commands](#commands)
     + [Administrative](#administrative)
-    + [General](#general)
 - [Deployment](#deployment)
 - [Maintenance](#maintenance)
   * [Service](#service)
@@ -327,15 +326,14 @@ and `+igpR` for [Rizon](https://wiki.rizon.net/index.php?title=User_Modes).
 This however doubles the time between consecutive posts in any given channel.
 Mirroring can however individually be disabled for a feed by setting `<feed>.mirror`.
 * **`publish.github`**: This is the username and repo name of a GitHub repo, e.g. [`feedarchive/libera-feedbot-live`](https://github.com/feedarchive/libera-feedbot-live).
-All posts are published to the repo, thereby providing a basic option to archive and search them.
+All posts are published to the repo, thereby providing a basic option to archive them.
 A new CSV file is written to the repo for each posted feed having one or more new posts.
-Basic search functionality is provisioned via a `search` [command](#commands).
 The following requirements apply:
   * The repo must exist; it is not created by the bot. It is recommended that an empty new repo is used.
 If the repo is of public interest, it can be requested to be moved into the [`feedarchive`](https://github.com/feedarchive) organization by filing an issue.
   * The GitHub user must have access to write to the repo. It is recommended that a dedicated new service account be used, not your primary user account.
-  * A GitHub [personal access token](https://github.com/settings/tokens) is required with access to the entire `repo` and `gist` scopes.
-The `repo` scope is used for making commits. The `gist` scope is used for sharing search results.
+  * A GitHub [personal access token](https://github.com/settings/tokens) is required with access to the entire `repo` scope.
+The `repo` scope is used for making commits.
 The token is provisioned for the bot via the `GITHUB_TOKEN` secret environment variable.
 
 ##### Developer
@@ -542,21 +540,6 @@ Note that a repeated invocation of this command has no effect.
 * **`fail`**: Similar to `exit` but with code 1.
 If running the bot as a Docker Compose service, using this command with `restart: on-failure` will (due to a nonzero code) cause the bot to automatically be restarted.
 * **`quit`**: Alias of `exit`.
-#### General
-General commands can be sent by any user. The supported commands are:
-* **`search`**: This requires `publish.github` to be configured and functional. This also requires access to the `gist` scope by `GITHUB_TOKEN`.
-An example of a search command is `MyBot: search github: foo bar -baz`.
-The response is a link to a secret [GitHub Gist](https://gist.github.com/c8b57d9e4bbae5a67240eb4802814da6#file-results-md) 
-with tabulated results in markdown and CSV formats.
-A channel filter is also supported as `path:/##MyChannel` for inclusion and `-path:/##MyChannel` for exclusion.
-The post feed name, title, and URL are included in the searched text.
-To search for all entries posted to a channel, up to the returned limit, construct an all-inclusive query such as `https path:/##MyChannel`
-Depending on the number of results, the search can take a few seconds to two minutes.
-The maximum number of results returned for a search is 500.
-The results are sorted in descending order by the approximate date and time at which they were posted in the channel.
-Major [limitations](https://docs.github.com/en/github/searching-for-information-on-github/searching-code#considerations-for-code-search) 
-imposed by GitHub are that only files smaller than 384 KB and only repositories with less than 500,000 files are searchable.
-For these reasons and more, the search results must not be trusted for thoroughness.
 
 ## Deployment
 * As a reminder, it is recommended that the alerts channel be registered and monitored.
