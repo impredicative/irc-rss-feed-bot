@@ -178,7 +178,7 @@ class URLReader:
                 log.info(f"Error reading {url} in attempt {num_attempt} of {config.READ_ATTEMPTS_MAX}: {exc}")
                 if num_attempt == config.READ_ATTEMPTS_MAX:
                     raise exc from None
-                time.sleep(2 ** num_attempt)
+                time.sleep(2**num_attempt)
             else:
                 log.debug(f"Received response having status code {response.status_code} in attempt {num_attempt} for {url} in {timer}.")
                 break

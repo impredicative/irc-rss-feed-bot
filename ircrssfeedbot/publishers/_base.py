@@ -73,7 +73,7 @@ class BasePublisher(abc.ABC):
                         config.runtime.alert(f"Failed to publish {desc_minimal}. The entries are queued. The error was: {exc}")
                         raise exc from None
                     assert num_attempt < max_attempts
-                    sleep_time = min(config.PUBLISH_RETRY_SLEEP_MAX, 2 ** num_attempt)
+                    sleep_time = min(config.PUBLISH_RETRY_SLEEP_MAX, 2**num_attempt)
                     log.warning(f"Failed to publish {desc}. A reattempt will be made in {sleep_time}s. The error was: {exc}")
                     time.sleep(sleep_time)
 

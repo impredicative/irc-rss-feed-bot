@@ -25,7 +25,7 @@ PACKAGE_PATH: Final = Path(__file__).parent
 PACKAGE_NAME: Final = PACKAGE_PATH.stem
 REPO_NAME = "impredicative/irc-rss-feed-bot"
 ENV: Final = os.getenv(f"{PACKAGE_NAME.upper()}_ENV", "prod")  # Externally set as needed: IRCRSSFEEDBOT_ENV='dev'
-GiB = 1024 ** 3  # pylint: disable=invalid-name
+GiB = 1024**3  # pylint: disable=invalid-name
 
 # Main
 ALERTS_CHANNEL_FORMAT_DEFAULT: Final = "##{nick}-alerts"

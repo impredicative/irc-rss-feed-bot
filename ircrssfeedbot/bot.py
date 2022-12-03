@@ -15,7 +15,6 @@ import ircstyle
 import miniirc
 
 from . import config, publishers
-# from . import searchers
 from .db import Database
 from .feed import FeedReader
 from .url import URLReader
@@ -46,7 +45,8 @@ class Bot:
         self._outgoing_msg_lock = threading.Lock()  # Used for rate limiting across multiple channels.
         self._db = Database()
         self._url_shortener = dagdshort.Shortener(
-            user_agent_suffix=config.REPO_NAME, max_cache_size=config.CACHE_MAXSIZE__URL_SHORTENER,
+            user_agent_suffix=config.REPO_NAME,
+            max_cache_size=config.CACHE_MAXSIZE__URL_SHORTENER,
         )
         self._publishers = [getattr(getattr(publishers, p), "Publisher")() for p in dir(publishers) if ((not p.startswith("_")) and (p in (instance.get("publish") or {})))]
         # self._searchers = {s: getattr(getattr(searchers, s), "Searcher")() for s in dir(searchers) if ((not s.startswith("_")) and (s in (instance.get("publish") or {})))}

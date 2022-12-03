@@ -22,8 +22,8 @@ class Int8Hash:
     BYTES = 8
     BITS = BYTES * 8
     BITS_MINUS1 = BITS - 1
-    MIN = -(2 ** BITS_MINUS1)
-    MAX = 2 ** BITS_MINUS1 - 1
+    MIN = -(2**BITS_MINUS1)
+    MAX = 2**BITS_MINUS1 - 1
 
     @classmethod
     def as_dict(cls, texts: List[str]) -> Dict[int, str]:
