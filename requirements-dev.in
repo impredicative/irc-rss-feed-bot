@@ -5,12 +5,6 @@ pip-tools
 pycodestyle
 pydocstyle
 pylint
-pytest
-pytest-isort
-pytest-mypy
-pytest-pycodestyle
-pytest-pydocstyle
-pytest-pylint
 types-cachetools
 types-emoji
 types-requests
