@@ -16,12 +16,12 @@ help:
 	@echo "test          : Run tests."
 
 build:
-	docker build -t irc-rss-feed-bot --target build .
+	docker build -t irc-rss-feed-bot -t ascensive/irc-rss-feed-bot --target build .
 	docker build --target test .
 	docker images
 
 build-hostnet:
-	docker build --network host -t irc-rss-feed-bot --target build .
+	docker build --network host -t irc-rss-feed-bot -t ascensive/irc-rss-feed-bot --target build .
 	docker build --target test .
 	docker images
 
