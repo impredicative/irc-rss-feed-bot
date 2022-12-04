@@ -58,5 +58,9 @@ setup-venv:
 	python3.11 -m venv ./venv
 
 test:
+	isort --check-only .
 	black --check .
-	pytest
+	mypy .
+	pycodestyle
+	pydocstyle
+	pylint .
