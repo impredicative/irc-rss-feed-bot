@@ -12,6 +12,7 @@ method-rgx=([a-z_][a-z0-9_]{2,60}|test_[a-z0-9_]{2,90})$
 [MESSAGES CONTROL]
 disable=
     broad-except,
+    c-extension-no-member,
     consider-using-with,
     duplicate-code,
     locally-disabled,
