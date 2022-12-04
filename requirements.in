@@ -3,20 +3,20 @@ cachetools  # https://github.com/tkem/cachetools/blob/master/CHANGELOG.rst
 dagdshort
 diskcache
 dressuplite
-emoji
+emoji  # https://github.com/carpedm20/emoji/blob/master/CHANGES.md
 feedparser  # https://github.com/kurtmckee/feedparser/blob/develop/CHANGELOG.rst
 hext
 html5lib  # Required by pandas.read_html
-humanize
+humanize  # https://github.com/python-humanize/humanize/releases
 ircstyle
 jmespath
-lxml
+lxml  # https://github.com/lxml/lxml/blob/master/CHANGES.txt
 miniirc  # https://github.com/luk3yx/miniirc/blob/master/CHANGELOG.md
 numpy
-ordered-set
+ordered-set  # https://github.com/rspeer/ordered-set/blob/master/CHANGELOG.md
 pandas
 peewee  # https://github.com/coleifer/peewee/releases
-psutil
+psutil  # https://github.com/giampaolo/psutil/blob/master/HISTORY.rst
 pygithub  # https://pygithub.readthedocs.io/en/latest/changes.html
 requests  # https://requests.readthedocs.io/en/latest/community/updates/#release-history
-ruamel.yaml
+ruamel.yaml  # https://sourceforge.net/p/ruamel-yaml/code/ci/default/tree/
