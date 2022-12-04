@@ -1,5 +1,5 @@
 bs4  # Required by pandas.read_html
-cachetools
+cachetools  # https://github.com/tkem/cachetools/blob/master/CHANGELOG.rst
 dagdshort
 diskcache
 dressuplite
@@ -20,4 +20,3 @@ psutil
 pygithub  # https://pygithub.readthedocs.io/en/latest/changes.html
 requests  # https://requests.readthedocs.io/en/latest/community/updates/#release-history
 ruamel.yaml
-tabulate
