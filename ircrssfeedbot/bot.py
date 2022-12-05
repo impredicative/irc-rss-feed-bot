@@ -71,7 +71,7 @@ class Bot:
         self._setup_channels()
         self._log_config()
         # threading.Thread(target=self._search, name="Searcher").start()
-        self._exit()  # Blocks.
+        self._exit_when_signaled()  # Blocks.
 
     # def _search(self) -> None:
     #     while self._active:
@@ -138,7 +138,7 @@ class Bot:
     #         except Exception as exc:
     #             config.runtime.alert(f"Error searching: {request}: {exc.__class__.__qualname__}: {exc}")
 
-    def _exit(self) -> None:
+    def _exit_when_signaled(self) -> None:
         code = self.EXITCODE_QUEUE.get()
         self._active = False
         log.info(f"Initiated graceful exit with code {code}.")
