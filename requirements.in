@@ -9,7 +9,7 @@ hext
 html5lib  # Required by pandas.read_html
 humanize  # https://github.com/python-humanize/humanize/releases
 ircstyle
-jmespath
+jmespath  # https://github.com/jmespath/jmespath.py/blob/develop/CHANGELOG.rst
 lxml  # https://github.com/lxml/lxml/blob/master/CHANGES.txt
 miniirc  # https://github.com/luk3yx/miniirc/blob/master/CHANGELOG.md
 numpy
