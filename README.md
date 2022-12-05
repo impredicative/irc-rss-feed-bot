@@ -463,6 +463,7 @@ The `title` can be a string or a list of strings.
 for parsing a list of entry [dictionaries](https://en.wikipedia.org/wiki/Associative_array#Example) from an HTML web 
 page. 
 Before using, it can be tested in the form [here](https://hext.thomastrapp.com/).
+Note that `max_searches` is set to 10_000 to protect against resource exhaustion.
 * **`<feed>.jmespath`**: This is a string representing the [jmespath](http://jmespath.org/examples.html) DSL 
 for parsing a list of entry [dictionaries](https://en.wikipedia.org/wiki/Associative_array#Example) from JSON.
 Before using, it can be tested in the form [here](http://jmespath.org/).

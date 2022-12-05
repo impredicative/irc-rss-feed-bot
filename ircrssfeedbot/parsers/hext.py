@@ -8,6 +8,8 @@ import hext
 from ..entry import RawFeedEntry as BaseRawFeedEntry
 from ._base import BaseParser
 
+_MAX_SEARCHES = 10_000  # Ref: https://github.com/html-extract/hext/releases/tag/v1.0.1
+
 
 class RawFeedEntry(BaseRawFeedEntry):
     """Raw feed entry."""
@@ -25,7 +27,7 @@ class Parser(BaseParser):
         self.html = hext.Html(self.content.decode())
 
     def _parse(self, selector: str) -> List[Dict[str, str]]:
-        return hext.Rule(selector).extract(self.html)
+        return hext.Rule(selector).extract(self.html, max_searches=_MAX_SEARCHES)
 
     @property
     def _raw_urls(self) -> List[Dict[str, str]]:  # type: ignore
