@@ -11,4 +11,6 @@
 export IRC_PASSWORD=YourActualPassword
 CONFIG_PATH="/workspaces/irc-bots/libera/feed-bot/config.yaml"
 
+# Run bot in dev mode
+export IRCRSSFEEDBOT_ENV='dev'
 python -m ircrssfeedbot --config-path "${CONFIG_PATH}"
