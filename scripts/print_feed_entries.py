@@ -12,9 +12,6 @@ CLI example: python -m scripts.print_feed_entries --config-path /workspaces/irc-
 # pylint: disable=import-error,invalid-name
 
 import logging
-from pathlib import Path
-
-import dagdshort
 
 from ircrssfeedbot import config
 from ircrssfeedbot.feed import FeedReader
@@ -25,7 +22,7 @@ from ircrssfeedbot.url import URLReader
 FEED = "COVID-19:stats:USA:NY"
 CHANNEL, FEED = "#trading", "Medium"
 # CHANNEL, FEED = "##CoV", "stats:🇺🇸"
-CHANNEL, FEED = "#workerbot", "ArXiv:crypto"
+CHANNEL, FEED = "#workerbot", "ArXiv:fin"
 
 config.LOGGING["loggers"][config.PACKAGE_NAME]["level"] = "DEBUG"  # type: ignore
 config.configure_logging()
@@ -37,12 +34,13 @@ config.runtime.identity = ""
 load_instance_config(log_details=False)
 config.INSTANCE["feeds"][CHANNEL][FEED]["style"] = None
 
-URL_SHORTENER__USER_AGENT_SUFFIX = f"{config.REPO_NAME}/" + "/".join(Path(__file__).parts[-2:])
-print(f"User agent suffix for URL shortener is: {URL_SHORTENER__USER_AGENT_SUFFIX}")
+# URL_SHORTENER__USER_AGENT_SUFFIX = f"{config.REPO_NAME}/" + "/".join(Path(__file__).parts[-2:])
+# print(f"User agent suffix for URL shortener is: {URL_SHORTENER__USER_AGENT_SUFFIX}")
+# url_shortener = dagdshort.Shortener(user_agent_suffix=URL_SHORTENER__USER_AGENT_SUFFIX, max_cache_size=config.CACHE_MAXSIZE__URL_SHORTENER)
+# Note: url_shortener cannot be used in this script because URL shortening is done at a later stage.
 
 url_reader = URLReader(max_cache_age=3600)
-url_shortener = dagdshort.Shortener(user_agent_suffix=URL_SHORTENER__USER_AGENT_SUFFIX, max_cache_size=config.CACHE_MAXSIZE__URL_SHORTENER)
-feed = FeedReader(channel=CHANNEL, name=FEED, irc=None, db=None, url_reader=url_reader, url_shortener=url_shortener, publishers=None).read()  # type: ignore
+feed = FeedReader(channel=CHANNEL, name=FEED, irc=None, db=None, url_reader=url_reader, url_shortener=None, publishers=None).read()  # type: ignore
 for index, entry in enumerate(feed.entries):
     post = f"\n#{index + 1:,}: {entry.message()}"
     if entry.categories:
