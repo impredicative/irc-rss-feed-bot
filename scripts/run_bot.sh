@@ -6,7 +6,7 @@
 #
 # Usage:
 # Customize the values of the variables below, but do not check-in IRC_PASSWORD into version control.
-# Run: ./scripts/run_bot.sh
+# Run: clear; ./scripts/run_bot.sh
 
 export IRC_PASSWORD=YourActualPassword
 export GITHUB_TOKEN=YourToken
