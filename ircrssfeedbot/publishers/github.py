@@ -23,7 +23,7 @@ class Publisher(BasePublisher):
     def _publish(self, channel: str, df_entries: pd.DataFrame) -> Dict[str, Any]:
         assert not df_entries.empty
         path = f"{channel}/{datetime.datetime.utcnow().strftime('%Y/%m%d/%H%M%S')}.csv"  # Ref: https://strftime.org/
-        feed_counts = readable_list([f"{count} {value}" for value, count in df_entries["feed"].value_counts().iteritems()])
+        feed_counts = readable_list([f"{count} {value}" for value, count in df_entries["feed"].value_counts().items()])
         content = df_entries.drop(columns="channel").to_csv(index=False)
         self._repo.create_file(path=path, message=f"Add {feed_counts} entries of {channel}", content=content)
         return {
