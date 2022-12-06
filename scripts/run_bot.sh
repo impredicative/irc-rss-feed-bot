@@ -9,6 +9,7 @@
 # Run: ./scripts/run_bot.sh
 
 export IRC_PASSWORD=YourActualPassword
+export GITHUB_TOKEN=YourToken
 CONFIG_PATH="/workspaces/irc-bots/libera/feed-bot/config.yaml"
 
 # Run bot in dev mode
