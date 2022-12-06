@@ -3,8 +3,10 @@
 The feed settings are parsed from the user configuration file.
 
 Usage:
-CLI arg example: --config-path ~/irc-rss-feed-bot/config.yaml
-Customize CHANNEL and FEED.
+Customize CHANNEL and FEED below.
+
+CLI example: python -m scripts.print_feed_entries --config-path /workspaces/irc-bots/libera/feed-bot/config.yaml
+
 """
 
 # pylint: disable=import-error,invalid-name
@@ -23,6 +25,7 @@ from ircrssfeedbot.url import URLReader
 FEED = "COVID-19:stats:USA:NY"
 CHANNEL, FEED = "#trading", "Medium"
 # CHANNEL, FEED = "##CoV", "stats:🇺🇸"
+CHANNEL, FEED = "#workerbot", "ArXiv:crypto"
 
 config.LOGGING["loggers"][config.PACKAGE_NAME]["level"] = "DEBUG"  # type: ignore
 config.configure_logging()
@@ -34,8 +37,11 @@ config.runtime.identity = ""
 load_instance_config(log_details=False)
 config.INSTANCE["feeds"][CHANNEL][FEED]["style"] = None
 
+URL_SHORTENER__USER_AGENT_SUFFIX = f"{config.REPO_NAME}/" + "/".join(Path(__file__).parts[-2:])
+print(f"User agent suffix for URL shortener is: {URL_SHORTENER__USER_AGENT_SUFFIX}")
+
 url_reader = URLReader(max_cache_age=3600)
-url_shortener = dagdshort.Shortener(user_agent_suffix=f"{config.REPO_NAME}/" + "/".join(Path(__file__).parts[-2:]), max_cache_size=config.CACHE_MAXSIZE__URL_SHORTENER)
+url_shortener = dagdshort.Shortener(user_agent_suffix=URL_SHORTENER__USER_AGENT_SUFFIX, max_cache_size=config.CACHE_MAXSIZE__URL_SHORTENER)
 feed = FeedReader(channel=CHANNEL, name=FEED, irc=None, db=None, url_reader=url_reader, url_shortener=url_shortener, publishers=None).read()  # type: ignore
 for index, entry in enumerate(feed.entries):
     post = f"\n#{index + 1:,}: {entry.message()}"
