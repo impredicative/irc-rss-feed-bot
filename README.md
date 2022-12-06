@@ -93,7 +93,7 @@ GITHUB_TOKEN=c81a62ca23caa140715bbfc175997c02d0fdd768
 ```
 
 #### GITHUB_TOKEN
-Refer to the optional `publish.github` feature.
+This is optional. Refer to the [`publish.github`](#optional) feature.
 
 ### Configuration: non-secret
 Prepare a version-controlled `config.yaml` file using the sample below.
