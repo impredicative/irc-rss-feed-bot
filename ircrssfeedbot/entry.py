@@ -155,6 +155,6 @@ class FeedEntry:
         topic_parts = {k: v for k, _, v in (p.partition(": ") for p in topic.split(" | "))}
         for key, pattern in topic_config.items():
             if re.search(pattern, self.title):
-                topic_parts[key] = self.short_url or self.feed_reader.url_shortener.shorten_urls([self.long_url])[0]
+                topic_parts[key] = self.short_url or self.feed_reader.url_shortener.shorten_urls([self.long_url])[self.long_url]
         topic = " | ".join((f"{k}: {v}" if v else k) for k, v in topic_parts.items())
         return topic
