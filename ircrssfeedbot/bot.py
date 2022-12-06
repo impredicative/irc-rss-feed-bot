@@ -59,7 +59,7 @@ class Bot:
             nick=instance["nick"],
             channels=instance["feeds"],
             ssl=True,
-            debug=log.info if instance.get("log", {}).get("irc") else False,
+            debug=log.info if (instance.get("log") or {}).get("irc") else False,
             ns_identity=(instance["nick"], os.environ["IRC_PASSWORD"]),
             connect_modes=instance.get("mode"),
             quit_message="",
