@@ -1,4 +1,4 @@
-.PHONY: help build build-hostnet clean compile fmt install install-py prep push setup setup-ppa setup-venv test
+.PHONY: help build build-hostnet clean compile fmt install install-py prep push setup setup-ppa setup-venv shell test
 
 help:
 	@echo "build         : Build, tag, and list Docker image."
@@ -13,6 +13,7 @@ help:
 	@echo "setup         : Install third-party Python package requirements and run tests."
 	@echo "setup-ppa     : Add deadsnakes PPA on Ubuntu to subsequently install Python."
 	@echo "setup-venv    : Create a Python virtual environment."
+	@echo "shell         : Enter a new shell with the Python virtual environment sourced."
 	@echo "test          : Run tests."
 
 build:
@@ -57,6 +58,9 @@ setup-ppa:
 
 setup-venv:
 	python3.11 -m venv ./venv
+
+shell:
+	. ./venv/bin/activate && exec $$SHELL
 
 test:
 	isort --check-only .
