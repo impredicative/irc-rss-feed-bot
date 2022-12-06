@@ -24,7 +24,7 @@ deprecated==1.2.13
     # via pygithub
 diskcache==5.4.0
     # via -r requirements.in
-dressuplite==0.1.1
+dressuplite==0.1.2
     # via -r requirements.in
 emoji==2.2.0
     # via -r requirements.in
