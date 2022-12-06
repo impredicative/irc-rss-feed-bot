@@ -99,7 +99,7 @@ LOGGING: Final = {  # Ref: https://docs.python.org/3/howto/logging.html#configur
     "handlers": {"console": {"class": "logging.StreamHandler", "level": "DEBUG", "formatter": "detailed", "stream": "ext://sys.stdout"}},
     "loggers": {
         PACKAGE_NAME: {"level": "INFO", "handlers": ["console"], "propagate": False},
-        "dagdshorten": {"level": "INFO", "handlers": ["console"], "propagate": False},
+        "dagdshort": {"level": "INFO", "handlers": ["console"], "propagate": False},
         "peewee": {"level": "INFO", "handlers": ["console"], "propagate": False},
         "": {"level": "INFO", "handlers": ["console"]},
     },
