@@ -3,6 +3,19 @@ import time
 from typing import Union
 
 
+def sleep_long(secs: int | float) -> None:
+    """Sleep for up to an extended number of seconds, beyond what `time.sleep` may natively support."""
+    # Ref: https://stackoverflow.com/a/74712113/
+    max_secs = 9217972800  # Ref: datetime.timedelta(days=292.3 * 365).total_seconds()
+    if secs <= max_secs:
+        time.sleep(secs)
+    else:
+        while secs > 0:
+            sleep_time = min(secs, max_secs)
+            time.sleep(sleep_time)
+            secs -= max_secs
+
+
 class Throttle:
     """Provide a context manager which uses at least the given number of seconds."""
 

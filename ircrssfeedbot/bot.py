@@ -21,6 +21,7 @@ from .util.datetime import timedelta_desc
 from .util.humanize import humanize_bytes
 from .util.list import ensure_list
 from .util.str import list_irc_modes
+from .util.time import sleep_long
 
 log = logging.getLogger(__name__)
 
@@ -266,7 +267,7 @@ class Bot:
             sleep_time = max(0.0, query_time - time.monotonic())
             if sleep_time != 0:
                 log.debug(f"Will wait {timedelta_desc(sleep_time)} to read feed {feed_name} of {channel}.")
-                time.sleep(sleep_time)
+                sleep_long(sleep_time)
 
             try:
                 # Read feed
