@@ -6,7 +6,7 @@ from typing import Union
 def sleep_long(secs: int | float) -> None:
     """Sleep for up to an extended number of seconds, beyond what `time.sleep` may natively support."""
     # Ref: https://stackoverflow.com/a/74712113/
-    max_secs = 9217972800  # Ref: datetime.timedelta(days=292.3 * 365).total_seconds()
+    max_secs = 9208512000  # Ref: datetime.timedelta(days=292 * 365).total_seconds()
     if secs <= max_secs:
         time.sleep(secs)
     else:
