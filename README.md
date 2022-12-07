@@ -415,6 +415,7 @@ The default value is `false`.
 The default value is `true`.
 The alternative value `false` is recommended if the URL is naturally small, or if `sub` or `format` can be used to make
 it small.
+If a "Blacklisted long URL" error is experienced for a reasonable website which should not be blacklisted, it can be reported [here](https://github.com/dagd/dagd/issues). As an example, see [this](https://github.com/dagd/dagd/issues/50) issue.
 * **`<feed>.style.name.bg`**: This is a string representing the name of a background color applied to the 
 feed's name.
 It can be one of: white, black, blue, green, red, brown, purple, orange, yellow, lime, teal, aqua, royal, pink, grey,
