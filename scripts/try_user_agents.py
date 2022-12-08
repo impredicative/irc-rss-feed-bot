@@ -50,7 +50,7 @@ USER_AGENTS = [
 USER_AGENTS = list(dict.fromkeys(USER_AGENTS))
 for user_agent in USER_AGENTS:
     print(f"Trying user agent: {user_agent!r}")
-    response = requests.Session().get(TEST_URL)
+    response = requests.Session().get(TEST_URL, timeout=3, headers={"User-Agent": user_agent})
     try:
         response.raise_for_status()
     except Exception as exc:
