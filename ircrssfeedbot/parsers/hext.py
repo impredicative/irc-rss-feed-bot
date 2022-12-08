@@ -8,7 +8,8 @@ import hext
 from ..entry import RawFeedEntry as BaseRawFeedEntry
 from ._base import BaseParser
 
-_MAX_SEARCHES = 10_000  # Ref: https://github.com/html-extract/hext/releases/tag/v1.0.1
+_MAX_SEARCHES = 100_000  # Ref: https://github.com/html-extract/hext/releases/tag/v1.0.1
+# Note: 10_000 was observed to be insufficient for the Xarray:WhatsNew feed.
 
 
 class RawFeedEntry(BaseRawFeedEntry):
