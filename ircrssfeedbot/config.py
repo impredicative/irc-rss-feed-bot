@@ -52,6 +52,7 @@ ETAG_CACHE_PROHIBITED_NETLOCS: Final = {
     "investing.com",
     "lynalden.com",
     "microsoft.com",
+    "newsbtc.com",
     "news.developer.nvidia.com",
     "protonmail.com",
     "rise.cs.berkeley.edu",
