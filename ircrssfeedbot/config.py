@@ -72,6 +72,10 @@ PUBLISH_THREADS_MAX: Final = 4
 PUBLISH_RETRY_SLEEP_MAX: Final = 60
 QUOTE_LEN_MAX: Final = 512 - 2 - 1  # Leaving 2 for "\r\n" and 1 to prevent unexplained truncation.
 READ_ATTEMPTS_MAX: Final = 3
+REQUESTOR_DEFAULT: Final = "requests"
+REQUESTOR_OVERRIDES: Final = {  # Site-specific overrides (without www prefix). Sites must be in lowercase.
+    "investing.com": "httpx",
+}
 REQUEST_TIMEOUT: Final = 90
 SEARCH_CACHE_MAXSIZE: Final = 256
 SEARCH_CACHE_TTL: Final = 3600 * 8

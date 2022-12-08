@@ -8,6 +8,7 @@ from typing import Optional, cast
 
 import cachetools.func
 import diskcache
+import httpx
 import requests
 
 from . import config
@@ -166,15 +167,23 @@ class URLReader:
                 log.debug(f"Added request header If-None-Match={request_headers['If-None-Match']} for {url}.")
 
         # Request URL
-        log.debug(f"Resiliently retrieving content for {url} using user agent {request_headers['User-Agent']!r}.")
+        requestor = config.REQUESTOR_OVERRIDES.get(netloc, config.REQUESTOR_DEFAULT)
+        log.debug(f"Resiliently retrieving content for {url} using {requestor} with user agent {request_headers['User-Agent']!r}.")
         assert not url.startswith("file://")
         timer = Timer()
         for num_attempt in range(1, config.READ_ATTEMPTS_MAX + 1):
             try:
-                response = requests.Session().get(url, timeout=config.REQUEST_TIMEOUT, headers=request_headers)
-                # Note: requests.Session may be relevant for reading a page which requires cookies to be accepted.
+                match requestor:
+                    case "requests":
+                        response = requests.Session().get(url, timeout=config.REQUEST_TIMEOUT, headers=request_headers)
+                        # Note: requests.Session may be relevant for reading a page which requires cookies to be accepted.
+                    case "httpx":
+                        response = httpx.Client().get(url, timeout=config.REQUEST_TIMEOUT, headers=request_headers, follow_redirects=True)  # type: ignore
+                        # Note: httpx.Client may be relevant for reading a page which requires cookies to be accepted.
+                    case _:
+                        assert False
                 response.raise_for_status()
-            except requests.RequestException as exc:
+            except Exception as exc:
                 log.info(f"Error reading {url} in attempt {num_attempt} of {config.READ_ATTEMPTS_MAX}: {exc}")
                 if num_attempt == config.READ_ATTEMPTS_MAX:
                     raise exc from None

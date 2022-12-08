@@ -7,6 +7,7 @@ emoji  # https://github.com/carpedm20/emoji/blob/master/CHANGES.md
 feedparser  # https://github.com/kurtmckee/feedparser/blob/develop/CHANGELOG.rst
 hext  # https://github.com/html-extract/hext/releases
 html5lib  # Required by pandas.read_html
+httpx
 humanize  # https://github.com/python-humanize/humanize/releases
 ircstyle
 jmespath  # https://github.com/jmespath/jmespath.py/blob/develop/CHANGELOG.rst

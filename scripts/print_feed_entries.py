@@ -5,7 +5,7 @@ The feed settings are parsed from the user configuration file.
 Usage:
 Customize CHANNEL and FEED below.
 
-CLI example: python -m scripts.print_feed_entries --config-path /workspaces/irc-bots/libera/feed-bot/config.yaml
+CLI example: python -m scripts.print_feed_entries --config-path /workspaces/irc-bots/libera/news-bot/config.yaml
 
 """
 
@@ -23,6 +23,7 @@ FEED = "COVID-19:stats:USA:NY"
 CHANNEL, FEED = "#trading", "Medium"
 # CHANNEL, FEED = "##CoV", "stats:🇺🇸"
 CHANNEL, FEED = "#workerbot", "ArXiv:fin"
+CHANNEL, FEED = "#us-market-news", "Investing"
 
 config.LOGGING["loggers"][config.PACKAGE_NAME]["level"] = "DEBUG"  # type: ignore
 config.configure_logging()
