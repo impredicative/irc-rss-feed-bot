@@ -8,6 +8,8 @@ from ircrssfeedbot import config
 
 TEST_URL = ""
 READER = ["requests", "httpx"][0]
+SUCCESS_FN = lambda response: bool(response)
+
 
 # pylint: disable=line-too-long
 USER_AGENTS = [
@@ -52,17 +54,20 @@ USER_AGENTS = [
 USER_AGENTS = list(dict.fromkeys(USER_AGENTS))
 for user_agent in USER_AGENTS:
     print(f"Trying {READER} with user agent: {user_agent!r}")
-    if READER == "requests":
-        response = requests.Session().get(TEST_URL, timeout=3, headers={"User-Agent": user_agent})
-    elif READER == "httpx":
-        response = httpx.Client().get(TEST_URL, timeout=3, headers={"User-Agent": user_agent})  # type: ignore
-    else:
-        assert False
     try:
+        if READER == "requests":
+            response = requests.Session().get(TEST_URL, timeout=2, headers={"User-Agent": user_agent})
+        elif READER == "httpx":
+            response = httpx.Client().get(TEST_URL, timeout=2, headers={"User-Agent": user_agent})  # type: ignore
+        else:
+            assert False
         response.raise_for_status()
     except Exception as exc:
-        print(f"Failed: {exc}")
+        print(f"Error: {exc}")
     else:
-        print("Succeeded.")
+        if SUCCESS_FN(response):  # type: ignore
+            print("Succeeded.")
+        else:
+            print("Failed.")
     print()
     time.sleep(1)
