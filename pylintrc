@@ -15,13 +15,15 @@ disable=
     c-extension-no-member,
     consider-using-with,
     duplicate-code,
+    fixme,
     locally-disabled,
     logging-format-interpolation,
     logging-fstring-interpolation,
     relative-beyond-top-level,
     too-few-public-methods,
     too-many-instance-attributes,
-    fixme
+    unnecessary-lambda,
+    unnecessary-lambda-assignment
 
 [REPORTS]
 output-format=colorized
