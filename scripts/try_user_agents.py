@@ -1,11 +1,13 @@
 """Read a URL using a variety of user agent strings."""
 import time
 
+import httpx
 import requests
 
 from ircrssfeedbot import config
 
-TEST_URL = "https://www.investing.com/rss/121899.rss"
+TEST_URL = ""
+READER = ["requests", "httpx"][0]
 
 # pylint: disable=line-too-long
 USER_AGENTS = [
@@ -49,8 +51,13 @@ USER_AGENTS = [
 
 USER_AGENTS = list(dict.fromkeys(USER_AGENTS))
 for user_agent in USER_AGENTS:
-    print(f"Trying user agent: {user_agent!r}")
-    response = requests.Session().get(TEST_URL, timeout=3, headers={"User-Agent": user_agent})
+    print(f"Trying {READER} with user agent: {user_agent!r}")
+    if READER == "requests":
+        response = requests.Session().get(TEST_URL, timeout=3, headers={"User-Agent": user_agent})
+    elif READER == "httpx":
+        response = httpx.Client().get(TEST_URL, timeout=3, headers={"User-Agent": user_agent})  # type: ignore
+    else:
+        assert False
     try:
         response.raise_for_status()
     except Exception as exc:
