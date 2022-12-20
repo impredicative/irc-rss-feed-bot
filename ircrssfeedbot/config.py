@@ -41,6 +41,7 @@ DISKCACHE_SIZE_LIMIT: Final = GiB * 2
 DEDUP_STRATEGY_DEFAULT: Final = "feed"
 ETAG_CACHE_PROHIBITED_NETLOCS: Final = {
     "ambcrypto.com",
+    "beincrypto.com",
     "blog.ml.cmu.edu",
     "blogs.cornell.edu",
     "bodyrecomposition.com",
