@@ -45,6 +45,7 @@ ETAG_CACHE_PROHIBITED_NETLOCS: Final = {
     "blog.ml.cmu.edu",
     "blogs.cornell.edu",
     "bodyrecomposition.com",
+    "coinfomania.com",
     "code.fb.com",
     "cryptomining-blog.com",
     "dailycoin.com",
