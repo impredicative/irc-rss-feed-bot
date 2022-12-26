@@ -47,6 +47,7 @@ ETAG_CACHE_PROHIBITED_NETLOCS: Final = {
     "bodyrecomposition.com",
     "coinfomania.com",
     "code.fb.com",
+    "crypto-news-flash.com",
     "cryptomining-blog.com",
     "dailycoin.com",
     "deeplearning.ai",
