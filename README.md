@@ -556,9 +556,9 @@ services:
   irc-rss-feed-bot:
     container_name: irc-rss-feed-bot
     image: ascensive/irc-rss-feed-bot:<VERSION>
-#    network_mode: host  # If having DNS name resolution issues.
-    restart: on-failure
-#    restart: always
+    network_mode: host  # If having DNS name resolution issues. Also seems necessary for da.gd URL shortener.
+#    restart: on-failure
+    restart: always
     logging:
       options:
         max-size: 2m
